@@ -1,0 +1,82 @@
+[
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B validates every player-scoped command against a filtered per-player view and shares unit parsing between deployment and import, so hidden information is harder to leak and new rules are safer to add, and its tests also cover the resolver's swap/cycle cases, reply flushing and hidden-occupant behavior more thoroughly, whereas A scatters visibility checks through a monolithic handler.",
+   "Both implement the spec with similar logic, but A shares unit-fact parsing between deployment and import, reuses a player-view type as the field for validation, splits out helpers like attackValid and repairAmount, and has broader tests, whereas B duplicates parsing inside a longer inline `handle` and has thinner tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B separates request parsing from execution, shares unit parsing between deployments and documents, and makes sight-limited decisions structural by validating against the player's view, whereas A has a long string-switching handle, duplicated parsing, and scattered visibility checks; both have thorough tests.",
+   "A separates request parsing from game logic, shares one unit parser between deployment and import, and has stronger tests (atomic-refusal checks, wide invalid-document coverage), while B packs parsing, validation and dispatch into one long handle function."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B separates request parsing from execution, uses typed enums, and routes forecast, order validation and resolution through one shared attack_effect function plus a PlayerSight type for fog of war, while A packs everything into one stringly-typed main.rs with a long if-chain request function and duplicated validation logic in resolve.",
+   "A parses requests into typed enums and shares one attack_effect between forecast, validation and resolution, with a PlayerSight type scoping what a player can see, while B uses strings and one long request function that duplicates attack and repair logic between forecast and resolve, which makes new rules riskier to add."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B separates parsing from execution with a typed Command enum, Error enum, Phase enum and Effect enum (damage versus repair), so new rules and commands slot in cleanly, while A packs validation and execution into one string-error request function with tuple stats and a derived phase; both have broad tests, and B's also cover route costs and flush behaviour.",
+   "A separates parsing from execution and uses typed enums for errors, phases, effects and kinds, with named per-kind accessors and tests that cover most of the spec. B uses string error codes, a phase derived from turn and winner, a tuple of unnamed stats, and one large `request` function with sentinel zero values, so it is harder to extend, though it handles `-0` correctly and has a process-level flush test."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ }
+]

@@ -1,0 +1,78 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "tesla-valve",
+ "model": "gpt-6.1-sol",
+ "run": 0,
+ "source": "20261010-131545/skirmish__go__baseline__gpt-6.1-sol__0",
+ "refactor": {
+  "session": {
+   "id": "01a12688-3968-7741-b2c8-427dd853afe8",
+   "cost": null,
+   "out_tokens": 9133,
+   "ms": 255860
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 841,
+   "removed": 518,
+   "files": 13
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  }
+ }
+}

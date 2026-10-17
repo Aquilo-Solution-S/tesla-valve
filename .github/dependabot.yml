@@ -1,0 +1,65 @@
+# Every tool the examples and CI run is pinned, and a pin goes stale. Dependabot
+# opens one pull request per ecosystem a month; CI then proves each enforcer
+# still refuses its bad file. A bump to a file the docs quote fails CI until
+# `python3 scripts/build.py` runs on the branch.
+#
+# cooldown: a release is taken once it is a week old, so a compromised one has
+# time to be pulled first.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: rust-toolchain
+    directory: /examples/rust
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: cargo
+    directory: /examples/rust
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      rust:
+        patterns: ["*"]
+
+  - package-ecosystem: gomod
+    directory: /examples/go
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      go:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: /examples/python
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /examples/typescript
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      typescript:
+        patterns: ["*"]

@@ -1,0 +1,82 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates validation from execution and shares typed commands between live play and replay, making future changes easier to reason about, while its substantial behavioral tests and modest abstractions fit the game\u2019s complexity.",
+   "A separates validation from execution and reuses typed commands for replay, making future changes easier to reason about than B\u2019s combined command handler and JSON round trips, while both provide substantial behavioral tests and proportionate complexity."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed command boundary, cohesive piece representation, clear gravity naming, and tests covering observable behavior and refusal invariants make future changes easier to understand and safer without adding disproportionate complexity.",
+   "A\u2019s typed command boundary, cohesive piece representation, explicit gravity naming, and tests covering hidden-state refusals and output flushing make future changes easier to understand and safer, while both projects keep complexity proportional to the game."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed commands and phases, separate parsing and execution, derived level, and direct replay execution make future changes safer and clearer, with substantial behavioural tests and complexity appropriate to the game.",
+   "A\u2019s typed commands, modes and piece-bearing phases make changes safer, its derived level avoids redundant state, and its replay reuses execution without JSON round trips, while substantial invariant and interaction tests protect behaviour without disproportionate complexity."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed commands, phases carrying active pieces, and separate parsing and execution make future changes safer and easier to understand, while its focused tests protect observable behavior and hidden-state invariants without disproportionate complexity.",
+   "A\u2019s typed commands, piece kinds and phases make invariants clearer and changes safer, its replay reuses gameplay without JSON round trips, and its tests explicitly protect hidden state and protocol boundaries with complexity proportionate to the rules."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

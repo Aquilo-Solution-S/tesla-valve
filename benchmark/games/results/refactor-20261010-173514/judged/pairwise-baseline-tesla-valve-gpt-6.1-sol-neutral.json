@@ -1,0 +1,162 @@
+[
+ {
+  "pair": "driftfall__go__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A\u2019s typed piece identities, explicit draw mapping, centralized command validation and refusal checks, and separated lock rules make future changes easier to understand and safer to implement, while both projects provide substantial, comparable behavioral tests and proportionate complexity.",
+   "B\u2019s typed piece identities, centralized refusal checks, command member table, and clear separation of locking stages make future changes easier to understand and safer, with similarly substantive behavioral tests and complexity appropriate to the game."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B\u2019s typed input keys, shared live/replay key parsing, and named piece kinds make extensions safer and clearer, while its focused behavioural tests and straightforward design keep complexity appropriate.",
+   "A\u2019s typed input keys and shared live/replay key parsing make future commands safer to add without duplicated string registries, while both projects have understandable designs and substantial behavioral tests with complexity appropriate to the game."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B makes future changes safer by enforcing phase refusals within Game, encapsulating piece and replay invariants, deriving level from lines, and using typed errors, with focused geometry and behavioral tests and complexity appropriate to the rules.",
+   "A makes future changes safer by enforcing phase and hold restrictions within Game, encapsulating piece invariants, deriving level from lines, and providing focused geometry and rule tests, while both projects use complexity appropriate to the problem."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B makes changes safer by owning refusals in Game, deriving level from lines, and testing refusal results alongside unchanged state, while retaining clear, proportionate boundaries between gameplay and protocol.",
+   "A centralizes gameplay refusals in the game API, derives level instead of maintaining redundant state, and directly tests refusal invariants, making future changes safer while both projects use reasonable decomposition and meaningful behavioral tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B separates commands, parsing, rendering and game rules into cohesive files and shares target-resolution and ownership helpers, making future changes easier to understand and safer while retaining meaningful behavioral tests without unnecessary abstraction.",
+   "A separates parsing, commands, rendering and resolution into focused code and shares target-resolution logic, making future changes easier to understand and safer, while both show useful behavioral tests and proportionate algorithms."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A centralizes order validation and victory rules across gameplay and import, reducing drift as features grow, while retaining clear resolution stages and similarly strong behavioral tests without unnecessary abstraction.",
+   "B centralizes order validation and victory rules across gameplay and import, reducing drift as features grow while retaining clear code, substantial behavioral tests, and complexity appropriate to the game."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A\u2019s cohesive rule, resolution and protocol modules plus centralized kind statistics and limits make future changes easier to locate and safer to coordinate, while both show useful behavioral tests and complexity appropriate to the game.",
+   "B\u2019s cohesive modules, narrower public surface and centralized kind statistics make future changes easier to locate and safer to implement, while retaining shared rule checks and meaningful behavioral tests without unnecessary abstraction."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B better supports safe growth through private game state, typed sides and winners, validated import construction, reusable route calculations, and explicit query/order agreement tests, without adding disproportionate complexity.",
+   "A offers safer extension through private game state, typed sides and winners, validated document construction, reusable route calculations and explicit query/order agreement tests, while both projects keep their rule logic understandable and complexity proportionate."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ }
+]

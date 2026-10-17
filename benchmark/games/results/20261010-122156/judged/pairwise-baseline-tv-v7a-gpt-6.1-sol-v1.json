@@ -1,0 +1,82 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates boundary validation from execution, shares validation and transitions between live commands and replay, and makes gameplay flow clearer with focused methods and behavioural tests, although its hard-coded pulse bottom duplicates a shape fact.",
+   "A separates boundary validation from execution and shares validated commands, phase restrictions, and gameplay transitions with replay, reducing duplicated rules and making future changes easier to follow, while both projects use proportionate machinery and tests that express intended behaviour."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B uses a validated command boundary and shared input-key rules for live play and replay, represents active pieces and gravity progress clearly, and states intended behaviour in concrete tests without unnecessary machinery.",
+   "A separates boundary validation from typed command execution, reuses input validation and gameplay transitions for replay, groups piece data coherently, and documents behavioural invariants in tests without unnecessary machinery."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B uses typed states and validated commands, derives level from lines, and shares execution between replay and live play, making future changes easier to follow without unnecessary machinery, while its tests describe concrete intended behaviours.",
+   "A validates into typed commands, makes phase and piece relationships explicit, derives level from lines, and reuses execution directly for replay, with behaviour-focused tests and no unnecessary machinery; B relies on strings, duplicated validation, independently mutable state, and replay serialization."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B uses purposeful types to make phases and transitions explicit, validates external data into commands, shares rules between live play and replay without JSON round trips, and documents intended behaviour through focused tests.",
+   "A uses purposeful typed phases and commands, shares boundary validation between live commands and replay, and reuses game transitions directly, making future changes easier to follow than B's string states, duplicated validation and JSON playback round trips, while its tests clearly state intended behaviour."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

@@ -1,0 +1,122 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B's replay runs through the same command handler as live play, so replay and live rules cannot drift apart, and its typed response and mostly protocol-level tests suit a growing game, whereas A duplicates phase and hold gating in separate replay helpers (B's remaining flaw is duplicated new-game setup).",
+   "B's main.go calls indexOf, which is defined only in main_test.go, so the program does not compile outside tests, and B's replay duplicates phase handling instead of reusing the live command path; A is slightly hacky in building replay commands as strings but reuses the live logic, has a clean piece model, and has tests that cover the specified behaviour."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A replays by feeding the same command handler that live play uses, so the two paths cannot drift, and its tests check state preservation with reflect.DeepEqual, while B duplicates the replay logic in playReplay and its json.Marshal(g) checks compare only \"{}\" because every game field is unexported, so they cannot catch mutation.",
+   "B replays by driving the same command handler that live play uses, so replay and live behaviour cannot drift apart, and its tests check refusals with full state comparisons; the cost is string-formatted internal commands, a '-0' integer quirk and some redundant lock code, whereas A duplicates the pause/resume/hold gating in a separate replay path that will need updating with every new command."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B routes live and replay input through one shared input method, guards ticks by phase, validates UTF-8, and its tests compare full internal state including rng and gravity, whereas A duplicates the key-dispatch switch in applyReplayKey and its refusal-preservation checks use json.Marshal on a struct with no exported fields, so they compare '{}' to '{}' and prove nothing.",
+   "A is stricter on protocol edge cases (B treats null cmd as unknown_command and null mode as endless), reuses one input dispatcher for live and replay play, and its tests compare full internal state including RNG and gravity, whereas B duplicates dispatch and has weaker, partly convoluted tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "baseline"
+  ],
+  "winner": "tie",
+  "why": [
+   "B's replay drives the same request path as live commands, so replay cannot drift from live behaviour as rules grow, and its tests go through the protocol and check hidden state such as rng and gravity, whereas A duplicates input dispatch in replay and its tests lean more on poking internals.",
+   "B resets gravity credit on every lock as the spec requires, whereas A skips the reset on soft and hard drop locks, a real bug; A has the stronger tests and a cleaner replay that reuses request(), but B's local-cells-plus-origin model and invalid-UTF-8 handling are sound, and its replay duplicates the dispatch logic only mildly."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B uses typed enums for phase, mode and kind, keeps piece origin separate from local cells, and its tests compare whole-game state for refusals; A relies on string phases, duplicates new-game setup in replay, and replays by building JSON commands for itself, though B has some redundant phase checks and a clumsy key mapping in parse_replay.",
+   "A uses typed enums for kind, phase and mode, keeps replay parsing separate from playback, and calls game methods directly, while B relies on stringly-typed phases, usize kinds, one large command method and replay playback that rebuilds JSON commands, making future rules harder to add safely."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B's replay only advances time while playing, so paused or finished phases add no elapsed_ms or gravity as the spec requires, whereas A ticks unconditionally during replay and its own test asserts the wrong elapsed value; B also reads raw bytes so invalid UTF-8 gets a bad_json reply, though its tuple-based `parsed` plumbing in `command` is clumsy.",
+   "A's command() is clumsy, but its replay playback correctly skips ticks while paused or finished; B's replay ticks unconditionally, so paused time inflates elapsed_ms and gravity credit, and B's own test even asserts the wrong elapsed value."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

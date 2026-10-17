@@ -1,0 +1,82 @@
+{
+ "game": "driftfall",
+ "lang": "go",
+ "arm": "reshape",
+ "model": "gpt-6-luna",
+ "run": 3,
+ "source": "20261010-120905/driftfall__go__baseline__gpt-6-luna__2",
+ "refactor": {
+  "session": {
+   "id": "01a12679-4cc9-7d11-aba9-f84e90d3bd49",
+   "cost": null,
+   "out_tokens": 11646,
+   "ms": 123874
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 682,
+   "removed": 626,
+   "files": 6
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 9,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": [
+    "test_f5::test_bad_mode_is_atomic[None]"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 9,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": [
+    "test_f5::test_bad_mode_is_atomic[None]"
+   ]
+  }
+ }
+}

@@ -1,0 +1,261 @@
+{
+ "game": "skirmish",
+ "lang": "rust",
+ "arm": "baseline",
+ "model": "gpt-6-luna",
+ "run": 1,
+ "steps": [
+  {
+   "step": 1,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12586-a44c-7a00-abcc-e2d35b3cbe62",
+    "cost": null,
+    "turns": 11,
+    "out_tokens": 6009,
+    "ms": 68194
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12586-a44c-7a00-abcc-e2d35b3cbe62",
+    "cost": null,
+    "turns": 4,
+    "out_tokens": 6693,
+    "ms": 14521
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 584,
+    "removed": 1,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    }
+   }
+  },
+  {
+   "step": 2,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12587-fd78-7b62-9ba4-9439a2b4a81c",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 2128,
+    "ms": 28503
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12587-fd78-7b62-9ba4-9439a2b4a81c",
+    "cost": null,
+    "turns": 2,
+    "out_tokens": 2306,
+    "ms": 8155
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 102,
+    "removed": 5,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    }
+   }
+  },
+  {
+   "step": 3,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12588-9bfe-7333-b6aa-40a8cfb48c28",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 2861,
+    "ms": 67755
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12588-9bfe-7333-b6aa-40a8cfb48c28",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 2984,
+    "ms": 8129
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 142,
+    "removed": 7,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    }
+   }
+  },
+  {
+   "step": 4,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12589-d545-7822-ab54-7ec58854950f",
+    "cost": null,
+    "turns": 10,
+    "out_tokens": 3561,
+    "ms": 39871
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12589-d545-7822-ab54-7ec58854950f",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 3721,
+    "ms": 7054
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 112,
+    "removed": 6,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 5,
+   "rules": "baseline",
+   "session": {
+    "id": "01a1258a-a0e0-7052-82ff-ef72acfb1424",
+    "cost": null,
+    "turns": 12,
+    "out_tokens": 2237,
+    "ms": 36556
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1258a-a0e0-7052-82ff-ef72acfb1424",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 2379,
+    "ms": 6838
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 73,
+    "removed": 3,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 6,
+   "rules": "baseline",
+   "session": {
+    "id": "01a1258b-6295-7981-84af-b94b96468029",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 2774,
+    "ms": 29816
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1258b-6295-7981-84af-b94b96468029",
+    "cost": null,
+    "turns": 3,
+    "out_tokens": 3070,
+    "ms": 9781
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 236,
+    "removed": 0,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 4,
+     "total": 4
+    },
+    "f6": {
+     "passed": 87,
+     "total": 88
+    }
+   }
+  }
+ ]
+}

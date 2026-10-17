@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates boundary validation from shared live/replay execution, centralizes key and mode validation, derives level from lines, and tests concrete behaviour without unnecessary machinery, though A represents phases more explicitly.",
+   "A separates boundary validation from shared live/replay execution, centralizes key and mode rules, derives level rather than duplicating state, and tests intended behavior, outweighing B\u2019s clearer explicit phase field and avoiding its internal JSON round trips."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates boundary validation from execution, makes phases and active pieces explicit through enums, derives level instead of duplicating state, reuses live commands for replay, and states intended behaviour in focused tests without unnecessary machinery.",
+   "A uses proportionate typed commands and phases, derives level from lines, and validates input before shared execution, making rules and transitions easier to maintain than B\u2019s string states, duplicated validation and JSON-based replay dispatch, while both provide meaningful behavioural tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

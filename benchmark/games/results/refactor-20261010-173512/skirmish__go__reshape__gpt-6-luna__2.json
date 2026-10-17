@@ -1,0 +1,122 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "reshape",
+ "model": "gpt-6-luna",
+ "run": 2,
+ "source": "20261010-131542/skirmish__go__baseline__gpt-6-luna__2",
+ "refactor": {
+  "session": {
+   "id": "01a12685-4772-7571-8106-ce87579b476f",
+   "cost": null,
+   "out_tokens": 2664,
+   "ms": 60463
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 21,
+   "removed": 19,
+   "files": 1
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 146,
+    "total": 156
+   },
+   "f2": {
+    "passed": 3,
+    "total": 5
+   },
+   "f3": {
+    "passed": 7,
+    "total": 9
+   },
+   "f4": {
+    "passed": 2,
+    "total": 4
+   },
+   "f5": {
+    "passed": 2,
+    "total": 4
+   },
+   "f6": {
+    "passed": 85,
+    "total": 88
+   },
+   "failed": [
+    "test_f1::test_committed_literal_scenarios",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command21-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command34-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command43-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command57-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command66-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command75-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command89-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command98-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[{\"cmd\":null}-bad_request]",
+    "test_f2::test_committed_literal_scenarios",
+    "test_f2::test_legal_crag_deployment_and_start_cost_zero",
+    "test_f3::test_committed_literal_scenarios",
+    "test_f3::test_player_commands_are_indistinguishable_with_hidden_enemies",
+    "test_f4::test_committed_literal_scenarios",
+    "test_f4::test_stacked_repairs_cap_once_and_doomed_mender_repairs",
+    "test_f5::test_committed_literal_scenarios",
+    "test_f5::test_repair_ignores_shelter",
+    "test_f6::test_bad_document_preserves_half_ended_future[document15]",
+    "test_f6::test_committed_literal_scenarios",
+    "test_f6::test_roundtrip_continuation_all_phases"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 146,
+    "total": 156
+   },
+   "f2": {
+    "passed": 3,
+    "total": 5
+   },
+   "f3": {
+    "passed": 7,
+    "total": 9
+   },
+   "f4": {
+    "passed": 2,
+    "total": 4
+   },
+   "f5": {
+    "passed": 2,
+    "total": 4
+   },
+   "f6": {
+    "passed": 85,
+    "total": 88
+   },
+   "failed": [
+    "test_f1::test_committed_literal_scenarios",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command21-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command34-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command43-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command57-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command66-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command75-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command89-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command98-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[{\"cmd\":null}-bad_request]",
+    "test_f2::test_committed_literal_scenarios",
+    "test_f2::test_legal_crag_deployment_and_start_cost_zero",
+    "test_f3::test_committed_literal_scenarios",
+    "test_f3::test_player_commands_are_indistinguishable_with_hidden_enemies",
+    "test_f4::test_committed_literal_scenarios",
+    "test_f4::test_stacked_repairs_cap_once_and_doomed_mender_repairs",
+    "test_f5::test_committed_literal_scenarios",
+    "test_f5::test_repair_ignores_shelter",
+    "test_f6::test_bad_document_preserves_half_ended_future[document15]",
+    "test_f6::test_committed_literal_scenarios",
+    "test_f6::test_roundtrip_continuation_all_phases"
+   ]
+  }
+ }
+}

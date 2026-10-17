@@ -1,0 +1,122 @@
+[
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B passes the game state explicitly and has an end-to-end `run` entry point, so it is easier to extend and test, while A relies on a global `game`, a very large `process` function, order parsing duplicated between `validateDocument` and `process`, and an import check that temporarily swaps the global state; B's own flaws are smaller, namely the near-duplicate `validOrder`/`validPlayerOrder` and an unused `reachable` helper.",
+   "A keeps state in a Game value with a testable run/handle entry point and separates parsing, validation and resolution into functions, though it carries some duplicated validation and dead code; B uses a global game, one very long process function, duplicated order parsing, and an import validator that temporarily swaps the global state."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B validates request shape before phase checks, as the error precedence requires, where A returns not_started or finished first. B also splits order parsing and document parsing into helpers and has broader tests, while A packs everything into one huge process function and hides panics behind a recover that returns bad_request. B has some dead helpers and a minor precedence slip on unknown commands that carry extra members, but those are smaller problems than A's.",
+   "Both are similar single-file designs with duplicated validation and global tables, but A validates request shape before phase checks as the spec's precedence rules require (and tests it), while B returns not_started/finished before bad_request and hides defects behind a blanket panic recover, although B's end-to-end serve test is a plus."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B has a smaller, cleaner structure with shared validation helpers (attackValid, moveValid, playerField, effect) used by orders, queries, resolution and import. A has one very long handle function, JSON re-marshalling hacks and repeated view recomputation, and it also looks buggy: `new` returns a state member, and `omitempty` on cells can drop an empty reachable list.",
+   "A shares attackValid, moveValid and playerField across order, forecast, reachable and import, so those paths stay in agreement as rules grow, whereas B's one giant handle() duplicates validation across commands, re-marshals JSON in obj(), recomputes whole views in seenBy, and likely breaks the spec by returning state from new."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B models unit kinds as an enum and reuses one `valid_order` for import, where A keeps kinds and phases as strings and repeats the move and attack validation in several places; both share the same bug where three moves to one destination don't all cancel, and B's tests are slightly more thorough.",
+   "A models unit kinds as an enum with a shared validation helper, while B uses stringly-typed kinds and has a resolution bug where three moves to one cell cancel only two and let the third through, so A is safer to extend despite its long request function."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B reuses one set of validators (valid_move, valid_attack, a sight-filtered 'known' field) across order, reachable, forecast and import, which keeps the query/order agreement safe as rules grow, whereas A duplicates that visibility and validation logic inline in a long if-chain in handle; B's route_cost has confusing variable shadowing, but that is outweighed by its cleaner structure.",
+   "A routes order, reachable, forecast and import through shared helpers (valid_move, valid_attack, player_field), so the queries cannot drift from order acceptance, while B copy-pastes that validation inside one giant handle function and has thinner tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B routes forecast, order acceptance, import validation and resolution through shared functions (`forecast`, `legal_destination`), so these rules cannot drift apart as features grow. A duplicates the attack and repair rules across forecast, order and resolve, lets a mender target itself, and checks order shape after the idle and unit-availability checks, which breaks the specified error precedence.",
+   "A routes order, forecast, resolution and import through shared `forecast` and `legal_destination` functions, so the rules live in one place, while B duplicates them in four places and has real bugs: mender forecast skips the range check and allows self-targeting, and a malformed order body returns `unavailable` before `bad_request`."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

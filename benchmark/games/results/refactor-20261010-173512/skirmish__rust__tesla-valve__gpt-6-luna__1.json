@@ -1,0 +1,82 @@
+{
+ "game": "skirmish",
+ "lang": "rust",
+ "arm": "tesla-valve",
+ "model": "gpt-6-luna",
+ "run": 1,
+ "source": "20261010-131542/skirmish__rust__baseline__gpt-6-luna__1",
+ "refactor": {
+  "session": {
+   "id": "01a12686-71d8-72f3-b210-d189db8ddd3c",
+   "cost": null,
+   "out_tokens": 2804,
+   "ms": 35048
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 36,
+   "removed": 53,
+   "files": 1
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 87,
+    "total": 88
+   },
+   "failed": [
+    "test_f6::test_document_command_shapes[c0]"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 87,
+    "total": 88
+   },
+   "failed": [
+    "test_f6::test_document_command_shapes[c0]"
+   ]
+  }
+ }
+}

@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s separate parsing and execution, shared live/replay command path, typed piece kinds and derived level make future changes easier to reason about, with substantial behavioral tests and complexity proportionate to the game.",
+   "A separates validation from execution, reuses typed commands directly for replay, avoids redundant level state, and provides fixed expected results and detailed refusal tests that make future changes easier to understand and safer to maintain."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed commands and phases, derived state, and separation of parsing from execution make extensions safer and easier to understand, while its behavioural and subprocess protocol tests provide useful protection without excessive architectural complexity.",
+   "A\u2019s typed commands, pieces and phases, separate validation and execution, derived level, and process-level protocol tests make future changes safer and clearer than B\u2019s string states, numeric piece indices, redundant state and JSON-based replay dispatch."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

@@ -1,0 +1,84 @@
+{
+ "game": "skirmish",
+ "lang": "rust",
+ "arm": "tesla-valve",
+ "model": "gpt-6-luna",
+ "run": 0,
+ "source": "20261010-131542/skirmish__rust__baseline__gpt-6-luna__0",
+ "refactor": {
+  "session": {
+   "id": "01a12685-a197-7d22-81b3-182528aaa4b4",
+   "cost": null,
+   "out_tokens": 5459,
+   "ms": 66677
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 105,
+   "removed": 35,
+   "files": 1
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 3,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 87,
+    "total": 88
+   },
+   "failed": [
+    "test_f4::test_mender_sides_ranges_and_terrain",
+    "test_f6::test_bad_document_preserves_half_ended_future[document59]"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 3,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 87,
+    "total": 88
+   },
+   "failed": [
+    "test_f4::test_mender_sides_ranges_and_terrain",
+    "test_f6::test_bad_document_preserves_half_ended_future[document59]"
+   ]
+  }
+ }
+}

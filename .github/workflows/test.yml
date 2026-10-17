@@ -1,0 +1,110 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Generated files match their sources
+        run: |
+          python3 scripts/build.py
+          python3 assets/draw.py
+          git diff --exit-code
+
+      - name: Manifests are valid JSON
+        run: git ls-files '*.json' | xargs -n1 python3 -m json.tool > /dev/null
+
+      - name: Each hook hands over AGENTS.md, whatever arrives on stdin
+        env:
+          CLAUDE_PLUGIN_ROOT: ${{ github.workspace }}
+        run: |
+          python3 - <<'EOF'
+          import json, subprocess
+
+          rules = open("AGENTS.md").read()
+          for event, entries in json.load(open("hooks/claude-codex-hooks.json"))["hooks"].items():
+              for hook in (hook for entry in entries for hook in entry["hooks"]):
+                  for stdin in (json.dumps({"hook_event_name": event}), "", "not json"):
+                      run = subprocess.run(hook["command"], shell=True, input=stdin, capture_output=True, text=True, check=True)
+                      assert json.loads(run.stdout)["hookSpecificOutput"] == {"hookEventName": event, "additionalContext": rules}, event
+          EOF
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the toolchain in rust-toolchain.toml
+        working-directory: examples/rust
+        run: rustup toolchain install
+
+      - name: The example passes, and every enforcer refuses its bad file
+        run: python3 scripts/check_examples.py rust
+
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.26"
+          cache: false
+
+      - name: Install golangci-lint
+        run: |
+          # region: golangci-lint
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+          # endregion
+
+      - name: The example passes, and every enforcer refuses its bad file
+        run: python3 scripts/check_examples.py go
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install -r examples/python/requirements.txt
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: The example passes, and every enforcer refuses its bad file
+        run: python3 scripts/check_examples.py python
+
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      - name: Install the locked packages, without their install scripts
+        working-directory: examples/typescript
+        run: npm ci --ignore-scripts
+
+      - name: The example passes, and every enforcer refuses its bad file
+        run: python3 scripts/check_examples.py typescript

@@ -1,0 +1,19 @@
+--- original/spec.md
++++ used/spec.md
+@@ -3,6 +3,7 @@
+ Two squads fight on a fixed field. The game is deterministic. Coordinates are `[x,y]`,
+ with x increasing right and y increasing down. Input is UTF-8 text. Each input line is a JSON request;
+ produce exactly one JSON object and newline per line, in input order, and exit at EOF.
++Write and flush each reply before reading the next line: a client waits for every reply.
+ Keep running after refusals. A refusal is exactly `{"ok":false,"error":CODE}` and changes
+ nothing, including pending orders and every fact affecting future play. A success has
+ exactly the members specified below. Object member order is immaterial. Array order is
+@@ -83,7 +84,7 @@
+ 2. Consider all attack orders from the post-move positions. Each still deals Attack
+    if its target exists, is an enemy, and is in range; otherwise it deals zero. Apply
+    all damage together, then remove units at hp <= 0. A unit killed in this turn still
+-   performs its attack. Visibility is not a condition of this resolution rule.
++   performs its attack.
+ 3. Update turn, ended, orders, phase, and winner as defined above.
+ 
+ `{"cmd":"reachable","player":p,"unit":id}` returns `{"ok":true,"cells":[[x,y],...]}`,

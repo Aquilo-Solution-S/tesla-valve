@@ -1,0 +1,453 @@
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -1,9 +1,8 @@
+ # Tesla Valve
+ 
+ Build code like a Tesla valve: the right path is the path of least resistance,
+-and the wrong path works against itself. The measure is mental load per shipped
+-feature: someone who did not write the code understands it at first glance. A
+-guard, pin, fixture or proof that no feature needs is load, not safety.
++and the wrong path works against itself. The measure is mental load, not lines:
++someone who did not write the code understands it at first glance.
+ 
+ ## Before you write
+ 
+@@ -13,8 +12,7 @@
+ 1. Which streams does it need? Name every transformation on the way.
+ 2. Which streams already flow? Join them at their contract. Never dig a second
+    channel beside one: two sources of truth drift. Search the project before
+-   you build one: its logger beats a bare `print`. A channel you replace goes,
+-   with its tests and its guards, in the commit that adds the new one.
++   you build one: its logger beats a bare `print`.
+ 3. What does the language guarantee? Carry each stream in types, exhaustive
+    matches, ownership and a single constructor. A convention is not a guarantee.
+ 
+@@ -28,10 +26,7 @@
+   forges one.
+ - Check once, at the spring: data from a user, a file, the network, another
+   system, the database or the clock is parsed into its type where it enters,
+-  and trusted from there. Read the clock at the spring and pass it in. Your own
+-  repository is not a spring: a hash pin, or a list of its own files, types or
+-  names that each change must extend, is only right while someone remembers
+-  it. Derive it from the tree or delete it.
++  and trusted from there. Read the clock at the spring and pass it in.
+ - Facts about the world go stale: stock sells out, a token expires. A fact is
+   not an invariant. Check it again where the operation commits, atomically
+   with it: a conditional update, a constraint, a lock. A read and a later write
+@@ -45,9 +40,8 @@
+ When a finding says "add a check", or a diff adds a defensive comparison, first
+ ask whether a shape can make the mistake impossible.
+ 
+-- It can, and the shape weighs less than the check: change the shape, add the
+-  line that proves the wrong use does not compile where the toolchain checks
+-  one, and remove the check.
++- It can, and the shape weighs less than the check: change the shape, add one
++  line that proves the wrong use does not compile, and remove the check.
+   Otherwise the check stays: a unit converter needs no Meter, Foot and
+   Conversion types for one multiplication.
+ - It cannot, because the data comes from outside: the check goes to the spring,
+@@ -61,22 +55,10 @@
+ - Test the intent: what the code computes (a date, a price, a business rule)
+   and what it guarantees across its parts (a reservation is released when the
+   order is cancelled) keeps a test at the cheapest level that shows it.
+-- Tests build each value through one test constructor beside its type, which
+-  fills in defaults and builds it the way the code does. A new required field
+-  changes that constructor and the tests that care about the field, nothing
+-  else.
+-- Every check at a spring gets a test that feeds it the bad data. A test double
+-  is not a spring: its checks get no tests.
+-- Where the toolchain checks a line that must not compile (`compile_fail` in a
+-  Rust library, `@ts-expect-error`), one such line per shape another crate or
+-  package uses keeps the shape from being loosened unnoticed. The line is the
+-  proof, not a snapshot of the compiler's message. Where the toolchain does not
+-  check one, as in Go, a Rust binary crate or a crate with doctests turned off,
+-  the compiler alone holds the shape: no test runs the compiler, and no crate
+-  is split to get one.
+-- A test goes when the behaviour it pins goes, in the same commit, or when the
+-  compiler or a linter this project runs now catches what it caught: then name
+-  the shape that does.
++- Every check at a spring gets a test that feeds it the bad data.
++- One minimal line per shape proves the wrong use still does not compile.
++- Delete a test only when the compiler or a linter this project runs now
++  catches what it caught, and name the shape that does.
+ 
+ ## Where the shape stops
+ 
+@@ -89,16 +71,15 @@
+   nothing does, keep the check.
+ - A type that needs a paragraph of comment to be understood loses to a plain
+   check at the spring.
+-- A shape costs its fixtures and proofs, and pays where a mistake can travel:
+-  into another module, across a boundary, into a later change. In a one-file
+-  script or a demo it only adds load: keep the code plain, but keep the check
+-  of outside data at the spring and a test of what the code computes. A script
+-  that prunes old backups needs no Backup type around a file name, and still a
+-  test that it keeps the newest seven.
++- A shape pays where a mistake can travel: into another module, across a
++  boundary, into a later change. In a one-file script or a demo it only adds
++  load: keep the code plain, but keep the check of outside data at the spring
++  and a test of what the code computes. A script that prunes old backups needs
++  no Backup type around a file name, and still a test that it keeps the newest
++  seven.
+ 
+ ## Rules you write
+ 
+ Every line of a style guide, a review checklist or a prompt names its enforcer
+ (a type, a tool, a gate), or is a judgment call with its why and one example.
+-Delete the rest. A list each change must extend by hand is not an enforcer.
+-Whatever has to be remembered will be forgotten.
++Delete the rest. Whatever has to be remembered will be forgotten.
+--- a/README.md
++++ b/README.md
+@@ -57,10 +57,9 @@
+ check goes to the spring, with a test that feeds it the bad data.
+ 
+ The tests follow the same line. What the code computes keeps its test. Every
+-check at a spring is fed the bad data it must refuse. Where the toolchain can
+-check it, one line per shape proves that the wrong use still does not compile.
+-Where it cannot, as in Go, the compiler alone holds the shape. A test goes when
+-the behaviour it pins goes, or when the compiler catches what it caught.
++check at a spring is fed the bad data it must refuse. One line per shape proves
++that the wrong use still does not compile. A test goes only when the compiler
++catches what it caught.
+ 
+ The whole method, traced through one feature down to the code:
+ [before the first line](MANIFESTO.md#before-the-first-line).
+--- a/MANIFESTO.md
++++ b/MANIFESTO.md
+@@ -58,10 +58,8 @@
+    intent.
+ 6. **Mental load, not lines of code.** Slop is not measured in lines. The
+    measure is: does someone who did not write it understand it at first
+-   glance? Lines still count where nothing needs them: a guard, a pin, a
+-   fixture or a proof that no feature needs is load, not safety. A type that
+-   needs a paragraph of comment to be understood loses to a plain check at the
+-   spring.
++   glance? A type that needs a paragraph of comment to be understood loses to
++   a plain check at the spring.
+ 7. **A rule names its enforcer, or carries its why, or goes.** Style guides,
+    review checklists, the rules we give AI: each line is enforced by a type, a
+    tool or a gate, or it is a judgment call with its reason and one example.
+@@ -143,12 +141,8 @@
+ 
+ Beside the intent, a test has two more homes: the spring, where it feeds in the
+ bad data the check must refuse, and the shape, where one line proves that the
+-wrong use still does not compile, so the shape cannot be loosened unnoticed.
+-That line exists only where the toolchain checks it: a `compile_fail` doc test
+-in a Rust library, `@ts-expect-error` in TypeScript. In Go, in a Rust program
+-without a library, and in a library whose doc tests are off, the compiler alone
+-holds the shape, and nothing is
+-built to prove it. Any other test of shape marks unfinished landscape:
++wrong use still does not compile. Any other test of shape marks unfinished
++landscape:
+ 
+ - where we found no clean way to move information from A to B in the shape of a
+   Tesla valve,
+@@ -157,8 +151,7 @@
+ - where we act implicitly instead of explicitly.
+ 
+ Such a test goes when the compiler, or a linter the project runs, catches what
+-it caught. And every test goes with the behaviour it pins: when a path is
+-replaced, its tests leave in the commit that replaces it.
++it caught, and not a day sooner.
+ 
+ Tests are code too. Past a certain number they would need tests of their own,
+ and if we are honest, hardly anyone reads them. Every check is a second place
+@@ -295,7 +288,7 @@
+ 
+ | | 2. Shape over checks | 3. If it exists, it is valid | 4. Check once, at the spring |
+ | --- | --- | --- | --- |
+-| Rust | an exhaustive `match`; clippy forbids the `_` arm | private fields; in a library, a `compile_fail` doc test that tries to forge one | `serde`, `TryFrom` or `FromStr` into the type |
++| Rust | an exhaustive `match`; clippy forbids the `_` arm | private fields; a `compile_fail` doc test that tries to forge one | `serde`, `TryFrom` or `FromStr` into the type |
+ | Go | an interface closed by convention, or a named type, switched case by case; `gochecksumtype` and `exhaustive` hold it | unexported fields, and `ParseX` as the only way in | a wire struct, then a parse function into the type |
+ | TypeScript | `switch-exhaustiveness-check`, and `default` calls `unreachable(x: never)` | a private constructor; no `as`, no `any` | a runtime parser at every boundary, such as zod |
+ | Python | `match` with `case _: assert_never(x)`, under pyright strict or mypy | a constructor that refuses, and `frozen=True`; no `cast`, no `Any` | a strict pydantic model at every boundary |
+--- a/skills/tesla-valve/SKILL.md
++++ b/skills/tesla-valve/SKILL.md
+@@ -14,9 +14,8 @@
+ A Tesla valve is a channel with no moving parts: water passes freely one way,
+ and flowing back, the shape turns it against itself. Build code the same way.
+ The right path is the path of least resistance, and the wrong path works
+-against itself. The measure is mental load per shipped feature: someone who
+-did not write the code understands it at first glance. A guard, pin, fixture or
+-proof that no feature needs is load, not safety.
++against itself. The measure is mental load, not lines: someone who did not
++write the code understands it at first glance.
+ 
+ The reasoning behind every rule here is in the
+ [manifesto](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/MANIFESTO.md).
+@@ -30,14 +29,12 @@
+ 2. **Which streams already flow?** Join them at their contract. Never dig a
+    second channel beside one: two sources of truth drift, and that is the one
+    fault no type can catch. Search the project before you build one: its
+-   logger beats a bare `print`. A channel you replace goes, with its tests and
+-   its guards, in the commit that adds the new one.
++   logger beats a bare `print`.
+ 3. **What does the language guarantee?** Carry each stream in types, exhaustive
+    matches, ownership and a single constructor. A convention is not a
+    guarantee.
+ 
+-For a new feature or a new stream, write the answers down before the code, in
+-your own notes, never in a commit, issue or report:
++For anything beyond a one-line change, write the answers down before the code:
+ 
+ ```text
+ feature     show the delivery date at checkout
+@@ -69,12 +66,7 @@
+   cast forges one. Nobody checks it again.
+ - **Check once, at the spring.** Data from a user, a file, the network, another
+   system, the database or the clock is parsed into its type where it enters,
+-  and trusted from there. Read the clock at the spring and pass it in. Your own
+-  repository is not a spring: a hash pin, or a list of its own files, types or
+-  names that each change must extend, is only right while someone remembers
+-  it. Derive it from the tree or delete it. A checksum file over the migrations
+-  directory changes with every migration; the migration tool's own record of
+-  what it applied does not.
++  and trusted from there. Read the clock at the spring and pass it in.
+ - **Facts about the world go stale.** Stock sells out, a token expires. A fact
+   is not an invariant. Check it again where the operation commits, atomically
+   with it: a conditional update, a constraint, a lock. A read and a later write
+@@ -98,8 +90,7 @@
+ 
+ 1. **Wrong use:** a caller doing what the design never meant. Where the shape
+    weighs less than the check, change the shape so it cannot be written, add
+-   the line that proves it does not compile where the toolchain checks one, and
+-   remove the check. Otherwise
++   one line that proves it does not compile, and remove the check. Otherwise
+    the check stays: a unit converter needs no Meter, Foot and Conversion types
+    for one multiplication.
+ 2. **Bad data:** something from outside that no type can see. The check goes to
+@@ -128,29 +119,15 @@
+   plain unit test. Types remove the tests of shape, not the tests of meaning.
+   Protocols, atomicity and failure recovery are intent: no local type proves
+   them.
+-- **The spring:** every check there gets a test that feeds it the bad data. A
+-  test double is not a spring: its checks get no tests.
+-- **The shape:** where the toolchain checks a line that must not compile, one
+-  minimal line per shape another crate or package uses proves the wrong use
+-  still does not compile, so the shape cannot be loosened unnoticed. Keep it to
+-  the one line, so no unrelated error can satisfy it. The line is the proof,
+-  not a snapshot of the compiler's message: the message changes with the
+-  compiler. Where the toolchain has no such check, as in Go, a Rust binary
+-  crate or a crate with doctests turned off, the compiler alone holds the
+-  shape: no test runs the compiler or a type checker, and no crate is split to
+-  get one.
++- **The spring:** every check there gets a test that feeds it the bad data.
++- **The shape:** one minimal line per shape proves the wrong use still does not
++  compile. Keep it to the one line, so no unrelated error can satisfy it.
+ 
+ Any other test of shape marks unfinished landscape: no clean shape yet, an
+-unclear rule, an ambiguity, something implicit. A test goes when the behaviour
+-it pins goes, in the same commit, or when the compiler or a linter this project
+-runs now catches what it caught: then name the shape that does.
++unclear rule, an ambiguity, something implicit. Delete a test only when the
++compiler or a linter this project runs now catches what it caught, and name the
++shape that does.
+ 
+-Tests build each value through one test constructor beside its type, which
+-fills in defaults and builds it the way the code does. A new required field
+-changes that constructor and the tests that care about the field, nothing else.
+-Forty tests that each spell out `Order { … }` all change when `Order` gains a
+-field; forty that call the test constructor do not.
+-
+ ## Where the shape stops
+ 
+ - Keep the runtime check wherever types are erased: deserialization, and any
+@@ -162,19 +139,18 @@
+   nothing does, keep the check.
+ - A type that needs a paragraph of comment to be understood loses to a plain
+   check at the spring.
+-- A shape costs its fixtures and proofs, and pays where a mistake can travel:
+-  into another module, across a boundary, into a later change. In a one-file
+-  script or a demo it only adds load: keep the code plain, but keep the check
+-  of outside data at the spring and a test of what the code computes. A script
+-  that prunes old backups needs no Backup type around a file name, and still a
+-  test that it keeps the newest seven.
++- A shape pays where a mistake can travel: into another module, across a
++  boundary, into a later change. In a one-file script or a demo it only adds
++  load: keep the code plain, but keep the check of outside data at the spring
++  and a test of what the code computes. A script that prunes old backups needs
++  no Backup type around a file name, and still a test that it keeps the newest
++  seven.
+ 
+ ## Rules you write
+ 
+ Every line of a style guide, a review checklist or a prompt is one of three:
+ 
+ - **Enforced:** name the type, tool or gate that refuses the wrong version.
+-  A list each change must extend by hand is not an enforcer.
+ - **Could be enforced:** name the gate to build.
+ - **Judgment:** keep its why and one example.
+ 
+@@ -183,6 +159,5 @@
+ 
+ ## When you reply
+ 
+-If the change added, moved or removed checks or tests, end with one line per
+-shape or spring, not per test: what moved, and what holds it now (a shape, the
+-spring, or the commit).
++If the change added, moved or removed checks or tests, end with one line each:
++what it was, and what holds it now (a shape, the spring, or the commit).
+--- a/skills/reshape/SKILL.md
++++ b/skills/reshape/SKILL.md
+@@ -59,10 +59,9 @@
+ 
+ - The tests pass before the slice and after it. A slice changes how the code is
+   shaped, never what it computes.
+-- Add first: the spring test that feeds the bad data, and, where the toolchain
+-  checks one, the line that proves the wrong use does not compile. Delete
+-  second: the check, and each test the shape now covers, naming the enforcer
+-  that does.
++- Add first: the spring test that feeds the bad data, and the one line that
++  proves the wrong use does not compile. Delete second: the check, and each test
++  the shape now covers, naming the enforcer that does.
+ - After each slice, show the diff and the checks passing, and go on when the
+   user agrees.
+ 
+@@ -80,5 +79,5 @@
+ 
+ ## 6. Report
+ 
+-One line per row of the plan, not per test: what the check was, and what holds
+-it now (a shape, the spring, the commit), or why it stays.
++One line per check or test that went, moved or stayed: what it was, and what
++holds it now (a shape, the spring, the commit), or why it stays.
+--- a/skills/prepare/references/rust.md
++++ b/skills/prepare/references/rust.md
+@@ -68,9 +68,8 @@
+ ```
+ 
+ `--all-targets` lints the tests too, where `unwrap` stays allowed. `cargo test`
+-runs the doc tests, but only for a library. In a crate with only `main.rs`, or
+-where the project turns doc tests off, the compiler alone holds the shapes: it
+-gets no `lib.rs` and no doc tests turned on just for `compile_fail` lines.
++runs the doc tests, but only for a library: a crate with only `main.rs` needs a
++`lib.rs` for its `compile_fail` lines.
+ 
+ ## The proofs
+ 
+--- a/skills/tesla-valve/references/rust.md
++++ b/skills/tesla-valve/references/rust.md
+@@ -69,11 +69,6 @@
+ `Option` again, `70000` once it is wider than a `u16`. `Backorder {}` would
+ prove neither, because a missing field fails to compile either way.
+ 
+-Cargo runs doc tests only for a library, and only where the project leaves them
+-on. In a crate with only `main.rs`, or where the project turns doc tests off,
+-the compiler alone holds these shapes: write no test that runs `rustc`,
+-trybuild included, and split no crate to get one.
+-
+ ## One constructor, held by a doc test
+ 
+ The second doc test fails the day someone makes the field public. Keep its body
+--- a/skills/tesla-valve/references/go.md
++++ b/skills/tesla-valve/references/go.md
+@@ -91,9 +91,6 @@
+ }
+ ```
+ 
+-The unexported field holds the constructor. Go has no test that a line does not
+-compile, so write none: no test runs the compiler or `go/types` to prove it.
+-
+ ## The holes
+ 
+ The interface is closed by convention, not by the language.
+--- a/rules/tesla-valve.mdc
++++ b/rules/tesla-valve.mdc
+@@ -8,9 +8,8 @@
+ # Tesla Valve
+ 
+ Build code like a Tesla valve: the right path is the path of least resistance,
+-and the wrong path works against itself. The measure is mental load per shipped
+-feature: someone who did not write the code understands it at first glance. A
+-guard, pin, fixture or proof that no feature needs is load, not safety.
++and the wrong path works against itself. The measure is mental load, not lines:
++someone who did not write the code understands it at first glance.
+ 
+ ## Before you write
+ 
+@@ -20,8 +19,7 @@
+ 1. Which streams does it need? Name every transformation on the way.
+ 2. Which streams already flow? Join them at their contract. Never dig a second
+    channel beside one: two sources of truth drift. Search the project before
+-   you build one: its logger beats a bare `print`. A channel you replace goes,
+-   with its tests and its guards, in the commit that adds the new one.
++   you build one: its logger beats a bare `print`.
+ 3. What does the language guarantee? Carry each stream in types, exhaustive
+    matches, ownership and a single constructor. A convention is not a guarantee.
+ 
+@@ -35,10 +33,7 @@
+   forges one.
+ - Check once, at the spring: data from a user, a file, the network, another
+   system, the database or the clock is parsed into its type where it enters,
+-  and trusted from there. Read the clock at the spring and pass it in. Your own
+-  repository is not a spring: a hash pin, or a list of its own files, types or
+-  names that each change must extend, is only right while someone remembers
+-  it. Derive it from the tree or delete it.
++  and trusted from there. Read the clock at the spring and pass it in.
+ - Facts about the world go stale: stock sells out, a token expires. A fact is
+   not an invariant. Check it again where the operation commits, atomically
+   with it: a conditional update, a constraint, a lock. A read and a later write
+@@ -52,9 +47,8 @@
+ When a finding says "add a check", or a diff adds a defensive comparison, first
+ ask whether a shape can make the mistake impossible.
+ 
+-- It can, and the shape weighs less than the check: change the shape, add the
+-  line that proves the wrong use does not compile where the toolchain checks
+-  one, and remove the check.
++- It can, and the shape weighs less than the check: change the shape, add one
++  line that proves the wrong use does not compile, and remove the check.
+   Otherwise the check stays: a unit converter needs no Meter, Foot and
+   Conversion types for one multiplication.
+ - It cannot, because the data comes from outside: the check goes to the spring,
+@@ -68,22 +62,10 @@
+ - Test the intent: what the code computes (a date, a price, a business rule)
+   and what it guarantees across its parts (a reservation is released when the
+   order is cancelled) keeps a test at the cheapest level that shows it.
+-- Tests build each value through one test constructor beside its type, which
+-  fills in defaults and builds it the way the code does. A new required field
+-  changes that constructor and the tests that care about the field, nothing
+-  else.
+-- Every check at a spring gets a test that feeds it the bad data. A test double
+-  is not a spring: its checks get no tests.
+-- Where the toolchain checks a line that must not compile (`compile_fail` in a
+-  Rust library, `@ts-expect-error`), one such line per shape another crate or
+-  package uses keeps the shape from being loosened unnoticed. The line is the
+-  proof, not a snapshot of the compiler's message. Where the toolchain does not
+-  check one, as in Go, a Rust binary crate or a crate with doctests turned off,
+-  the compiler alone holds the shape: no test runs the compiler, and no crate
+-  is split to get one.
+-- A test goes when the behaviour it pins goes, in the same commit, or when the
+-  compiler or a linter this project runs now catches what it caught: then name
+-  the shape that does.
++- Every check at a spring gets a test that feeds it the bad data.
++- One minimal line per shape proves the wrong use still does not compile.
++- Delete a test only when the compiler or a linter this project runs now
++  catches what it caught, and name the shape that does.
+ 
+ ## Where the shape stops
+ 
+@@ -96,16 +78,15 @@
+   nothing does, keep the check.
+ - A type that needs a paragraph of comment to be understood loses to a plain
+   check at the spring.
+-- A shape costs its fixtures and proofs, and pays where a mistake can travel:
+-  into another module, across a boundary, into a later change. In a one-file
+-  script or a demo it only adds load: keep the code plain, but keep the check
+-  of outside data at the spring and a test of what the code computes. A script
+-  that prunes old backups needs no Backup type around a file name, and still a
+-  test that it keeps the newest seven.
++- A shape pays where a mistake can travel: into another module, across a
++  boundary, into a later change. In a one-file script or a demo it only adds
++  load: keep the code plain, but keep the check of outside data at the spring
++  and a test of what the code computes. A script that prunes old backups needs
++  no Backup type around a file name, and still a test that it keeps the newest
++  seven.
+ 
+ ## Rules you write
+ 
+ Every line of a style guide, a review checklist or a prompt names its enforcer
+ (a type, a tool, a gate), or is a judgment call with its why and one example.
+-Delete the rest. A list each change must extend by hand is not an enforcer.
+-Whatever has to be remembered will be forgotten.
++Delete the rest. Whatever has to be remembered will be forgotten.

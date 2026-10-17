@@ -1,0 +1,82 @@
+[
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B runs order, reachable, forecast and document checks through one shared validator (orderError) on a per-player perceived field, so sight rules are enforced by construction, whereas A duplicates visibility checks across moveOK, playerAttackError and the import path inside a long handle() function; B also shares unit parsing between deployment and import and has broader table-driven tests.",
+   "A routes order submission and import validation through one shared orderError, builds the player's field once (playerField) for every decision, and shares unit parsing between deployment and import, whereas B duplicates deployment parsing inline in a long handle and computes mender forecast and repair logic separately, so A is easier to extend safely."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B routes order, forecast, reachable and import through one sight-projected field and one shared orderError and unit-parsing path, so later rules are less likely to drift apart, whereas A scatters visibility checks across handle, destinationOK and parseDocument.",
+   "A runs order, forecast and import through one shared validator on a sight-projected game and uses one attackEffect for both forecast and resolution, so the rules cannot drift apart as features are added, whereas B duplicates attack, forecast and import checks across handle and parseDocument."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B models kinds, effects, phases and errors as typed enums, separates request parsing from execution, and routes every player decision through a sight-limited PlayerField, so new rules and commands fit more safely; A packs the same logic into stringly-typed stat tuples and one long request function, although its tests are thorough.",
+   "A models kinds, effects, phases and positions as typed enums with a sight-limited PlayerField projection and a clean lib/main split, while B uses stringly typed kinds, a monolithic request() function and derived phase, and lacks arbitrary_precision so huge numbers like 1e400 likely yield bad_json instead of bad_request."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates parsing from execution, uses typed errors, a Phase enum, an Effect enum and a PlayerField that serves both the sight-scoped decisions and the view output, so new rules and commands slot in cleanly, while A packs everything into one string-coded request() with kind==Mender special cases; both have thorough tests, and B's are slightly more focused.",
+   "A separates parsing from execution with a typed Error enum, a Request enum, an Effect enum and a PlayerField abstraction that keeps sight-limited decisions in one place, and its tests are thorough. B works but uses string error codes, positional stat tuples like stats().3 and one large string-matched request() function, which makes the next feature riskier to add."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

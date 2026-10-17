@@ -1,0 +1,78 @@
+{
+ "game": "driftfall",
+ "lang": "rust",
+ "arm": "tesla-valve",
+ "model": "gpt-6-luna",
+ "run": 2,
+ "source": "20261010-120905/driftfall__rust__baseline__gpt-6-luna__1",
+ "refactor": {
+  "session": {
+   "id": "01a1267a-d520-7021-be78-06cd8098ca92",
+   "cost": null,
+   "out_tokens": 2953,
+   "ms": 40366
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 76,
+   "removed": 41,
+   "files": 1
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 10,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 10,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": []
+  }
+ }
+}

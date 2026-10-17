@@ -1,0 +1,104 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "tesla-valve",
+ "model": "gpt-6-luna",
+ "run": 1,
+ "source": "20261010-131542/skirmish__go__baseline__gpt-6-luna__1",
+ "refactor": {
+  "session": {
+   "id": "01a12683-c893-7d72-ae0b-ef6a78f2e0b1",
+   "cost": null,
+   "out_tokens": 6498,
+   "ms": 84678
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 527,
+   "removed": 488,
+   "files": 5
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 147,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 2,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 87,
+    "total": 88
+   },
+   "failed": [
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command21-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command34-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command43-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command57-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command66-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command75-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command89-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command98-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[{\"cmd\":null}-bad_request]",
+    "test_f4::test_mender_sides_ranges_and_terrain",
+    "test_f4::test_seeded_fuzz_at_least_2000_commands",
+    "test_f6::test_bad_document_preserves_half_ended_future[document15]"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 147,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 2,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 87,
+    "total": 88
+   },
+   "failed": [
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command21-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command34-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command43-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command57-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command66-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command75-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command89-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command98-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[{\"cmd\":null}-bad_request]",
+    "test_f4::test_mender_sides_ranges_and_terrain",
+    "test_f4::test_seeded_fuzz_at_least_2000_commands",
+    "test_f6::test_bad_document_preserves_half_ended_future[document15]"
+   ]
+  }
+ }
+}

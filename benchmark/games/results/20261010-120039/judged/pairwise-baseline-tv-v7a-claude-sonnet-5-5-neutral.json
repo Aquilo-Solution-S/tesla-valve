@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B replays by feeding the ordinary command path so live and replay behaviour cannot drift apart, and it keeps the preview queue as the source of the next piece; A duplicates the playback logic in separate helpers and handles every command in one large switch, though B's paused-state atomicity test is vacuous because it marshals a struct with only unexported fields.",
+   "A replays through the same command path as live play, so replay behaviour cannot drift from live behaviour, and it splits rotate, drop and lock into separate methods with broader tests, whereas B duplicates new/replay setup and the pause/phase rules in a separate playback layer and packs rotation into one large input switch."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A's per-command match in `command` is clearer and easier to extend than B's convoluted tuple-based parse-then-dispatch, which outweighs B's typed Phase/Mode enums over A's string phases; the two are otherwise comparable in tests and game logic.",
+   "B's per-command match with explicit validation is much easier to extend than A's convoluted tuple-based `parsed` handling in `command()`, and its tests cover more rules (pulse, elapsed time, replay equal times), even though its string-typed phases are a weakness compared with A's enums."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

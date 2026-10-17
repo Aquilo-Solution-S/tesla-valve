@@ -1,0 +1,482 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The game logic and protocol code are identical, but B splits snapshot and replay into their own files and adds protocol and snapshot tests (exact integer syntax, bad_json versus bad_request, snapshot field set), so it is easier to extend and its tests guard more of the spec, while A keeps everything in a few larger files and has fewer protocol tests.",
+   "The game logic is essentially identical, but A splits snapshot, replay and protocol into separate files with a dedicated protocol test file, while B folds the snapshot into game.go and replay into protocol.go, making A a bit easier to extend and navigate."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The code and tests are nearly identical, but B splits game logic (game.go), I/O loop (main.go) and protocol (protocol.go) into separate files, which is easier to navigate and extend, while A puts the game logic and the I/O loop together in main.go; B's tests also cover trailing-data rejection, which A's do not.",
+   "The game logic and protocol code are almost identical, but A splits them across game.go, protocol.go and main.go while B puts the engine and the I/O loop together in main.go, which makes A easier to extend; B's extra unknown-command test does not make up for that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The two share nearly identical logic, but A splits the code across game.go, protocol.go and main.go and adds a test of the serialized snapshot shape, whereas B puts everything in one main.go; B's typed phase constants and playRefusal helper are nice but are applied inconsistently (pause/resume still duplicate the gate, and its own tests use string literals for phases), so A's file separation and better protocol test win slightly.",
+   "The two are near-identical, but B splits game logic (game.go) from the protocol layer (protocol.go), which makes future changes easier to locate, and adds a test of the serialized reply shape; A keeps everything in one file but has typed phase/mode constants and a shared playRefusal helper that B lacks, a smaller edge that doesn't outweigh B's file separation and extra protocol test."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__3",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The game logic is essentially identical, but B splits it into game.go, main.go, protocol.go and replay.go whereas A puts the game and the I/O loop together in main.go, and B's tests cover duplicate keys and NaN/trailing-data input, though A's exact-reply-shape tests are a useful offset.",
+   "The game logic is line-for-line identical, so A's split into game.go, main.go, protocol.go and replay.go is the deciding edge over B's game and entry point crammed into main.go, while the test sets trade off roughly evenly (A covers duplicate keys and NaN/Infinity rejection; B has exact reply-shape tests and a non-vacuous state-preservation check in its first test)."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The two share nearly identical engine code, but A splits lock into depositActive and clearRows, uses named board constants, and tests row-clearing and snapshot ownership directly, while B keeps lock as one block with magic numbers; B's per-type request interface and fuzz test are good but don't outweigh that.",
+   "The two are near-identical, but B splits lock into depositActive and clearRows, names the board constants and tests clearRows directly, which helps most as game rules grow; A's typed request objects and fuzz test are nice, but its lock stays monolithic and B's single request struct is simple enough."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "baseline",
+   "tesla-valve"
+  ],
+  "winner": "tie",
+  "why": [
+   "A keeps one small shared execute path, named constants, a lock split into deposit and clearRows, and tests that cover transport errors, snapshot aliasing and fuzzed refusal atomicity, while B adds a many-type command hierarchy with an AST type-check test and an opaque SHA-256 digest test, and leaves lock monolithic with magic numbers 18 and 10.",
+   "A parses each command into its own typed request and reuses the same key parser for replay, so new commands and rules slot in cleanly, whereas B's flat string-switch request, its count/field parsing hack and duplicated replay key list are brittle; B does have a nicer lock split, named constants and stronger fuzz/transport tests, but A's structure edges ahead despite its opaque digest test and an overbuilt AST-based type-check test."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   true,
+   true
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__2",
+  "orders": [
+   "baseline",
+   "tesla-valve"
+  ],
+  "winner": "tie",
+  "why": [
+   "A splits code into cohesive files (board, pieces, protocol, replay, snapshot) with named constants and adds a golden-transcript test and a refusal fuzz test, whereas B keeps magic numbers in a dense game.go, uses a two-switch parser ending in a panic, and adds a brittle go/types test to prove a compile-time property, even though its typed request interface is a nice touch.",
+   "A models each command as a typed request with its own apply method and a single gameplayRefusal helper, so live commands and replay events share one path and a new command is just a new type, whereas B's string-named catch-all command struct and growing execute switch will get messier, even though B has the better file split and stronger tests (golden transcript, fuzz, transport flush)."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   true,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The two share nearly identical logic, but B replaces stringly-typed phase and mode values with Phase and Mode enums (compiler-checked matches, a single finished() helper, and a tested wire representation), which makes adding phases and modes safer, while A's split into game.rs and protocol.rs is a modest modularity gain that doesn't outweigh that.",
+   "The logic is nearly identical, but A models phase and mode as enums so the compiler checks matches and typos, while B uses stringly-typed phase/mode and splits into modules with pub(crate) fields on everything, giving little real encapsulation and leaving its tests in main.rs; B's file split helps slightly, but A's type safety matters more as rules and modes grow."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The two share nearly identical core logic, but B parses input keys into typed InputKey/ReplayKey enums at the JSON boundary so gameplay can't receive invalid strings and the compiler checks matches exhaustively, while A passes raw strings with a silent `_ => {}` fallthrough; A has a few more protocol-level tests (validation order, snapshot fields) and a small error() helper, but B's type safety matters more as commands grow.",
+   "The two projects are nearly identical single-file implementations, but A parses input keys into typed InputKey/ReplayKey enums once at the boundary, so the compiler checks the key set as commands grow, whereas B passes stringly-typed keys with a silent `_ => {}` fallback and duplicates key lists; B's extra protocol and snapshot-field tests are a real plus but don't outweigh the safer design in A."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The two share nearly identical logic and tests, but B replaces stringly-typed phase and mode with enums, so the compiler checks matches and a new phase or mode cannot slip past silently, whereas A keeps string phases with an unreachable!() fallback and gains only a lib/bin split that B lacks.",
+   "The two projects share nearly identical logic and tests, but A models phase and mode as enums so the compiler checks every match, while B uses stringly-typed &'static str fields with unreachable!() arms that will fail at runtime when a new phase is added; B's lib/bin split is a modest plus but doesn't outweigh that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__3",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The game logic and tests are essentially identical, but B uses Phase and Mode enums so the compiler checks phase handling (exhaustive matches, no stringly-typed states or unreachable!() arms), which makes adding future phases and modes safer, while A's split into game.rs/protocol.rs is a modest modularity gain that does not offset its string-typed phases.",
+   "The game logic is essentially identical, but A models phase and mode as enums with exhaustive matches, while B uses string phases with `unreachable!()` fallbacks where a typo compiles silently; B's split into game and protocol modules is a real plus, but it doesn't outweigh that safety loss."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B's typed Phase/Kind/Mode enums, single Action path with centralized phase gating, and readable tests (Kind::Ramp rather than magic indices like 2 or vec![3,4,1]) make new rules safer to add than A's stringly-typed phases and usize kinds, though B's fragile rustc-invoking compile-fail test is overbuilt tooling.",
+   "A models phase, mode and kind as enums and builds replay as a plain action list, which makes new rules safer to add, while B's string phases and usize kinds with magic numbers in tests invite silent typos; A's fragile rustc-spawning compile-fail test is overbuilt, but it is only a test and does not outweigh the better design."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   true,
+   true
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B's typed Input/Action enums make key handling exhaustive and remove A's string matching with an `unreachable!()` panic path, and its protocol unit tests cover live/replay parity; A's lib.rs and I/O flush tests are a real plus, but B's brittle rustc-spawning compile-fail test is overbuilt and costs it some of that advantage.",
+   "The game logic is nearly identical in both, but A parses keys into an Input enum and replay events into typed Actions, so adding a key or command is checked by the compiler. B passes key strings through, repeats the key lists in protocol.rs, and relies on `unreachable!()` in game.rs. B's lib.rs split and flush/broken-pipe stream tests are a real strength. They don't outweigh the loss of type safety, though A's rustc-invoking compile-fail test is a brittle extra."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   true,
+   true
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__2",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The two share nearly identical engine logic and the same extensive tests, but A names the gravity accumulator `gravity_credit_ms` (B's `elapsed` sits beside `elapsed_ms`, which invites bugs), uses `WIDTH`/`HEIGHT` constants and a separate `piece` module, and adds transport tests covering flushing, read failures and a reply-fixture comparison, which outweighs B's somewhat cleaner required/optional field parsing.",
+   "B splits piece geometry, wire parsing and game state into separate modules, names the gravity accumulator `gravity_credit_ms` (A's `elapsed` sits next to `elapsed_ms` and is easy to confuse), and adds transport tests for flush and read failures, while A's engine and tests are nearly identical but sit in two bigger files."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B splits the same logic into model, rules, engine, and protocol files and adds a dedicated protocol test, which makes it easier to navigate, while A has the identical logic in one file and only gains a shared moveDestinationLegal helper (and its test) that B lacks, so B's file separation is a modest edge that is partly offset by its duplicated move-validation code.",
+   "A splits the code into engine, model, protocol and rules files, which is easier to navigate and extend, whereas B puts everything in one main.go; B's shared moveDestinationLegal helper and its test are a real improvement that A lacks, since A duplicates the move-legality logic across order, reachable and import, but this does not outweigh the structure gap."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The two share nearly identical logic and the same oversized process() function, but A extracts target visibility, interaction validation and forecast effect into shared helpers (with tests) so order and forecast cannot drift apart, which matters for this spec; B's named stats struct and file split are nice but it duplicates that validation inline, and A's [4]int stats indices are only a minor readability cost.",
+   "B puts target availability, interaction validation and forecast effect into shared helpers, so order and forecast cannot drift apart, and it adds tests for exactly that agreement, while A duplicates that logic inline; A's file split and named stats fields are nicer than B's single file with magic-index stats arrays, but they weigh less."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "Both share the same logic and weaknesses (a monolithic handle function, repeated parsing code), but B pulls move legality, side/range checks and forecast into shared canMove, validInteraction and forecast helpers, so order, reachable, forecast and import cannot drift apart, while A repeats those rules in three places despite its nicer file split; B also adds a test for the shared helpers.",
+   "A centralizes movement and interaction rules in shared helpers (canMove, validInteraction, forecast) that order, reachable, forecast and import all use, so the spec's agreement requirements hold by construction and are directly tested, whereas B splits the code into files but duplicates those rules across handle and parseDocument, so they can drift."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B gives each command its own request type with an execute method, keeps unit stats (including sight) in one table, and has a boundary test that mutates every field of every command, so a new command is a local addition, whereas A grows one long if-chain in execute and keeps sight in a separate map; the two share nearly identical rules, resolution and document code, so the difference is structure and test coverage.",
+   "A splits requests into typed command structs with per-command execute methods, which makes new commands easy to add and keeps the precedence checks in small functions, and it adds a protocol-transcript test; B funnels everything through one long if-chain in execute and a flat requestData bag, which will grow unwieldy, though B's fuzz atomicity test and more compact layout are good; A's compile-time type-mismatch test via go/types is overkill, but its core design is the more maintainable one."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   true
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B parses each request into a closure and gives each command its own small method, with shared placement parsing and a default deployment built as data, so new commands are easier to add safely; A packs everything into one long `handle` with mode-switching conditionals, a JSON-string default deployment, and duplicated unit validation between deployment and documents, though both share the same rules and similar tests.",
+   "A splits parsing from execution into per-command functions and shares one placement parser between deployment and import, while B packs everything into one long `handle` that re-checks the command name repeatedly, duplicates placement parsing, and builds the default deployment from an embedded JSON string, so new commands would be harder to add safely."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The two are nearly identical, but A pulls the target-visibility and side/range check into shared helpers (visible_target, can_interact) used by order, forecast and import, while B copies that mender/side/range logic into three places that could drift apart as rules grow.",
+   "The two projects are nearly identical, but B pulls the target-visibility and interaction-rule checks into shared helpers (`visible_target`, `can_interact`) used by order, forecast and import, while A repeats that logic three times, which risks drift as rules grow; A's few extra tests don't outweigh that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "The two are nearly identical monolithic files, but B routes order, reachable, forecast and import through the same `can_move_to`, `can_interact` and `visible_unit` helpers, so legality rules live in one place, whereas A re-implements move and attack legality inline in import and risks silent divergence as rules grow; A's `order_value` helper and one extra test don't outweigh that.",
+   "The two are near-identical, but A reuses `can_move_to` and `can_interact` in import validation, so imported orders cannot drift from live order acceptance, whereas B re-inlines those rules in `import_document` (B's `order_value` and `forecast` helpers and extra shared-rules test are smaller wins)."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B routes forecast, order and import through one shared attack_effect helper and uses a Phase enum, while A duplicates that logic and its mender forecast skips the range check, so it can disagree with order acceptance; A's split resolve functions and movement tests are good but don't outweigh that.",
+   "A routes forecast, order and import through one shared `attack_effect` and uses a `Phase` enum, so the agreement rules hold by construction, while B duplicates the attack checks in three places and its mender forecast skips the range check (a real bug), which outweighs B's nicer split of `resolve` and its movement-cycle test."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B parses requests into a typed Command enum, uses a Kind enum and an Error enum, and shares one `interaction()` rule between validation, forecast and resolution, plus shared unit parsing and systematic validation tests, while A relies on string kinds, a long ad hoc `request` function and duplicated mender/damage logic that will be harder to extend safely.",
+   "A models unit kinds as an enum, errors as a typed enum, and commands as a parsed Command type, with one shared interaction() rule for validation, forecast and resolution, whereas B uses stringly-typed kinds and error codes, an if-chain request() that duplicates the attack rule between validate and resolve and special-cases mender in forecast, and it relies on a fixture file I can't see, though B's module split is tidy."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tesla-valve",
+   "tesla-valve"
+  ],
+  "winner": "tesla-valve",
+  "why": [
+   "B uses a typed Error enum and a flat Command enum, and adds tests for request shapes and numeric domains checked before phase rules; A splits modules by concern more cleanly but relies on string error codes, re-matches the command name inside its Request parser, and its compatibility test needs a fixture file that isn't shown.",
+   "A's typed Error enum and flat Command enum are safer to extend than B's string error codes and double-match request parsing, and its tests cover more of the protocol's validation and precedence rules, though B's file split by responsibility and its compatibility fixtures are real advantages."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tesla-valve": [
+   false,
+   false
+  ]
+ }
+]

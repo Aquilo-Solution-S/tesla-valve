@@ -1,0 +1,33 @@
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -12,7 +12,9 @@
+ 1. Which streams does it need? Name every transformation on the way.
+ 2. Which streams already flow? Join them at their contract. Never dig a second
+    channel beside one: two sources of truth drift. Search the project before
+-   you build one: its logger beats a bare `print`.
++   you build one: its logger beats a bare `print`. A path that must give the
++   same result as another runs through it: a replay feeds its events to the
++   handler that live input uses.
+ 3. What does the language guarantee? Carry each stream in types, exhaustive
+    matches, ownership and a single constructor. A convention is not a guarantee.
+ 
+@@ -26,7 +28,9 @@
+   forges one.
+ - Check once, at the spring: data from a user, a file, the network, another
+   system, the database or the clock is parsed into its type where it enters,
+-  and trusted from there. Read the clock at the spring and pass it in.
++  and trusted from there: a named type with one case per kind of input, not
++  a tuple the next reader has to decode. Read the clock at the spring and pass
++  it in.
+ - Facts about the world go stale: stock sells out, a token expires. A fact is
+   not an invariant. Check it again where the operation commits, atomically
+   with it: a conditional update, a constraint, a lock. A read and a later write
+@@ -56,6 +60,8 @@
+   and what it guarantees across its parts (a reservation is released when the
+   order is cancelled) keeps a test at the cheapest level that shows it.
+ - Every check at a spring gets a test that feeds it the bad data.
++- A test must be able to fail: two JSON dumps of a struct whose fields are
++  all private both read `{}`, so comparing them proves nothing.
+ - One minimal line per shape proves the wrong use still does not compile.
+ - Delete a test only when the compiler or a linter this project runs now
+   catches what it caught, and name the shape that does.

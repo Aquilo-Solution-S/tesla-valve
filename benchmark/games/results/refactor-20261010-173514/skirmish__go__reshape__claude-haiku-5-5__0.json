@@ -1,0 +1,78 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "reshape",
+ "model": "claude-haiku-5-5",
+ "run": 0,
+ "source": "20261010-142859/skirmish__go__baseline__claude-haiku-5-5__0",
+ "refactor": {
+  "session": {
+   "id": "191e55f0-ccaa-496f-8044-5b502f816e8d",
+   "cost": 0.55232166,
+   "turns": 99,
+   "ms": 493657
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 398,
+   "removed": 185,
+   "files": 5
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  }
+ }
+}

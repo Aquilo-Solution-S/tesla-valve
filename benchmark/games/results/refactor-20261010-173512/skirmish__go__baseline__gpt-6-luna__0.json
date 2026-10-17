@@ -1,0 +1,82 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "baseline",
+ "model": "gpt-6-luna",
+ "run": 0,
+ "source": "20261010-131542/skirmish__go__baseline__gpt-6-luna__0",
+ "refactor": {
+  "session": {
+   "id": "01a12681-d540-7e83-94cd-41d86483af23",
+   "cost": null,
+   "out_tokens": 5678,
+   "ms": 59198
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 60,
+   "removed": 23,
+   "files": 2
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 8,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": [
+    "test_f3::test_committed_literal_scenarios"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 8,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": [
+    "test_f3::test_committed_literal_scenarios"
+   ]
+  }
+ }
+}

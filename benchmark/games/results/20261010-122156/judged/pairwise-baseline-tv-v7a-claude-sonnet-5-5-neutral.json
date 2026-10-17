@@ -1,0 +1,82 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates parsing (parseCommand into a typed command) from execution and has replay reuse those same paths, whereas A mixes validation and execution in one long function and replays by marshaling JSON to call itself, so B is easier to extend; both have thorough tests.",
+   "A separates parsing from execution, so replay documents are validated into typed commands and played back through the same execute path, while B packs parsing, phase checks and execution into one long function and replays by re-marshalling JSON into itself; both have solid tests, so A is easier to extend."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates parsing from execution with typed commands and runs replay through the same execute path, while A passes stringly-typed arguments, keeps confusingly named duplicate clock fields (elapsed/elapsedMS), and has replay logic inline in command(); both are sensibly sized with good tests, but B is easier to extend.",
+   "A parses untrusted JSON into a typed command and keeps the gravity accumulator (gravityCredit) and elapsedMS clearly separate, while B uses a stringly-typed execute(cmd, key, mode, value) and confusingly named near-duplicate fields (elapsed vs elapsedMS); both have solid tests that check state is unchanged after refusals."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B models phases as an enum that carries the active piece, separates command parsing from execution, and builds replay from typed commands, whereas A uses string phases, hand-parsed raw JSON numbers, re-serializes JSON to replay commands, and has confusingly named `elapsed` and `elapsed_ms` fields.",
+   "A models phase, kind, mode, key and command as typed enums (the active piece lives inside the phase) and replays through typed commands, whereas B uses stringly-typed phases, usize kinds, a confusingly named gravity field `elapsed` next to `elapsed_ms`, and replays by re-serializing JSON commands, which is more fragile to extend even though both have thorough tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates parsing from execution and uses typed enums, with the active piece carried inside the live phases, so illegal states such as a playing phase with no piece cannot be represented, and its tests are thorough and in their own file; A relies on string phases, unwraps, and a replay that serializes commands to JSON and re-parses them, though its tests are also solid.",
+   "A models phases and commands as enums, with the active piece living inside the live phases and parsing kept apart from execution, so new rules and commands are safer to add; B uses string phases, unwraps on Option, confusingly named `elapsed` and `elapsed_ms` fields, and replays by re-serializing commands to JSON strings, though both have broad tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

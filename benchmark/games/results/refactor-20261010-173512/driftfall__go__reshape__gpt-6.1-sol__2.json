@@ -1,0 +1,78 @@
+{
+ "game": "driftfall",
+ "lang": "go",
+ "arm": "reshape",
+ "model": "gpt-6.1-sol",
+ "run": 2,
+ "source": "20261010-122156/driftfall__go__baseline__gpt-6.1-sol__1",
+ "refactor": {
+  "session": {
+   "id": "01a1267d-c6a7-7493-acba-c19bb8ada463",
+   "cost": null,
+   "out_tokens": 13513,
+   "ms": 399777
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 720,
+   "removed": 434,
+   "files": 14
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 10,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 10,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": []
+  }
+ }
+}

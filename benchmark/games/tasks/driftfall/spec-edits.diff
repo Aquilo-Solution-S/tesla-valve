@@ -1,0 +1,48 @@
+--- original/spec.md
++++ used/spec.md
+@@ -1,8 +1,7 @@
+ # Driftfall: observable rules
+ 
+-This document describes the completed game. Each numbered section is introduced by the
+-matching step; before that step its commands and fields do not exist. No internal design
+-is prescribed. Coordinates are integers, x increases right, y increases down.
++This document describes the game's observable behaviour. No internal design is prescribed.
++Coordinates are integers, x increases right, y increases down.
+ 
+ ## 1. Base game and JSON-lines protocol
+ 
+@@ -24,13 +23,13 @@
+ for this protocol, even if mathematically integral. Booleans are not numbers. Validation order:
+ invalid JSON -> bad_json; non-object, missing/non-string cmd -> bad_request; unknown command
+ -> unknown_command; wrong members, missing fields, wrong types/ranges or unknown input key ->
+-bad_request; then phase restrictions below. These five codes are initially available:
++bad_request; then phase restrictions below. The error codes are
+ `bad_json`, `bad_request`, `unknown_command`, `not_started`, `finished`.
+ Before new, phase is idle; input/tick refuse not_started. In over, they refuse finished.
+ New and state always work (subject to field validation), even after game over.
+ 
+ The board has 10 columns and 18 rows. Snapshot board is 18 top-to-bottom strings of length 10:
+-`.` means empty and `#` means locked. It never includes active cells. The base snapshot has
++`.` means empty and `#` means locked. It never includes active cells. The snapshot has
+ exactly phase, board, active, score, lines, level. Initially: phase idle, empty board, active null,
+ score=0, lines=0, level=1. During play phase is playing. Active is an object with exactly kind
+ (a name below) and cells (absolute `[x,y]` pairs sorted by y, then x). Over has active null.
+@@ -70,7 +69,7 @@
+ Add `{"cmd":"pause"}` and `{"cmd":"resume"}`, with no other members. Pause playing -> paused;
+ resume paused -> playing. Repeating pause while paused or resume while playing succeeds without
+ change. Input and tick while paused refuse `paused`. Pause/resume before new refuse not_started;
+-in over (and later won) refuse finished. State and new remain usable. Pause preserves gravity
++in over refuse finished. State and new remain usable. Pause preserves gravity
+ credit; refused ticks contribute nothing.
+ 
+ ## 3. Hold and preview
+@@ -84,7 +83,8 @@
+ held and current kinds without drawing. The incoming piece always uses initial orientation and
+ spawn position. Reset gravity credit on hold. Even an unsuccessful spawn consumes the hold and
+ enters over. Hold once makes hold_available false until the next lock; a second hold refuses
+-`hold_used`. Phase errors take precedence over hold_used. On over, hold_available is false.
++`hold_used`. Phase errors take precedence over hold_used. Pause and resume leave hold_available unchanged.
++On over, hold_available is false.
+ 
+ ## 4. Pulse
+ 

@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B offers clearer parsing, command and I/O boundaries, reuses live commands for replay, and centralizes preview consumption, whereas A duplicates playback rules and bypasses preview on normal spawns, though B\u2019s refusal tests need repair because marshaling unexported game fields checks nothing.",
+   "A\u2019s named pieces, focused rule methods, and shared live/replay command handling make future changes easier to understand and safer, while B duplicates playback semantics and bypasses preview on normal spawns; both have proportionate complexity and tests with meaningful coverage gaps."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed phases and modes make future changes safer, and its tests more meaningfully protect hold boundaries, gravity locking, and hidden replay state, while both projects keep complexity proportionate to the game.",
+   "A\u2019s typed phases and modes, centralized command guards, and tests that explicitly protect hidden state make future changes safer, while B duplicates phase checks, silently defaults unknown shapes, and includes a hold test that contradicts its own availability rule."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

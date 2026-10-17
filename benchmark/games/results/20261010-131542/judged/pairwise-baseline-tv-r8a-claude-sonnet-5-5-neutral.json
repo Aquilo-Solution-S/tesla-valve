@@ -1,0 +1,122 @@
+[
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B keeps state in a `game` struct and drives its tests end-to-end through an injectable `run`, whereas A relies on a global `game`, a single huge `process` function, and a validator that temporarily swaps the global; B's cost is a real bug in its shared-destination cancellation (a third unit aimed at the same cell still moves), which is easy to fix.",
+   "A keeps state in a value passed around and its tests drive the real protocol loop, whereas B relies on a global game and validateDocument swaps that global temporarily; both have sprawling command handlers and duplicated validation, and A's pairwise shared-destination cancellation misses a third unit, a small localized bug."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B routes order, reachable, forecast and import through one shared validateFor rule and splits commands into small handlers, so the next feature has one place to change, whereas A packs everything into one giant process() with duplicated order and forecast logic and a separate hand-rolled order parser for import.",
+   "A splits parsing, shared order validation (used by order, reachable, forecast and import) and resolution into small functions, while B packs everything into one long process() with duplicated attack checks, so B's mender self-target gap is easy to miss and the next feature would be harder to add safely."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B splits validation into small helpers (validTarget, canMoveFor, parseOrder) and keeps units in an id-keyed map, while A packs everything into one long handle() with JSON re-marshalling workarounds and recomputes the whole view for each visibility check; A's `new` also appears to return an unspecified state member.",
+   "A shares validation (parseOrder, validTarget, canMoveFor) between order, import and queries, which keeps the rules from drifting as features are added, while B duplicates that logic across a monolithic handle and parseDocument, re-marshals JSON just to unpack it, returns an extra state member from new, and would omit cells when none are reachable."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B uses a typed Kind enum with per-stat methods and shares move_valid and attack_valid across order, reachable, import and resolution, so the rules cannot drift apart, and it refuses a mender targeting itself as the spec's 'different ally' requires, whereas A uses string kinds, tuple stats and phases, duplicates the validation in several places, and lets a mender self-repair.",
+   "A models kinds as an enum with per-kind methods and routes order, reachable, forecast, import and resolution through shared move_valid/attack_valid/damage helpers, so the spec's agreement requirements hold by construction, whereas B uses stringly-typed kinds, tuple stats with magic indices and copy-pasted validation in four places."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B has a typed Phase enum, a per-command match in handle, shared exact-key validation, and tests covering hidden enemies, the turn-overflow guard, import legality and mender repair ordering, while A uses a stringly-typed phase and one long if-chain in handle with duplicated order parsing and serialisation.",
+   "A is easier to extend: it uses a Phase enum, a per-command match, and shared helpers (destination_ok, parse_order, phase_error) that order, reachable and import all reuse, whereas B packs everything into one long if-chain handle() with string phases and inline order parsing duplicated from parse_order; A also tests a bit more, including move collisions."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B uses an ErrCode enum with Result-based flow, derives phase from an Option rather than strings, and validates order shape before unit availability as the spec's precedence requires, which A gets wrong; B also has broader tests, despite a leftover `let _ = i;` and a long handle function.",
+   "A models phase and winner more cleanly and follows the refusal precedence, while B has real rule bugs: three units sharing a destination are not all cancelled, mender forecast skips the range check, and order shape is validated after unit availability."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ }
+]

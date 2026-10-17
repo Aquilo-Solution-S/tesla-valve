@@ -1,0 +1,21 @@
+version: "2"
+linters:
+  enable:
+    - exhaustive
+    - gochecksumtype
+    - exhaustruct_v5
+    - forbidigo
+    - revive
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: false
+    gochecksumtype:
+      default-signifies-exhaustive: false
+    forbidigo:
+      analyze-types: true
+      forbid:
+        - pattern: ^time\.(Now|Since|Until)$
+          msg: read the clock at the spring and pass it in
+    revive:
+      rules:
+        - name: flag-parameter

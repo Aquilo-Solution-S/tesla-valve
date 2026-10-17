@@ -1,0 +1,82 @@
+[
+ {
+  "pair": "skirmish__go__tv-v7a__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "A uses one shared orderError for command submission and document validation, so the agreement the spec demands cannot drift, while B duplicates that logic and relies on brittle string-replace tests, though B's flush test and error-returning run are nice touches.",
+   "B routes both order submission and document import through one shared orderError validator and uses a single attackEffect for forecast and resolution, while A duplicates that validation between handle and parseDocument; both have solid tests, but B's are more structured than A's string-replace mutations."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__tv-v7a__gpt-6.1-sol__1",
+  "orders": [
+   "tv-r8a",
+   "tv-v7a"
+  ],
+  "winner": "tie",
+  "why": [
+   "B separates request parsing from game handling and uses a cleaner cancel-set in move resolution, which makes new commands easier to add, while A packs parsing, validation and execution into one long request() function; both have comparable, thorough tests.",
+   "The two are close, but B routes forecast and resolution through one attackEffect function and finds reachable cells with a single route search, so new rules (damage, repair, movement) have one place to change; A duplicates the damage and repair logic between forecast and resolve and re-runs the search for every cell, though its separate parse step is a mild plus."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__tv-v7a__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "Both share the same architecture and appear to handle the rules correctly, but A has the clearer domain model (named Kind accessors, an Effect enum, and a single interaction rule) and similarly thorough tests, while B uses an opaque stats tuple and duplicates the attack lookup, despite its tidier test file layout.",
+   "The two are structurally near-identical, but B's per-attribute Kind methods and Kind::effect mapping to a Damage/Repair Effect make new kinds and rules easier to add than A's opaque (8,3,1,3) stats tuple with kind-specific branching; B also parses requests (including bad_json) in one place and keeps its tests alongside the code."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__tv-v7a__gpt-6.1-sol__1",
+  "orders": [
+   "tv-r8a",
+   "tv-v7a"
+  ],
+  "winner": "tie",
+  "why": [
+   "The two are nearly equivalent in behaviour and test depth, but B is a little leaner: it shares unit parsing between deployments and documents, and it layers visibility checks over one attack rule through `visible_attack`. A adds a `PlayerField` struct and keeps two similar `attack` functions, which adds some ceremony and duplication.",
+   "B routes every player-scoped decision through a PlayerField that holds only what that player can see, which suits the fog-of-war rules as they grow, and its arbitrary_precision setting keeps out-of-range numbers like 1e999 as bad_request, whereas A's plain serde_json would likely reply bad_json for them."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ }
+]

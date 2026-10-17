@@ -1,0 +1,78 @@
+{
+ "game": "skirmish",
+ "lang": "rust",
+ "arm": "reshape",
+ "model": "claude-haiku-5-5",
+ "run": 0,
+ "source": "20261010-142859/skirmish__rust__baseline__claude-haiku-5-5__0",
+ "refactor": {
+  "session": {
+   "id": "4e086480-9afd-423e-9fc4-6666d8f59bec",
+   "cost": 0.7523993000000001,
+   "turns": 73,
+   "ms": 438241
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 504,
+   "removed": 316,
+   "files": 2
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  }
+ }
+}

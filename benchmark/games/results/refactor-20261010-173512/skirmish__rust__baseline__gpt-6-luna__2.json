@@ -1,0 +1,124 @@
+{
+ "game": "skirmish",
+ "lang": "rust",
+ "arm": "baseline",
+ "model": "gpt-6-luna",
+ "run": 2,
+ "source": "20261010-131542/skirmish__rust__baseline__gpt-6-luna__2",
+ "refactor": {
+  "session": {
+   "id": "01a12687-3605-75a1-8e8b-34ef31ef6d87",
+   "cost": null,
+   "out_tokens": 2123,
+   "ms": 33663
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 66,
+   "removed": 1,
+   "files": 1
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 139,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 2,
+    "total": 4
+   },
+   "f5": {
+    "passed": 3,
+    "total": 4
+   },
+   "f6": {
+    "passed": 86,
+    "total": 88
+   },
+   "failed": [
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command104-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command105-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command106-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command107-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command108-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command109-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command110-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command111-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command112-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command113-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command114-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command115-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command116-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command117-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command118-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command119-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command120-bad_request]",
+    "test_f4::test_mender_sides_ranges_and_terrain",
+    "test_f4::test_seeded_fuzz_at_least_2000_commands",
+    "test_f5::test_seeded_fuzz_at_least_2000_commands",
+    "test_f6::test_bad_document_preserves_half_ended_future[document59]",
+    "test_f6::test_seeded_fuzz_at_least_2000_commands"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 139,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 2,
+    "total": 4
+   },
+   "f5": {
+    "passed": 3,
+    "total": 4
+   },
+   "f6": {
+    "passed": 86,
+    "total": 88
+   },
+   "failed": [
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command104-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command105-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command106-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command107-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command108-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command109-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command110-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command111-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command112-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command113-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command114-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command115-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command116-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command117-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command118-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command119-bad_request]",
+    "test_f1::test_shape_refusals_preserve_the_next_turn[command120-bad_request]",
+    "test_f4::test_mender_sides_ranges_and_terrain",
+    "test_f4::test_seeded_fuzz_at_least_2000_commands",
+    "test_f5::test_seeded_fuzz_at_least_2000_commands",
+    "test_f6::test_bad_document_preserves_half_ended_future[document59]",
+    "test_f6::test_seeded_fuzz_at_least_2000_commands"
+   ]
+  }
+ }
+}

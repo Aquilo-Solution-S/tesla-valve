@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B centralizes initialization and shares command handling between live play and replay, separates boundary validation from focused game operations, and avoids unnecessary machinery, although A\u2019s tests make stronger assertions about hidden-state preservation.",
+   "A shares initialization and command handling between live play and replay, uses named pieces and focused rule methods, and validates input before mutation, while B duplicates setup and phase transitions and tests replay against its own playback helpers; neither adds unnecessary machinery."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B makes phases and modes explicit, centralizes live-command phase restrictions, validates external input before mutation, and has clearer behavioural tests, without unnecessary machinery, though both duplicate transition rules in replay playback.",
+   "A uses explicit phase and mode enums, shares live command phase restrictions, validates external input before mutation, and has clearer behavioural tests, whereas B repeats phase checks and includes a test expecting a forbidden second hold to swap pieces; neither adds unnecessary machinery."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

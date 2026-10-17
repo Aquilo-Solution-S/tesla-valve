@@ -1,0 +1,245 @@
+{
+ "game": "driftfall",
+ "lang": "rust",
+ "arm": "tv-v7a",
+ "model": "gpt-6-luna",
+ "run": 1,
+ "steps": [
+  {
+   "step": 1,
+   "rules": "tv-v7a",
+   "session": {
+    "id": "01a12549-a72d-7da0-9d92-294b400a77a3",
+    "cost": null,
+    "turns": 6,
+    "out_tokens": 4543,
+    "ms": 42588
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 436,
+    "removed": 1,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    }
+   }
+  },
+  {
+   "step": 2,
+   "rules": "tv-v7a",
+   "session": {
+    "id": "01a1254a-5c20-75c2-a9b8-1f13029f4bad",
+    "cost": null,
+    "turns": 6,
+    "out_tokens": 1685,
+    "ms": 22528
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1254a-5c20-75c2-a9b8-1f13029f4bad",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 1818,
+    "ms": 5670
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 76,
+    "removed": 1,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    }
+   }
+  },
+  {
+   "step": 3,
+   "rules": "tv-v7a",
+   "session": {
+    "id": "01a1254a-d14f-7ef2-adc2-c6bc532c194c",
+    "cost": null,
+    "turns": 11,
+    "out_tokens": 2870,
+    "ms": 70359
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 104,
+    "removed": 4,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 4,
+   "rules": "tv-v7a",
+   "session": {
+    "id": "01a1254b-ea86-7f22-ab63-33563c3248db",
+    "cost": null,
+    "turns": 8,
+    "out_tokens": 2280,
+    "ms": 35501
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1254b-ea86-7f22-ab63-33563c3248db",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 2423,
+    "ms": 9609
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 86,
+    "removed": 9,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 5,
+   "rules": "tv-v7a",
+   "session": {
+    "id": "01a1254c-ac0c-7232-b807-d60ac9adf989",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 2177,
+    "ms": 50509
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1254c-ac0c-7232-b807-d60ac9adf989",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 2327,
+    "ms": 6571
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 95,
+    "removed": 5,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 10,
+     "total": 10
+    }
+   }
+  },
+  {
+   "step": 6,
+   "rules": "tv-v7a",
+   "session": {
+    "id": "01a1254d-9334-7f91-89b1-7eaaf7c798c0",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 3045,
+    "ms": 32488
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1254d-9334-7f91-89b1-7eaaf7c798c0",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 3130,
+    "ms": 6736
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 188,
+    "removed": 0,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 10,
+     "total": 10
+    },
+    "f6": {
+     "passed": 45,
+     "total": 46
+    }
+   }
+  }
+ ]
+}

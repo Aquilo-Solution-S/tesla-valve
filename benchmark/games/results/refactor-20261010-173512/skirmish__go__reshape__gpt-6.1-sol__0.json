@@ -1,0 +1,78 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "reshape",
+ "model": "gpt-6.1-sol",
+ "run": 0,
+ "source": "20261010-131545/skirmish__go__baseline__gpt-6.1-sol__0",
+ "refactor": {
+  "session": {
+   "id": "01a12689-0cb3-7b01-8e4f-048cbad0ab4a",
+   "cost": null,
+   "out_tokens": 13521,
+   "ms": 342262
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 866,
+   "removed": 530,
+   "files": 15
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  }
+ }
+}

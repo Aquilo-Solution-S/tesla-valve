@@ -1,0 +1,122 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A centralizes spawning and preview consumption, validates external input before mutation, and tests observable behaviour and hidden state explicitly, while B duplicates spawning rules, mutates shared cells during tentative rotation, and uses ineffective refusal checks that serialize unexported game fields.",
+   "B centralizes spawning and preview consumption, validates external input at entry, and tests observable behaviour plus hidden state preservation meaningfully, whereas A duplicates spawning logic and its refusal tests serialize unexported fields, despite A\u2019s clearer shared phase checks."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A centralizes initialization and reuses live command rules for replay, represents rotation origins explicitly, validates before mutation, and tests behavioural invariants, while B duplicates initialization and phase policies and relies on cell ordering to infer rotation origins.",
+   "B shares initialization and live command rules with replay and explicitly separates piece orientation from position, outweighing its duplicated phase checks, unnecessary replay JSON round trips, and some weaker test assertions."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a@first",
+   "tv-v7a@first"
+  ],
+  "winner": "tv-v7a@first",
+  "why": [
+   "B shares command and phase rules between live play and replay, validates external types explicitly, and tests intended behaviour and hidden state preservation more meaningfully, though its duplicated initialization and replay JSON round trips merit cleanup.",
+   "A shares command handling between live play and replay, represents initial state and snapshots explicitly, validates UTF-8 at entry, and tests hidden-state preservation meaningfully, whereas B duplicates replay transitions and several mutation tests merely compare JSON of unexported fields."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a@first",
+   "tv-v7a@first"
+  ],
+  "winner": "tv-v7a@first",
+  "why": [
+   "B centralizes preview consumption and reuses live command handling for replay, reducing duplicated rules while keeping phases clear and tests behavior-focused, though its optional-mode validation needs tightening; neither project adds unnecessary machinery.",
+   "A centralizes preview consumption and reuses live command handling for replay, making future rule changes safer, with explicit phases and concrete behavioral tests, though its boundary validation incorrectly accepts non-string modes."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A centralizes phase checks and lock-time gravity reset and reuses live command handling for replay, whereas B duplicates transition rules and spreads lock consequences across callers; both validate external input and include behaviour-focused tests without unnecessary machinery.",
+   "B centralizes play refusals and gravity reset, reuses live command handling for replay, validates external input before mutation, and tests hidden-state preservation without unnecessary machinery, although new-game initialization remains duplicated."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a@first",
+   "tv-v7a@first"
+  ],
+  "winner": "tv-v7a@first",
+  "why": [
+   "B\u2019s typed phases, explicit piece origins, shared live/replay command rules and behaviour-focused tests make future changes easier without unnecessary machinery, despite duplicated initialization and a mode-type validation gap.",
+   "A makes states explicit with enums and reuses live command handling for replay, whereas B duplicates phase rules in playback and tests shortcuts that bypass boundary checks; A has a mode-validation gap, but its structure and behavioural tests provide a stronger maintenance foundation without unnecessary machinery."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ }
+]

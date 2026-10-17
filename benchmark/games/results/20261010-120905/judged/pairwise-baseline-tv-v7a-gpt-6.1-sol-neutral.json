@@ -1,0 +1,122 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B groups shape data coherently, uses typed responses, and shares command handling between replay and live play, while A duplicates replay rules and makes production code depend on a test-only indexOf helper.",
+   "A offers cohesive piece state, typed responses, and replay through live command handling, while B duplicates replay restrictions and depends on a helper defined only in its test file; both have useful regression tests and proportionate complexity."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A better encapsulates moving pieces, shares live command handling with replay, and provides more meaningful regression protection, while B duplicates replay rules, bypasses preview on normal spawns, and checks mutation by serializing unexported fields to empty objects.",
+   "B better encapsulates active-piece state, shares movement logic and live command handling with replay, and provides meaningful state-preservation assertions, whereas A duplicates replay rules and marshals unexported game fields into empty objects in its atomicity tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B offers clearer initialization, unified shape definitions and shared live/replay input handling, with more precise behavioral assertions and explicit hidden-state comparisons where A\u2019s marshaling of unexported game fields makes several mutation checks ineffective.",
+   "A offers explicit state initialization, shared input dispatch for live play and replay, cohesive piece definitions, and stronger checks of hidden state, whereas several B mutation tests serialize unexported fields to empty objects and provide no protection."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A better separates gameplay from protocol handling and centralizes lock invariants, with explicit local coordinates that simplify rotation; B has stronger exact assertions and shared replay dispatch, but mixes gameplay into request handling and leaves rotation and gravity-reset defects unprotected.",
+   "B separates gameplay from protocol handling, represents rotation naturally with local cells and an explicit origin, and centralizes gravity reset in locking, making future changes safer despite duplicated replay guards and less thorough hidden-state tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed states and piece kinds, explicit local coordinates, focused gameplay methods, and whole-state test assertions make extension safer and clearer, though replay bypasses hold validation and should share live command rules.",
+   "A\u2019s explicit domain types, focused game methods, and full-state refusal assertions make future changes easier to understand and protect, though its replay path needs to share live hold validation to prevent behavioural divergence."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B centralizes phase restrictions, models local coordinates and origin explicitly, and tests replay against actual live commands, providing safer foundations for growth despite duplicated initialization and awkward command parsing.",
+   "A centralizes command guards and tests replay against actual live commands, giving safer foundations for new rules, while B duplicates phase handling and its replay tests bypass protocol refusals, masking divergent behavior."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

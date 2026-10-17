@@ -1,0 +1,32 @@
+{
+  "name": "tesla-valve",
+  "version": "0.1.0",
+  "description": "Build code like a Tesla valve: shape over checks, check once at the spring, test the intent.",
+  "author": {
+    "name": "Aquilo Solution.S GmbH",
+    "url": "https://github.com/Aquilo-Solution-S"
+  },
+  "homepage": "https://github.com/Aquilo-Solution-S/tesla-valve",
+  "repository": "https://github.com/Aquilo-Solution-S/tesla-valve",
+  "license": "MIT-0",
+  "skills": "./skills/",
+  "hooks": "./hooks/claude-codex-hooks.json",
+  "interface": {
+    "displayName": "Tesla Valve",
+    "shortDescription": "Shape over checks, tests for intent",
+    "longDescription": "Wrong use impossible to write instead of caught when it runs, data from outside checked once where it enters, and tests for what the code is for.",
+    "developerName": "Aquilo Solution.S GmbH",
+    "category": "Coding",
+    "capabilities": [
+      "Instructions",
+      "Lifecycle hooks"
+    ],
+    "websiteURL": "https://github.com/Aquilo-Solution-S/tesla-valve",
+    "defaultPrompt": [
+      "Map the streams for this feature before writing code.",
+      "Which checks in this diff can become shapes?",
+      "Which of these tests does the compiler already cover?"
+    ],
+    "brandColor": "#2a7fc0"
+  }
+}

@@ -1,0 +1,221 @@
+{
+ "game": "driftfall",
+ "lang": "rust",
+ "arm": "baseline",
+ "model": "gpt-6.1-sol",
+ "run": 1,
+ "steps": [
+  {
+   "step": 1,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12555-6b0f-7a22-82f3-9dd7a770504d",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 5849,
+    "ms": 147949
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 480,
+    "removed": 1,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    }
+   }
+  },
+  {
+   "step": 2,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12557-b045-74b3-b628-035b29a0811f",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 1591,
+    "ms": 60656
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 84,
+    "removed": 2,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    }
+   }
+  },
+  {
+   "step": 3,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12558-a2f3-7820-80c7-3d9d6bd86790",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 3127,
+    "ms": 76447
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 245,
+    "removed": 8,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 4,
+   "rules": "baseline",
+   "session": {
+    "id": "01a12559-d319-7842-ab89-1533bd8ef2fe",
+    "cost": null,
+    "turns": 6,
+    "out_tokens": 2581,
+    "ms": 70549
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 171,
+    "removed": 8,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 5,
+   "rules": "baseline",
+   "session": {
+    "id": "01a1255a-ed0c-7d62-b2ab-7b64f9219e8e",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 2740,
+    "ms": 75294
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1255a-ed0c-7d62-b2ab-7b64f9219e8e",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 3073,
+    "ms": 16409
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 172,
+    "removed": 6,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 10,
+     "total": 10
+    }
+   }
+  },
+  {
+   "step": 6,
+   "rules": "baseline",
+   "session": {
+    "id": "01a1255c-5b02-7ff2-b07b-cd7c45bbd0d0",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 3527,
+    "ms": 90531
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 260,
+    "removed": 0,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 27,
+     "total": 27
+    },
+    "f2": {
+     "passed": 7,
+     "total": 7
+    },
+    "f3": {
+     "passed": 4,
+     "total": 4
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 10,
+     "total": 10
+    },
+    "f6": {
+     "passed": 46,
+     "total": 46
+    }
+   }
+  }
+ ]
+}

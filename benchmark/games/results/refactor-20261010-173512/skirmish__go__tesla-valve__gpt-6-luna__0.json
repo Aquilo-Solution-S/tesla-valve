@@ -1,0 +1,82 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "tesla-valve",
+ "model": "gpt-6-luna",
+ "run": 0,
+ "source": "20261010-131542/skirmish__go__baseline__gpt-6-luna__0",
+ "refactor": {
+  "session": {
+   "id": "01a12682-e88f-7b80-94a8-9f3b57560cbe",
+   "cost": null,
+   "out_tokens": 3249,
+   "ms": 44802
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 858,
+   "removed": 782,
+   "files": 6
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 8,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": [
+    "test_f3::test_committed_literal_scenarios"
+   ]
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 8,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": [
+    "test_f3::test_committed_literal_scenarios"
+   ]
+  }
+ }
+}

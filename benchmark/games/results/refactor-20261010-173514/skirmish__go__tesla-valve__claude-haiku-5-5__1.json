@@ -1,0 +1,78 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "tesla-valve",
+ "model": "claude-haiku-5-5",
+ "run": 1,
+ "source": "20261010-142859/skirmish__go__baseline__claude-haiku-5-5__1",
+ "refactor": {
+  "session": {
+   "id": "3395ceee-1eb7-4d3b-9218-bf4cf9379b76",
+   "cost": 0.09609902000000001,
+   "turns": 40,
+   "ms": 355738
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 83,
+   "removed": 33,
+   "files": 2
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 156,
+    "total": 156
+   },
+   "f2": {
+    "passed": 5,
+    "total": 5
+   },
+   "f3": {
+    "passed": 9,
+    "total": 9
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 4,
+    "total": 4
+   },
+   "f6": {
+    "passed": 88,
+    "total": 88
+   },
+   "failed": []
+  }
+ }
+}

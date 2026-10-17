@@ -1,0 +1,16 @@
+{
+  "name": "tesla-valve",
+  "description": "Build code like a Tesla valve: shape over checks, check once at the spring, test the intent.",
+  "owner": {
+    "name": "Aquilo Solution.S GmbH",
+    "url": "https://github.com/Aquilo-Solution-S"
+  },
+  "plugins": [
+    {
+      "name": "tesla-valve",
+      "description": "Build code like a Tesla valve: shape over checks, check once at the spring, test the intent.",
+      "source": "./skills",
+      "category": "development"
+    }
+  ]
+}

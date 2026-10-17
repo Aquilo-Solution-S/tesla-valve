@@ -1,0 +1,14 @@
+{
+  "name": "tesla-valve",
+  "version": "0.1.0",
+  "displayName": "Tesla Valve",
+  "description": "Build code like a Tesla valve: shape over checks, check once at the spring, test the intent.",
+  "author": {
+    "name": "Aquilo Solution.S GmbH"
+  },
+  "homepage": "https://github.com/Aquilo-Solution-S/tesla-valve",
+  "repository": "https://github.com/Aquilo-Solution-S/tesla-valve",
+  "license": "MIT-0",
+  "skills": "./skills/",
+  "rules": "./rules/"
+}

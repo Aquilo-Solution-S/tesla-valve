@@ -1,0 +1,213 @@
+{
+ "game": "skirmish",
+ "lang": "go",
+ "arm": "tv-r8a",
+ "model": "gpt-6.1-sol",
+ "run": 1,
+ "steps": [
+  {
+   "step": 1,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12592-61ae-7db1-8f17-ff44f6b78609",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 7232,
+    "ms": 157201
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 703,
+    "removed": 1,
+    "files": 2
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    }
+   }
+  },
+  {
+   "step": 2,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12594-d1ed-79e0-8d31-d242fad93e89",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 2840,
+    "ms": 69291
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 130,
+    "removed": 4,
+    "files": 2
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    }
+   }
+  },
+  {
+   "step": 3,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12595-ed27-7cb2-aa05-71a47e389e56",
+    "cost": null,
+    "turns": 5,
+    "out_tokens": 4023,
+    "ms": 98335
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 213,
+    "removed": 10,
+    "files": 2
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    }
+   }
+  },
+  {
+   "step": 4,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12597-7d91-7d82-9c11-5699f04551f1",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 3154,
+    "ms": 75467
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 150,
+    "removed": 6,
+    "files": 3
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 5,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12598-b627-78e0-8581-acea302a6b74",
+    "cost": null,
+    "turns": 6,
+    "out_tokens": 2182,
+    "ms": 64726
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 107,
+    "removed": 1,
+    "files": 2
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 6,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12599-c643-7501-b621-667d43fbaa8c",
+    "cost": null,
+    "turns": 9,
+    "out_tokens": 6104,
+    "ms": 143496
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 371,
+    "removed": 28,
+    "files": 3
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 4,
+     "total": 4
+    },
+    "f6": {
+     "passed": 88,
+     "total": 88
+    }
+   }
+  }
+ ]
+}

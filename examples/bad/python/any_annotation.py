@@ -1,0 +1,6 @@
+# expect: ANN401
+from typing import Any
+
+
+def passthrough(value: Any) -> Any:
+    return value

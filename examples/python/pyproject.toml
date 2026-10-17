@@ -1,0 +1,29 @@
+[project]
+name = "shop"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["pydantic"]
+
+# region: enforcers
+[tool.pyright]
+typeCheckingMode = "strict"
+enableTypeIgnoreComments = false
+
+[tool.ruff.lint]
+select = ["ANN", "FBT", "PGH", "TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"typing.cast".msg = "a cast forges a value; parse it at the spring"
+"datetime.datetime.now".msg = "read the clock at the spring and pass it in"
+"datetime.datetime.utcnow".msg = "read the clock at the spring and pass it in"
+"datetime.datetime.today".msg = "read the clock at the spring and pass it in"
+"datetime.date.today".msg = "read the clock at the spring and pass it in"
+"time.time".msg = "read the clock at the spring and pass it in"
+# endregion
+
+# region: mypy
+[tool.mypy]
+strict = true
+warn_unreachable = true
+enable_error_code = ["exhaustive-match"]
+# endregion

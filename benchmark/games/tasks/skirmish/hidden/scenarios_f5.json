@@ -1,0 +1,853 @@
+[
+  {
+    "name": "thicket replaces damage and forecast follows it",
+    "events": [
+      {
+        "command": {
+          "cmd": "new",
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 1
+            }
+          ]
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 1,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "forecast",
+          "player": 1,
+          "unit": 1,
+          "target": 2
+        },
+        "reply": {
+          "ok": true,
+          "effect": "damage",
+          "amount": 1
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 1,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "order",
+          "player": 1,
+          "unit": 1,
+          "order": {
+            "type": "attack",
+            "target": 2
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 1,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 1
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            1
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 1,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 2
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 1,
+              "hp": 5,
+              "order": null
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "post-move shelter can reduce damage to zero",
+    "events": [
+      {
+        "command": {
+          "cmd": "new",
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1
+            }
+          ]
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "forecast",
+          "player": 1,
+          "unit": 1,
+          "target": 2
+        },
+        "reply": {
+          "ok": true,
+          "effect": "damage",
+          "amount": 2
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "order",
+          "player": 1,
+          "unit": 1,
+          "order": {
+            "type": "attack",
+            "target": 2
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "order",
+          "player": 2,
+          "unit": 2,
+          "order": {
+            "type": "move",
+            "to": [
+              2,
+              1
+            ]
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": {
+                "type": "move",
+                "to": [
+                  2,
+                  1
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 1
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            1
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 1,
+              "hp": 8,
+              "order": {
+                "type": "move",
+                "to": [
+                  2,
+                  1
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 2
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 2,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "forecast",
+          "player": 1,
+          "unit": 1,
+          "target": 2
+        },
+        "reply": {
+          "ok": true,
+          "effect": "damage",
+          "amount": 0
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 2,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "order",
+          "player": 1,
+          "unit": 1,
+          "order": {
+            "type": "attack",
+            "target": 2
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 2,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 1
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            1
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 2,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 2
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 3,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 2,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "crag provides no defence",
+    "events": [
+      {
+        "command": {
+          "cmd": "new",
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 5,
+              "y": 1
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "glider",
+              "x": 6,
+              "y": 1
+            }
+          ]
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 5,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "glider",
+              "x": 6,
+              "y": 1,
+              "hp": 5,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "forecast",
+          "player": 1,
+          "unit": 1,
+          "target": 2
+        },
+        "reply": {
+          "ok": true,
+          "effect": "damage",
+          "amount": 3
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 5,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "glider",
+              "x": 6,
+              "y": 1,
+              "hp": 5,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "order",
+          "player": 1,
+          "unit": 1,
+          "order": {
+            "type": "attack",
+            "target": 2
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 5,
+              "y": 1,
+              "hp": 8,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "glider",
+              "x": 6,
+              "y": 1,
+              "hp": 5,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 1
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            1
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 5,
+              "y": 1,
+              "hp": 8,
+              "order": {
+                "type": "attack",
+                "target": 2
+              }
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "glider",
+              "x": 6,
+              "y": 1,
+              "hp": 5,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 2
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 5,
+              "y": 1,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "glider",
+              "x": 6,
+              "y": 1,
+              "hp": 2,
+              "order": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

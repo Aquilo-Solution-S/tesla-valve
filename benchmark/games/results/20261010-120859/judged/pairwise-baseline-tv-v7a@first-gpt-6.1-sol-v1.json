@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "baseline",
+   "tv-v7a@first"
+  ],
+  "winner": "tie",
+  "why": [
+   "A\u2019s explicit phase and shared integer validator make states and protocol rules easier to maintain, with behaviour-focused tests and little machinery, outweighing B\u2019s cleaner command boundary and replay dispatch but scattered phase derivation and duplicated validation.",
+   "A separates external validation from reusable command execution, letting replay share gameplay rules without B's JSON reconstruction and reparsing, and its tests clearly express intended behaviour, despite B's clearer explicit phase representation."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a@first",
+   "tv-v7a@first"
+  ],
+  "winner": "tv-v7a@first",
+  "why": [
+   "B uses purposeful typed commands and phases, validates external input before execution, derives level in one place, shares gameplay transitions with replay without JSON round-trips, and tests intended behaviour through both game logic and the protocol.",
+   "A uses typed phases and commands, derives level from lines, and separates boundary validation from shared gameplay execution, making future changes easier to follow without unnecessary machinery, while both projects have tests that express intended behaviour."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a@first": [
+   false,
+   false
+  ]
+ }
+]

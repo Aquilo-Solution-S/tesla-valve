@@ -1,0 +1,122 @@
+[
+ {
+  "pair": "skirmish__go__tv-v7a__gpt-6-luna__0",
+  "orders": [
+   "tv-v7a",
+   "tv-r8a"
+  ],
+  "winner": "tie",
+  "why": [
+   "A funnels order, reachable and import validation through shared helpers (with some dead code and duplicated mender checks), while B repeats the validation across a monolithic handle function and lets a mender target itself in order and forecast, contradicting the spec's 'different ally' rule.",
+   "A's typed structs, deterministic slice-ordered resolution and protocol-level tests protect behaviour better than B's map-based replies, duplicated validators (validOrder, reachable) and tests that bypass the player-scoped paths, even though A has a minor omitempty bug that drops an empty `cells` array."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__tv-v7a__gpt-6-luna__1",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B routes order, reachable, forecast and import through one shared validateFor function and has small per-command handlers, which keeps those paths in agreement as rules grow, whereas A duplicates that validation across a monolithic handle and has dead helpers; B does misorder one error precedence (malformed order shape is checked after phase and unit checks), but that is an easy local fix.",
+   "A routes order, reachable, forecast and import through a single validateFor rule path, so the query-agreement requirement is structurally enforced, whereas B repeats move and attack validation in four places inside one monolithic handle() and carries dead code (stValid, a hardcoded moveRange separate from stats, unused abs); A does have a precedence slip (order syntax is checked after phase and unit checks), but that is a smaller maintenance risk."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__tv-v7a__gpt-6-luna__2",
+  "orders": [
+   "tv-r8a",
+   "tv-v7a"
+  ],
+  "winner": "tie",
+  "why": [
+   "Both implement the spec with similar rules and tests, but B has typed replies, a clearer per-command handler flow and an end-to-end protocol test, while A crams four commands into one tangled branch and relies on a hacky filtered pseudo-game for sight; B's drawbacks (duplicated target validation in resolve, a test-only canMove, a 4MB scanner line cap) are minor.",
+   "Both are correct and similarly sized, but B keeps all per-kind stats (including sight) in one table, reuses a player-scoped field for order, reachable, and import checks, and its tests cover more behaviours, such as unseen occupants colliding at resolution and exact reachable lists, while A has scattered stats, a map rebuilt per sight call, and no hidden-collision test."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__tv-v7a__gpt-6-luna__0",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "B routes order, reachable, forecast, import and resolution through shared helpers (move_valid, attack_valid), so a new rule only has to be added once, whereas A repeats the move and attack checks across several branches and lets a mender target itself in order and forecast.",
+   "A shares move_valid, attack_valid and effect_amount between order, forecast, reachable and import, so those checks cannot drift apart, while B repeats the move and attack validation in several places inside one large request function and does not use its own valid_order for live orders; the tests and overall design are otherwise comparable."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__tv-v7a__gpt-6-luna__1",
+  "orders": [
+   "tv-r8a",
+   "tv-r8a"
+  ],
+  "winner": "tv-r8a",
+  "why": [
+   "Both implement the spec correctly and are similarly sized, but B models phase explicitly with a Phase enum (A derives it from turn==0 plus a bool), has a cleaner Dijkstra, and its tests cover more behaviours (import legality, turn overflow, mender-only games, hidden-enemy refusals), whereas A rebuilds the 'known' game view three times inline and has thinner tests.",
+   "A has an explicit Phase enum and a shared parse_order used by both order and import, which makes adding rules and commands safer, whereas B derives phase from turn==0 plus a finished flag and copies order parsing into two places, though B's valid_attack helper and closure-based error handling are nicer than A's tripled side-validation."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__tv-v7a__gpt-6-luna__2",
+  "orders": [
+   "tv-v7a",
+   "tv-r8a"
+  ],
+  "winner": "tie",
+  "why": [
+   "A routes order, reachable, forecast, resolution and import through shared `legal_destination` and `forecast` functions, so the agreement requirements hold by construction, whereas B duplicates move and attack legality in three places and also checks the turn-limit refusal after the phase and ended checks, against the spec.",
+   "A resolves collisions correctly (all moves sharing a destination cancel) and applies damage and repairs from actual positions, whereas B has a three-way collision bug and reuses the sight-limited forecast during resolution, so attacks on unseen targets deal nothing; A also has typed error codes and broader tests, despite a sprawling handle function and a stray `let _ = i;`."
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ],
+  "overbuilt_tv-r8a": [
+   false,
+   false
+  ]
+ }
+]

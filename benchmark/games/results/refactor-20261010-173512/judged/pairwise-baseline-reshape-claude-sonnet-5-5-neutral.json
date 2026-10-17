@@ -1,0 +1,482 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B shares A's core logic but adds typed phase/mode/pieceKind constants, a newGame constructor that removes duplicated new/replay setup, and a phaseRefusal helper, while A repeats those pieces and uses magic strings and ints; B's tests are a near-superset with an added seed-normalization test, though both still keep the large reply function and duplicated key lists, and B lacks A's duplicate-key and trailing-data tests.",
+   "A has typed phase, mode and piece-kind constants, a single newGame constructor shared by new and replay, and a phaseRefusal helper, whereas B repeats the seed-normalisation and spawn setup in two places, repeats the phase checks inline and uses raw strings and magic numbers like kind 5; B's file split and two extra protocol tests (duplicate keys, trailing data) don't outweigh that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The game logic is nearly identical, but A separates protocol handling into protocol.go and has two extra tests (last-duplicate-member and unknown-command precedence), which outweigh B's small replay struct inside a single monolithic main.go.",
+   "The two share identical game logic, but B splits protocol and replay parsing into protocol.go and adds tests for duplicate keys, the unterminated final line and unknown_command precedence, while A keeps everything in one file with a slightly cleaner replay type that is outweighed by B's better file separation and test coverage."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "tie",
+   "reshape"
+  ],
+  "winner": "tie",
+  "why": [
+   "The two are nearly identical; B has slightly cleaner structure (replay.go, separate softDrop/hardDrop, explicit mode argument) but puts the protocol `response` type in game.go, while A keeps a variadic `reset` and a `drop(bool)` flag but has an extra test that checks the serialized reply shape, so the trade-offs roughly cancel.",
+   "The two are near-identical, but A has the cleaner structure (separate replay.go, explicit softDrop/hardDrop methods, and reset with a required mode parameter instead of B's variadic optional one), while B's only edge is one extra serialization-shape test and a drop(hard bool) flag method that is slightly less clear."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6-luna__3",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "The two share nearly identical logic, but B splits the code into game.go, process.go and a testable serve() with a named defaultMode and a pieceDefinition table, and its tests cover the unterminated final line, duplicate keys, NaN and trailing data, whereas A keeps a lot in main.go, parallel names/shapes slices and a variadic reset, with weaker protocol tests.",
+   "The game logic is essentially identical, but A splits it into game.go, protocol.go, replay.go, process.go and main.go, so the serve loop can be tested through an io.Reader/Writer (and its test exercises unterminated final lines and blank lines), and it uses a pieceDefinition table with a defaultMode constant, whereas B keeps the game and main loop in one file with parallel shapes/names slices, a variadic reset, and a stub test for the unterminated-line contract."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "baseline",
+   "reshape"
+  ],
+  "winner": "tie",
+  "why": [
+   "A splits lock into depositActive and clearRows, names its board constants, and adds a captured-transcript compatibility test plus snapshot-ownership tests, while B keeps lock as one long function with magic numbers and adds a go/types-based test plus per-command request types that go beyond what this small game needs, though its typed request dispatch would extend cleanly to new commands.",
+   "A's typed per-command requests with their own execute methods and phase helpers are safer to extend than B's string-switched request bag with a hand-listed phase-gating condition, though B's split lock, named constants and transcript test partly offset this."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A has the same behavior and tests but splits lock into deposit and clearRows, names its constants, and adds a fuzz test for atomic refusals plus protocol regression and transport-error tests, while B's per-command action types come with a brittle test that shells out to `go test` to check compile errors, and B keeps lock as one long function with magic numbers.",
+   "B has named constants, a lock split into deposit/clearRows, and sturdier tests (fuzzed refusal atomicity, transport errors, a captured protocol regression), while A's typed-action design is cleaner but its test that shells out to `go test` to check struct-literal compile errors is brittle and overbuilt, and its lock stays a monolith."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   true
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__2",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B's per-command apply types and combined piece definitions make adding commands easier, and its replay stores parsed commands, whereas A's string-named execute if-chain and parallel names/shapes arrays scale worse; B loses some ground to hardcoded board sizes and a brittle go/types compile-error test that is overbuilt, while A's golden transcript and fuzz test are well-judged protection.",
+   "A's typed command structs with apply methods and shared phase-refusal helpers make adding new commands safer than B's string-named command dispatch with an ad-hoc phase check, though B's golden transcript and fuzz tests protect behaviour well and A's compile-checking shape_test is odd and brittle."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "Both share the same logic, but B uses enums for kinds, phases, modes, keys and error codes (plus a typed ReplayAction), so the compiler catches typos and missing cases as features are added, whereas A's stringly-typed phases and keys fail silently, even though A's split into game.rs and protocol.rs is a modest structural plus.",
+   "Both share nearly identical logic, but A uses enums for kinds, phases, modes, keys and error codes so the compiler catches typos and missing cases as features grow, while B splits into modules but relies on stringly-typed phases and kinds that fail silently (e.g. a catch-all that treats any unknown kind as reed)."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "The two are near-identical, but B parses keys into InputKey/ReplayKey enums at the boundary so the compiler enforces exhaustive handling when new keys are added, whereas A passes strings and silently ignores unknown ones with `_ => {}`; A has a few more protocol tests and a half-used `error` helper, which doesn't outweigh that.",
+   "The two are nearly identical, but A's typed InputKey/ReplayKey enums make new keys compiler-checked and keep live and replay key sets from drifting, whereas B's string keys with a silent `_ => {}` fallback and duplicated key lists are easier to break; B's extra protocol and snapshot tests and its `error()` helper (used only in the early validation paths) do not outweigh that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B uses typed enums for phase, mode, piece kind and keys, and extracts apply_input and rotate_active so replay inputs share the live code path and invalid keys are caught at parse time, whereas A relies on string phases and magic kind indices (5 for pulse) and inlines everything in one large command function; both are otherwise nearly identical and similarly tested, though A's lib/bin split is a small plus.",
+   "A uses typed enums for phase, mode, piece kind and keys, and factors input handling into apply_input, so replay calls it directly and new keys or modes become compile-checked additions; B relies on string phases and magic kind indices (5 for pulse) and inlines all the input logic in one large command match, which is harder to extend safely. B's lib/bin split is a small plus, and A has an extra test for unknown keys."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6-luna__3",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "The game logic is nearly identical, but B uses enums for phase, mode, kind, keys and error codes (A uses strings and `unreachable!()` arms), avoids A's `unwrap()` panic in hold, and has a real lock-based level-up test where A's is a vacuous `1 + 4/4 == 2` assertion, which outweighs A's cleaner game/protocol module split.",
+   "A models phase, mode, kind, key and error code as enums, so typos are compile errors and match arms are exhaustive, and its tests include a real line-clear and level-up check, whereas B uses stringly-typed phases and modes and index-based kinds, and its level test ends with a vacuous `assert_eq!(1 + 4 / 4, 2)`; B's split into game.rs and protocol.rs is a modest plus but doesn't outweigh that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B's typed Kind, Mode, Key and State enums (with a dedicated Idle state and a piece carried only in Playing/Paused) make illegal states unrepresentable and make new rules and modes safer to add, while A relies on string phases, usize kind indices and unwraps; B is slightly overbuilt with the Three/Five Cells enum and compile_fail doctest gimmicks, but that is outweighed.",
+   "A's typed State, Kind, Mode and Command enums make invalid states unrepresentable and keep protocol parsing apart from rules, which suits a growing game, though its Three/Five Cells enum and compile_fail doctests are heavier than needed; B is compact and well tested but relies on string phases and modes, usize kind indices and unwrap on the active piece, which will get brittle as features accumulate."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   true
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B uses typed enums with the active piece carried inside Phase, derives level from lines, splits protocol, piece and phase into modules, and adds a regression fixture, which is safer to extend than A's string phases and unwrap-based Option<Piece>, though its Cells Three/Five enum and compile_fail doctests are more ceremony than the problem needs and it lacks A's flush and output-failure tests.",
+   "A models phases, kinds, modes, inputs and errors as typed enums (Phase carries the active piece, so invalid states are unrepresentable) and has a golden protocol regression fixture, which makes adding rules and commands safer; B's stringly-typed phase/mode/error codes and kind indices with unwrap on Option<active> are fragile as the game grows, though B has better stream/flush tests and is simpler."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__2",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B models kinds, phases, modes and errors as enums, so the compiler catches mistakes when new rules are added, whereas A passes string phases and numeric kind indices around; A has a proper lib/bin split and transport tests, but B's compile-fail shape_tests via rustc subprocess is fragile overbuilding, and its choice of a bin-only crate is a minor cost, though neither outweighs the type-safety gain.",
+   "A's typed Phase/Mode/Kind/Error enums and exhaustive matches make new rules and modes safer to add than B's string phases and numeric kind indices, though A's brittle rustc-invoking shape test is needless over-engineering, and B's lib/bin split and I/O tests are a real plus."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   true
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B has the same behaviour as A but removes duplication: a shared parseOrder, a single attackTargetValid rule used by order, forecast and import, a resolve() split into resolveMoves, applyRepairs, applyDamageAndRemove and advanceTurn, and an import validator that works on the candidate units instead of temporarily swapping the global game (as A does); B also adds tests for import validation and malformed orders.",
+   "A factors order parsing, attack-target validation and resolution phases into shared functions (parseOrder, attackTargetValid, moveDestinationAllowed taking an explicit units slice), so order, forecast and import validation cannot drift apart and import no longer swaps the global game to validate; B duplicates order parsing and target-side logic in three places and temporarily mutates the global game during import, though it has a decent shared-movement test."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B shares one decodeOrder and one newUnit between requests, deployment and import so syntax rules cannot drift, extracts decodeDeployment and defaultDeployment, and its tests cover malformed orders, invalid rosters and extra import cases, while A duplicates order parsing across three places (though A does factor out targetAvailable/attackError/interactionEffect, which B inlines twice).",
+   "A routes both requests and imports through one order decoder and pulls out deployment and unit constructors, while B parses order syntax twice (even re-parsing it while ignoring errors) and repeats it for import; B's shared order/forecast validation is a real plus that A lacks, but it doesn't outweigh that, and both share the same mender self-target gap."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6-luna__2",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "The code is nearly identical, but A splits it into focused files (commands, field, resolution, setup, types, json_helpers), which is easier to navigate and extend, while B keeps everything in one large main.go; B's single cached visibility calculation is slightly better than A's seenBy, which rebuilds the whole player view on every call, but this does not outweigh A's structure, and B's tests are the same as A's plus A's extra snapshot-independence and idle-export tests.",
+   "The logic is essentially identical, but B splits it into cohesive files (types, setup, resolution, commands, helpers) and adds snapshot-independence and idle-export tests, while A keeps everything in one large file; A's single cached visibility helper is a minor plus that doesn't outweigh B's better structure, and B's seenBy recomputing the whole view is a small inefficiency."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B has the cleaner structure for growth (one typed command per request, shared placement parsing, vision in the stats table), where A packs every command into one long if-chain in execute and duplicates parsing, though A's flush-gating and fuzz tests are valuable and B's brittle compile-fail test that shells out to `go test` is needless overhead.",
+   "A parses each command into its own typed struct with an execute method, shares placement parsing between deployment and import, and tests those parsers directly, so new commands are easy to add safely, whereas B routes everything through one long string-dispatched execute if-chain with duplicated parsing, even though B has nice flush-gating and fuzz tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   true,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B parses each command into its own request type with an execute method, so a new command is a new struct and method rather than another branch in A's long, order-sensitive handle function, though B's AST-based compile-check test is quirky and its movement.go and game.go mix concerns more than A's rules, resolution and movement files.",
+   "A routes each command through a small typed request with its own execute method and shares unit parsing between deployment and import, so new commands are easy to add safely, whereas B packs every command into one long string-switching handle function with duplicated unit parsing."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__0",
+  "orders": [
+   "baseline",
+   "reshape"
+  ],
+  "winner": "tie",
+  "why": [
+   "A routes order submission, reachable and import validation through shared helpers (can_move_to, visible_target, can_interact), so the rules that must agree live in one place, while B duplicates the move and attack checks across order, reachable, forecast and import and risks drift as rules grow; B's typed enums (Kind, Phase, Command) and extra boundary-parser test are real improvements but weigh less than the duplicated rule logic.",
+   "A models Kind, Phase and Command as enums, so a new kind or command is checked by the compiler and bad strings can't slip in, and its tests additionally cover unknown kind/phase/order parsing; B has the nicer shared helpers (can_move_to, visible_target, can_interact), but its stringly-typed kind and phase and its `_ => glider` stats fallback make growth riskier, and A's duplicated validation is a smaller cost than that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B removes duplication that A keeps (a shared parse_unit for deployment and import, a Phase enum, one can_interact rule used by order validation, import and resolution, one can_move), so a new rule is changed in one place instead of several; A keeps stringly-typed phases and repeats the targeting and parsing logic in handle, import and resolve, though its forecast helper is a small plus.",
+   "A routes order, forecast, resolution and import through shared helpers (can_interact, can_move, parse_unit, parse_order) and uses a Phase enum, so the rules live in one place; B duplicates unit parsing, order parsing, move checks and target checks across handle, import and resolve, and keeps phase as a string, which risks drift as rules are added."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6-luna__2",
+  "orders": [
+   "reshape",
+   "baseline"
+  ],
+  "winner": "tie",
+  "why": [
+   "Both share the same monolithic handler and logic, but B adds typed Phase and Command enums (removing string-typed phase and the string-list command check, with exhaustive matches) and an extra unknown-phase import test, while A's only edge is splitting resolve into movement/combat helpers and a direct movement-cycle test, which is a smaller gain.",
+   "The two are near-identical monoliths, but B splits resolution into movement, combat and turn-finish steps and adds tests for the riskiest logic (long move cycles and blocked chains), which A leaves untested; A's typed Phase and Command enums are safer than B's string phases, but not enough to outweigh that."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B parses requests into a typed Request enum and uses Kind, Error and Phase enums, so a new command, kind or error code is a compiler-guided change, and its forecast reuses order validation so the two cannot drift apart; A's single long request() function with string kinds and ad hoc cmd checks is harder to extend safely, though both have strong, near-identical test suites.",
+   "A parses requests into a typed Request enum and uses Kind, Error and Phase enums, so new commands and kinds get compiler-checked handling, whereas B relies on stringly-typed kinds, phases and errors, an `unreachable!` in its stats table, and one long if-chain in `request` that is harder to extend safely."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__gpt-6.1-sol__1",
+  "orders": [
+   "tie",
+   "baseline"
+  ],
+  "winner": "tie",
+  "why": [
+   "A has the cleaner module layout, with resolution split into movement, interactions and finish, one shared validate_order for live and imported orders, and a compatibility test, but it uses string error codes and duplicates unit parsing; B has a typed Error enum, a Phase enum, deduplicated unit parsing and fuller wire-shape tests, but its resolve is one long function, its request handler sits in game.rs, and it uses awkward #[path] module hacks, so the strengths roughly cancel.",
+   "The rules are nearly identical, but B has a cleaner module layout, a shared `validate_order` used by both live orders and import, a resolution split into stages, and extra compatibility and refusal-atomicity tests. A's typed `Error` and `Phase` enums are a real advantage over B's string errors and phases, but not enough to offset A's awkward `#[path]` modules and duplicated order-validation logic."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ }
+]

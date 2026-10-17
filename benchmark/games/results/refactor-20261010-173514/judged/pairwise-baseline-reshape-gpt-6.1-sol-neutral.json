@@ -1,0 +1,162 @@
+[
+ {
+  "pair": "driftfall__go__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B's command-specific payload types and shared live/replay action mapping make new commands safer to add, while both projects provide similarly substantial behavioural tests and proportionate complexity.",
+   "A\u2019s validated command types and shared action mapping make future commands safer to extend than B\u2019s loosely tagged payload and duplicated key lists, while both provide substantial behavioural tests and proportionate game logic."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B\u2019s typed piece kinds, input keys and error codes, shared live/replay key mapping, and focused behavioural tests make future changes safer while keeping the design proportionate to the game.",
+   "A\u2019s typed piece and input identities and shared live/replay key mapping make future changes safer than B\u2019s raw integers and duplicated string registries, while both have substantial behavioral tests and proportionate designs."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "reshape",
+   "baseline"
+  ],
+  "winner": "tie",
+  "why": [
+   "B makes changes safer by enforcing phase and hold restrictions within Game, using a closed refusal enum and shared validation helpers, while retaining understandable rules and substantial behavioural tests with complexity appropriate to the game.",
+   "B separates board operations, piece geometry and generation into cohesive modules that localize future changes, while retaining meaningful rule and protocol tests, though A better enforces refusals within the game API."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B makes the Game API enforce and report refusals for both live commands and replay, with explicit tests of refusal reasons and state preservation, giving future features a safer behavioral boundary despite A\u2019s useful modular organization.",
+   "A keeps gameplay refusals authoritative in the engine and explicitly tests their results and state preservation, making future commands safer to add than B\u2019s split between protocol gates and silently inert public game methods, while both designs remain proportionate."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B preserves the clear shared rules and staged resolution while using typed orders, kinds and phases, separating request parsing from execution, and adding explicit validation-precedence tests, making future changes safer at a reasonable complexity cost.",
+   "A\u2019s explicit parsing boundary, distinct order types and set-based ended tracking make future changes safer, while shared rule helpers and focused refusal, precedence and round-trip tests protect behavior without disproportionate complexity."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A centralizes order validation, resolution target rules and victory logic, making future changes less prone to drift than B\u2019s duplicated checks, while both provide substantial behavioral and round-trip tests and proportionate structure.",
+   "B centralizes order validation, attack eligibility, placement parsing and victory rules, reducing drift as features grow while retaining clear resolution stages and similarly thorough behavioral tests."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "baseline",
+   "baseline"
+  ],
+  "winner": "baseline",
+  "why": [
+   "A\u2019s cohesive modules, centralized kind statistics and explicit resolution stages make growing rules easier to understand and change, while its behavioral tests provide comparable protection to B\u2019s despite B\u2019s stronger player and outcome types.",
+   "B\u2019s cohesive modules, centralized kind statistics and explicit resolution stages make growing rules easier to navigate and change, with meaningful behavioral tests and proportionate complexity, although A\u2019s Player and Outcome types provide stronger invariant protection."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "reshape",
+   "reshape"
+  ],
+  "winner": "reshape",
+  "why": [
+   "B's private game state, validated domain types and phase-specific data make future changes safer by preventing invalid states, while its behavioral and compile-fail tests provide useful protection; A has cleaner module boundaries and better-shared combat rules, but exposes mutable invariants that maintainers must preserve manually.",
+   "Both show useful behavioral tests and proportionate complexity, but A\u2019s validated domain types, private game state and phase-specific data make future changes safer than B\u2019s publicly mutable state, despite B\u2019s cleaner module boundaries and shared attack rules."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_reshape": [
+   false,
+   false
+  ]
+ }
+]

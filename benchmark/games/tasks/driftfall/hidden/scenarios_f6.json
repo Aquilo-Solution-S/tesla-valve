@@ -1,0 +1,744 @@
+[
+  {
+    "name": "timed replay with equal times pauses and refusals",
+    "events": [
+      {
+        "command": {
+          "cmd": "new",
+          "seed": 742
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "playing",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            ".........."
+          ],
+          "active": {
+            "kind": "ramp",
+            "cells": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          "score": 0,
+          "lines": 0,
+          "level": 1,
+          "held": null,
+          "preview": [
+            "arch",
+            "arch",
+            "prong"
+          ],
+          "hold_available": true,
+          "mode": "endless",
+          "elapsed_ms": 0
+        }
+      },
+      {
+        "command": {
+          "cmd": "input",
+          "key": "hard"
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "playing",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "....#.....",
+            "....##....",
+            ".....##..."
+          ],
+          "active": {
+            "kind": "arch",
+            "cells": [
+              [
+                4,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          },
+          "score": 37,
+          "lines": 0,
+          "level": 1,
+          "held": null,
+          "preview": [
+            "arch",
+            "prong",
+            "reed"
+          ],
+          "hold_available": true,
+          "mode": "endless",
+          "elapsed_ms": 0
+        }
+      },
+      {
+        "command": {
+          "cmd": "replay",
+          "document": {
+            "seed": 15,
+            "mode": "endless",
+            "events": [
+              {
+                "at_ms": 100,
+                "key": "hold"
+              },
+              {
+                "at_ms": 100,
+                "key": "hold"
+              },
+              {
+                "at_ms": 600,
+                "key": "hard"
+              },
+              {
+                "at_ms": 600,
+                "key": "pause"
+              },
+              {
+                "at_ms": 700,
+                "key": "left"
+              },
+              {
+                "at_ms": 900,
+                "key": "resume"
+              },
+              {
+                "at_ms": 1000,
+                "key": "hold"
+              },
+              {
+                "at_ms": 1200,
+                "key": "hard"
+              }
+            ],
+            "end_ms": 1800
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "playing",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            ".........."
+          ],
+          "active": {
+            "kind": "pulse",
+            "cells": [
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                3
+              ]
+            ]
+          },
+          "score": 82,
+          "lines": 0,
+          "level": 1,
+          "held": "sprig",
+          "preview": [
+            "prong",
+            "prong",
+            "arch"
+          ],
+          "hold_available": true,
+          "mode": "endless",
+          "elapsed_ms": 1500
+        }
+      }
+    ]
+  },
+  {
+    "name": "replay wins and ignores finished actions",
+    "events": [
+      {
+        "command": {
+          "cmd": "new",
+          "seed": 15
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "playing",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            ".........."
+          ],
+          "active": {
+            "kind": "pulse",
+            "cells": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          "score": 0,
+          "lines": 0,
+          "level": 1,
+          "held": null,
+          "preview": [
+            "pulse",
+            "sprig",
+            "pulse"
+          ],
+          "hold_available": true,
+          "mode": "endless",
+          "elapsed_ms": 0
+        }
+      },
+      {
+        "command": {
+          "cmd": "pause"
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "paused",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            ".........."
+          ],
+          "active": {
+            "kind": "pulse",
+            "cells": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          "score": 0,
+          "lines": 0,
+          "level": 1,
+          "held": null,
+          "preview": [
+            "pulse",
+            "sprig",
+            "pulse"
+          ],
+          "hold_available": true,
+          "mode": "endless",
+          "elapsed_ms": 0
+        }
+      },
+      {
+        "command": {
+          "cmd": "replay",
+          "document": {
+            "seed": 1,
+            "mode": "rush",
+            "events": [
+              {
+                "at_ms": 7,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 7,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 7,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 7,
+                "key": "right"
+              },
+              {
+                "at_ms": 7,
+                "key": "right"
+              },
+              {
+                "at_ms": 7,
+                "key": "hard"
+              },
+              {
+                "at_ms": 14,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 14,
+                "key": "right"
+              },
+              {
+                "at_ms": 14,
+                "key": "hard"
+              },
+              {
+                "at_ms": 21,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 21,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 21,
+                "key": "left"
+              },
+              {
+                "at_ms": 21,
+                "key": "left"
+              },
+              {
+                "at_ms": 21,
+                "key": "hard"
+              },
+              {
+                "at_ms": 28,
+                "key": "hard"
+              },
+              {
+                "at_ms": 35,
+                "key": "left"
+              },
+              {
+                "at_ms": 35,
+                "key": "hard"
+              },
+              {
+                "at_ms": 42,
+                "key": "left"
+              },
+              {
+                "at_ms": 42,
+                "key": "left"
+              },
+              {
+                "at_ms": 42,
+                "key": "left"
+              },
+              {
+                "at_ms": 42,
+                "key": "left"
+              },
+              {
+                "at_ms": 42,
+                "key": "hard"
+              },
+              {
+                "at_ms": 49,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 49,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 49,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 49,
+                "key": "left"
+              },
+              {
+                "at_ms": 49,
+                "key": "left"
+              },
+              {
+                "at_ms": 49,
+                "key": "left"
+              },
+              {
+                "at_ms": 49,
+                "key": "hard"
+              },
+              {
+                "at_ms": 56,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 56,
+                "key": "hard"
+              },
+              {
+                "at_ms": 63,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 63,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 63,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 63,
+                "key": "right"
+              },
+              {
+                "at_ms": 63,
+                "key": "right"
+              },
+              {
+                "at_ms": 63,
+                "key": "hard"
+              },
+              {
+                "at_ms": 70,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 70,
+                "key": "left"
+              },
+              {
+                "at_ms": 70,
+                "key": "left"
+              },
+              {
+                "at_ms": 70,
+                "key": "left"
+              },
+              {
+                "at_ms": 70,
+                "key": "hard"
+              },
+              {
+                "at_ms": 77,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 77,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 77,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 77,
+                "key": "hard"
+              },
+              {
+                "at_ms": 84,
+                "key": "hard"
+              },
+              {
+                "at_ms": 91,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 91,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 91,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 91,
+                "key": "left"
+              },
+              {
+                "at_ms": 91,
+                "key": "left"
+              },
+              {
+                "at_ms": 91,
+                "key": "left"
+              },
+              {
+                "at_ms": 91,
+                "key": "left"
+              },
+              {
+                "at_ms": 91,
+                "key": "hard"
+              },
+              {
+                "at_ms": 98,
+                "key": "rotate"
+              },
+              {
+                "at_ms": 98,
+                "key": "right"
+              },
+              {
+                "at_ms": 98,
+                "key": "right"
+              },
+              {
+                "at_ms": 98,
+                "key": "right"
+              },
+              {
+                "at_ms": 98,
+                "key": "right"
+              },
+              {
+                "at_ms": 98,
+                "key": "hard"
+              },
+              {
+                "at_ms": 98,
+                "key": "hold"
+              },
+              {
+                "at_ms": 99,
+                "key": "pause"
+              }
+            ],
+            "end_ms": 198
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "won",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..#.....##",
+            ".##.#.#.#.",
+            "########.#"
+          ],
+          "active": null,
+          "score": 864,
+          "lines": 4,
+          "level": 2,
+          "held": null,
+          "preview": [
+            "reed",
+            "arch",
+            "ramp"
+          ],
+          "hold_available": false,
+          "mode": "rush",
+          "elapsed_ms": 98
+        }
+      }
+    ]
+  },
+  {
+    "name": "empty replay and zero endpoint",
+    "events": [
+      {
+        "command": {
+          "cmd": "replay",
+          "document": {
+            "seed": 0,
+            "mode": "rush",
+            "events": [],
+            "end_ms": 0
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "phase": "playing",
+          "board": [
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            "..........",
+            ".........."
+          ],
+          "active": {
+            "kind": "sprig",
+            "cells": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          "score": 0,
+          "lines": 0,
+          "level": 1,
+          "held": null,
+          "preview": [
+            "prong",
+            "sprig",
+            "ramp"
+          ],
+          "hold_available": true,
+          "mode": "rush",
+          "elapsed_ms": 0
+        }
+      }
+    ]
+  }
+]

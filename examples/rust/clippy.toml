@@ -1,0 +1,9 @@
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+max-fn-params-bools = 1
+max-struct-bools = 1
+disallowed-methods = [
+    { path = "chrono::Local::now", reason = "read the clock at the spring and pass it in" },
+    { path = "chrono::Utc::now", reason = "read the clock at the spring and pass it in" },
+    { path = "std::time::SystemTime::now", reason = "read the clock at the spring and pass it in" },
+]

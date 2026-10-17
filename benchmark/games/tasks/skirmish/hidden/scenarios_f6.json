@@ -1,0 +1,508 @@
+[
+  {
+    "name": "idle and half-ended documents preserve the entire battle",
+    "events": [
+      {
+        "command": {
+          "cmd": "export"
+        },
+        "reply": {
+          "ok": true,
+          "document": {
+            "turn": 0,
+            "phase": "idle",
+            "winner": null,
+            "ended": [],
+            "units": []
+          }
+        },
+        "state": {
+          "turn": 0,
+          "phase": "idle",
+          "winner": null,
+          "ended": [],
+          "units": []
+        }
+      },
+      {
+        "command": {
+          "cmd": "import",
+          "document": {
+            "turn": 0,
+            "phase": "idle",
+            "winner": null,
+            "ended": [],
+            "units": []
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 0,
+          "phase": "idle",
+          "winner": null,
+          "ended": [],
+          "units": []
+        }
+      },
+      {
+        "command": {
+          "cmd": "new",
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0
+            }
+          ]
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0,
+              "hp": 7,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "order",
+          "player": 2,
+          "unit": 2,
+          "order": {
+            "type": "attack",
+            "target": 3
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0,
+              "hp": 7,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 3
+              }
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 2
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            2
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0,
+              "hp": 7,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 3
+              }
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "export"
+        },
+        "reply": {
+          "ok": true,
+          "document": {
+            "turn": 1,
+            "phase": "planning",
+            "winner": null,
+            "ended": [
+              2
+            ],
+            "units": [
+              {
+                "id": 1,
+                "owner": 1,
+                "kind": "mender",
+                "x": 0,
+                "y": 0,
+                "hp": 7,
+                "order": null
+              },
+              {
+                "id": 2,
+                "owner": 2,
+                "kind": "bolt",
+                "x": 2,
+                "y": 0,
+                "hp": 6,
+                "order": {
+                  "type": "attack",
+                  "target": 3
+                }
+              },
+              {
+                "id": 3,
+                "owner": 1,
+                "kind": "bolt",
+                "x": 1,
+                "y": 0,
+                "hp": 6,
+                "order": null
+              }
+            ]
+          }
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            2
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0,
+              "hp": 7,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 3
+              }
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "new"
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "lancer",
+              "x": 1,
+              "y": 0,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 4,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "glider",
+              "x": 7,
+              "y": 0,
+              "hp": 5,
+              "order": null
+            },
+            {
+              "id": 11,
+              "owner": 2,
+              "kind": "lancer",
+              "x": 1,
+              "y": 8,
+              "hp": 8,
+              "order": null
+            },
+            {
+              "id": 12,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 4,
+              "y": 8,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 13,
+              "owner": 2,
+              "kind": "glider",
+              "x": 7,
+              "y": 8,
+              "hp": 5,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "import",
+          "document": {
+            "turn": 1,
+            "phase": "planning",
+            "winner": null,
+            "ended": [
+              2
+            ],
+            "units": [
+              {
+                "id": 1,
+                "owner": 1,
+                "kind": "mender",
+                "x": 0,
+                "y": 0,
+                "hp": 7,
+                "order": null
+              },
+              {
+                "id": 2,
+                "owner": 2,
+                "kind": "bolt",
+                "x": 2,
+                "y": 0,
+                "hp": 6,
+                "order": {
+                  "type": "attack",
+                  "target": 3
+                }
+              },
+              {
+                "id": 3,
+                "owner": 1,
+                "kind": "bolt",
+                "x": 1,
+                "y": 0,
+                "hp": 6,
+                "order": null
+              }
+            ]
+          }
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 1,
+          "phase": "planning",
+          "winner": null,
+          "ended": [
+            2
+          ],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0,
+              "hp": 7,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0,
+              "hp": 6,
+              "order": {
+                "type": "attack",
+                "target": 3
+              }
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "cmd": "end_turn",
+          "player": 1
+        },
+        "reply": {
+          "ok": true
+        },
+        "state": {
+          "turn": 2,
+          "phase": "planning",
+          "winner": null,
+          "ended": [],
+          "units": [
+            {
+              "id": 1,
+              "owner": 1,
+              "kind": "mender",
+              "x": 0,
+              "y": 0,
+              "hp": 7,
+              "order": null
+            },
+            {
+              "id": 2,
+              "owner": 2,
+              "kind": "bolt",
+              "x": 2,
+              "y": 0,
+              "hp": 6,
+              "order": null
+            },
+            {
+              "id": 3,
+              "owner": 1,
+              "kind": "bolt",
+              "x": 1,
+              "y": 0,
+              "hp": 4,
+              "order": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,78 @@
+{
+ "game": "driftfall",
+ "lang": "go",
+ "arm": "reshape",
+ "model": "claude-haiku-5-5",
+ "run": 0,
+ "source": "20261010-142859/driftfall__go__baseline__claude-haiku-5-5__0",
+ "refactor": {
+  "session": {
+   "id": "487a9eb2-8fb2-4c6e-9557-6d3d8f9cffba",
+   "cost": 0.35582534,
+   "turns": 61,
+   "ms": 442596
+  },
+  "ci_red": false,
+  "churn": {
+   "added": 231,
+   "removed": 131,
+   "files": 5
+  },
+  "before": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 10,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": []
+  },
+  "after": {
+   "built": true,
+   "f1": {
+    "passed": 27,
+    "total": 27
+   },
+   "f2": {
+    "passed": 7,
+    "total": 7
+   },
+   "f3": {
+    "passed": 4,
+    "total": 4
+   },
+   "f4": {
+    "passed": 4,
+    "total": 4
+   },
+   "f5": {
+    "passed": 10,
+    "total": 10
+   },
+   "f6": {
+    "passed": 46,
+    "total": 46
+   },
+   "failed": []
+  }
+ }
+}

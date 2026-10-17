@@ -1,0 +1,245 @@
+{
+ "game": "skirmish",
+ "lang": "rust",
+ "arm": "tv-r8a",
+ "model": "gpt-6-luna",
+ "run": 2,
+ "steps": [
+  {
+   "step": 1,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a1258c-1979-7e33-94f8-da4b336a5cbf",
+    "cost": null,
+    "turns": 21,
+    "out_tokens": 9905,
+    "ms": 215872
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 560,
+    "removed": 1,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    }
+   }
+  },
+  {
+   "step": 2,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a1258f-790a-7b52-ac28-50d912386751",
+    "cost": null,
+    "turns": 8,
+    "out_tokens": 2408,
+    "ms": 68687
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a1258f-790a-7b52-ac28-50d912386751",
+    "cost": null,
+    "turns": 3,
+    "out_tokens": 2721,
+    "ms": 18682
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 77,
+    "removed": 6,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    }
+   }
+  },
+  {
+   "step": 3,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12590-ddb9-7ca1-93e8-3994d7a8f068",
+    "cost": null,
+    "turns": 8,
+    "out_tokens": 3747,
+    "ms": 53233
+   },
+   "ci_red": false,
+   "churn": {
+    "added": 136,
+    "removed": 3,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    }
+   }
+  },
+  {
+   "step": 4,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12591-bea5-76c2-ade3-7792a3930511",
+    "cost": null,
+    "turns": 13,
+    "out_tokens": 3936,
+    "ms": 43776
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12591-bea5-76c2-ade3-7792a3930511",
+    "cost": null,
+    "turns": 7,
+    "out_tokens": 5207,
+    "ms": 20953
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 136,
+    "removed": 3,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 5,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12592-d2e5-7242-9ea4-aa937c77ce32",
+    "cost": null,
+    "turns": 14,
+    "out_tokens": 3764,
+    "ms": 50905
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12592-d2e5-7242-9ea4-aa937c77ce32",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 3855,
+    "ms": 10191
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 68,
+    "removed": 5,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 4,
+     "total": 4
+    }
+   }
+  },
+  {
+   "step": 6,
+   "rules": "tv-r8a",
+   "session": {
+    "id": "01a12593-db08-7df1-9430-cf11c46868dd",
+    "cost": null,
+    "turns": 9,
+    "out_tokens": 3220,
+    "ms": 36375
+   },
+   "ci_red": true,
+   "fix": {
+    "id": "01a12593-db08-7df1-9430-cf11c46868dd",
+    "cost": null,
+    "turns": 1,
+    "out_tokens": 3337,
+    "ms": 6444
+   },
+   "ci_red_after_fix": false,
+   "churn": {
+    "added": 247,
+    "removed": 0,
+    "files": 1
+   },
+   "hidden": {
+    "built": true,
+    "f1": {
+     "passed": 156,
+     "total": 156
+    },
+    "f2": {
+     "passed": 5,
+     "total": 5
+    },
+    "f3": {
+     "passed": 9,
+     "total": 9
+    },
+    "f4": {
+     "passed": 4,
+     "total": 4
+    },
+    "f5": {
+     "passed": 4,
+     "total": 4
+    },
+    "f6": {
+     "passed": 88,
+     "total": 88
+    }
+   }
+  }
+ ]
+}

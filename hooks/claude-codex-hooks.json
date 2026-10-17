@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(process.env.CLAUDE_PLUGIN_ROOT + '/hooks/inject.js')\" SessionStart",
+            "timeout": 5,
+            "statusMessage": "Loading Tesla Valve..."
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(process.env.CLAUDE_PLUGIN_ROOT + '/hooks/inject.js')\" SubagentStart",
+            "timeout": 5,
+            "statusMessage": "Loading Tesla Valve..."
+          }
+        ]
+      }
+    ]
+  }
+}

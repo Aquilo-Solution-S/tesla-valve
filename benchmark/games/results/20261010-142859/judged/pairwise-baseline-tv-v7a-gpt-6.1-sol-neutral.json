@@ -1,0 +1,162 @@
+[
+ {
+  "pair": "driftfall__go__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed commands and piece kinds, shared live/replay execution and key parsing, copied spawn shapes, and tests covering hidden state and replay across all phases make future changes safer without disproportionate complexity.",
+   "A offers clearer validation and rules boundaries, typed commands shared by live play and replay, independently owned piece cells, and stronger tests for hidden-state preservation and replay equivalence, with complexity appropriate to the growing game."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__go__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "baseline",
+   "tv-v7a"
+  ],
+  "winner": "tie",
+  "why": [
+   "A combines clear rule and protocol separation with shared live/replay execution and stronger independent tests using real pieces and hidden-state checks, while B\u2019s synthetic fixtures and tests that encode incorrect replay error classifications weaken protection for future changes.",
+   "A\u2019s typed commands and piece kinds, clear protocol boundary, and game methods that enforce their own phase restrictions make future changes safer, while focused tests protect rule interactions and hidden state without unnecessary architectural complexity."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s typed command boundary, lifecycle states that enforce active-piece invariants, shared live/replay execution, and tests comparing complete game state make future changes safer, with complexity proportionate to the growing rules.",
+   "A\u2019s typed commands, invariant-preserving lifecycle state, validated replay construction, and tests comparing hidden state make future changes safer, while B relies on caller discipline and couples replay execution to protocol logic; neither is overbuilt."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s explicit phase types, game-owned refusal rules, shared live/replay execution path, and focused rule, protocol, and process tests make future changes safer and easier to understand, with complexity proportionate to the game.",
+   "A\u2019s explicit lifecycle types, game-owned refusal rules, separated board operations and focused deterministic tests make future changes safer and easier to understand than B\u2019s split phase gating, redundant state and search-based winning test."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B provides clearer separation between protocol and game logic, typed orders and replies, and focused agreement and continuation tests that make future changes easier to understand and safer to maintain without disproportionate complexity.",
+   "A's typed domain model, clearer separation of protocol and game logic, and tests checking query agreement and unchanged continuation after refusals make future changes safer, while both projects use complexity appropriate to the rules."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__go__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s explicit domain types, distinct order variants, shared validation rules and behavioral protocol tests provide a clearer foundation for safe extensions, with complexity proportionate to the growing game.",
+   "A\u2019s typed domain model and shared order validation make evolving rules safer to maintain, supported by meaningful scenario, refusal-atomicity and continuation tests, without introducing disproportionate abstraction."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__claude-haiku-5-5__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s validated domain types, explicit phase states, focused modules and shared rule functions make extensions safer, while its visible tests protect movement cycles, query agreement and import continuation without adding disproportionate architectural complexity.",
+   "A\u2019s focused modules, validated domain types, explicit phase states and shared rule functions make future changes safer, while its agreement, collision and import-continuation tests protect meaningful behavior without disproportionate abstraction."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "skirmish__rust__baseline__claude-haiku-5-5__1",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B\u2019s bounded domain types, encapsulated phase states, explicit sight boundary and shared combat rules make extensions safer, while focused tests cover interactions and import continuation, justifying its added structure for a growing game.",
+   "A\u2019s typed domains, encapsulated phase invariants, shared combat rules and focused resolution/import tests make future changes safer than B\u2019s publicly mutable state and duplicated attack logic, with complexity justified by the specification."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]

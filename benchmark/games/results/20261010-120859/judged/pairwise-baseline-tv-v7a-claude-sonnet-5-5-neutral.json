@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "driftfall__go__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B separates protocol parsing from execution and reuses one execute path for live commands and replay, whereas A mixes validation, phase checks and mutation in one large function and replays by building JSON strings and re-parsing them; B's derived phase (flags plus a nil active piece) is slightly implicit, but the structure is still easier to extend safely.",
+   "A separates parsing into a typed request from execution and has replay reuse the same execute path as live commands, whereas B mixes validation and execution in one function and replays by re-serialising JSON strings back through it, though A's implicit phase derivation is slightly fragile."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ },
+ {
+  "pair": "driftfall__rust__baseline__gpt-6.1-sol__0",
+  "orders": [
+   "tv-v7a",
+   "tv-v7a"
+  ],
+  "winner": "tv-v7a",
+  "why": [
+   "B models phase as an enum that owns the active piece, parses requests into typed Commands (replay becomes a validated command list before any state changes), derives level and hold_available instead of storing them, and has process-level protocol tests; A keeps string phases, mixes parsing with execution in one long stringly-typed function, re-serializes JSON to run replays, and uses a fragile -0 text hack.",
+   "A models phases and kinds as enums, parses requests into a typed Command, and runs replay through the same execute path with a thorough test suite plus end-to-end protocol tests, whereas B relies on stringly-typed phases and a command() that re-parses JSON and carries a byte-level '-0' hack, which makes it harder to extend safely."
+  ],
+  "overbuilt_baseline": [
+   false,
+   false
+  ],
+  "overbuilt_tv-v7a": [
+   false,
+   false
+  ]
+ }
+]
