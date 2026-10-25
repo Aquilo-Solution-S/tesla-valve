@@ -6,7 +6,7 @@
     "test": "tsc && node --test \"dist/**/*.test.js\""
   },
   "dependencies": {
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/node": "24.19.1",
