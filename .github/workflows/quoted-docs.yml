@@ -1,0 +1,36 @@
+# Dependabot edits a file the docs quote and stops. This runs the same builder
+# CI runs, on that branch, so the quote matches before merge. The builder is
+# taken from the default branch: the PR is data, not code we execute.
+name: quoted-docs
+
+on:
+  pull_request_target:
+    paths:
+      - examples/**
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: true
+
+      - name: Quoted docs match the files they copy
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git fetch --no-tags --depth 1 origin "$DEFAULT_BRANCH"
+          git show "origin/${DEFAULT_BRANCH}:scripts/build.py" > /tmp/build.py
+          python3 /tmp/build.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          git diff --cached --quiet || git commit -m "Quoted docs match the dependency bump"
+          git push origin "HEAD:$HEAD_REF"

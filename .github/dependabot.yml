@@ -1,7 +1,10 @@
 # Every tool the examples and CI run is pinned, and a pin goes stale. Dependabot
 # opens one pull request per ecosystem a month; CI then proves each enforcer
-# still refuses its bad file. A bump to a file the docs quote fails CI until
-# `python3 scripts/build.py` runs on the branch.
+# still refuses its bad file. A bump to a file the docs quote is refreshed on
+# the branch by `.github/workflows/quoted-docs.yml`, which runs
+# `python3 scripts/build.py`. typescript-eslint's peer range is
+# `typescript@>=4.8.4 <6.1.0` (TS 7 has no API for it yet), so Dependabot
+# skips that bump until the peer range moves.
 #
 # cooldown: a release is taken once it is a week old, so a compromised one has
 # time to be pulled first.
@@ -63,3 +66,6 @@ updates:
     groups:
       typescript:
         patterns: ["*"]
+    ignore:
+      - dependency-name: typescript
+        versions: [">=6.1.0"]
