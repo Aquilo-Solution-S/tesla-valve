@@ -23,10 +23,10 @@ inside it.
     "test": "tsc && node --test \"dist/**/*.test.js\""
   },
   "dependencies": {
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
-    "@types/node": "24.19.1",
+    "@types/node": "26.6.5",
     "eslint": "10.12.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1"

@@ -15,7 +15,7 @@ call below it uses that toolchain:
 <!-- code: examples/rust/rust-toolchain.toml -->
 ```toml
 [toolchain]
-channel = "1.96.0"
+channel = "1.99.1"
 components = ["clippy"]
 ```
 

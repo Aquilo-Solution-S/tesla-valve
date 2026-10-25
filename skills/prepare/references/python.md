@@ -20,7 +20,7 @@ the project pins the rest, in a requirements file, `uv.lock` or
 pydantic==2.14.0
 pyright==1.1.414
 mypy==2.4.0
-ruff==0.16.10
+ruff==0.17.0
 pytest==9.1.1
 ```
 
