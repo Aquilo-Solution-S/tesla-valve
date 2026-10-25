@@ -17,10 +17,10 @@ the project pins the rest, in a requirements file, `uv.lock` or
 <!-- code: examples/python/requirements.txt -->
 ```text
 # The versions CI checks the example with.
-pydantic==2.14.0
+pydantic==2.14.1
 pyright==1.1.414
 mypy==2.4.0
-ruff==0.17.0
+ruff==0.17.1
 pytest==9.1.1
 ```
 
