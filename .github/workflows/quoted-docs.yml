@@ -21,14 +21,20 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           persist-credentials: true
 
+      # The builder takes the repo as Path(__file__).parent.parent, so it has
+      # to live at scripts/build.py in this checkout. A copy under /tmp makes
+      # that `/` and cannot open AGENTS.md. Put the default branch's copy
+      # there, run it, then restore the PR's file so this job does not commit
+      # the builder.
       - name: Quoted docs match the files they copy
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           git fetch --no-tags --depth 1 origin "$DEFAULT_BRANCH"
-          git show "origin/${DEFAULT_BRANCH}:scripts/build.py" > /tmp/build.py
-          python3 /tmp/build.py
+          git show "origin/${DEFAULT_BRANCH}:scripts/build.py" > scripts/build.py
+          python3 scripts/build.py
+          git checkout -- scripts/build.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -u
