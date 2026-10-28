@@ -3,7 +3,7 @@
 | tool | holds | comes with |
 | --- | --- | --- |
 | rustc | every arm of a `match`, private fields, every field of a variant, a literal inside its type | the toolchain |
-| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic | the toolchain, as the `clippy` component |
+| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason | the toolchain, as the `clippy` component |
 | doc tests | the one `compile_fail` line per shape | `cargo test`, for a library target |
 
 ## The tools
@@ -37,6 +37,8 @@ expect_used = "deny"
 fn_params_excessive_bools = "deny"
 struct_excessive_bools = "deny"
 disallowed_methods = "deny"
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
 ```
 
 In `clippy.toml`, beside it. Name the clock of every time crate the project
@@ -58,6 +60,11 @@ disallowed-methods = [
 The clock ban finds every place the project reads the clock today. They move
 behind one function, the way
 [the clock](../../tesla-valve/references/rust.md#the-clock) shows.
+
+`allow_attributes` and `allow_attributes_without_reason` turn every exception
+into an `#[expect(..., reason = "...")]`. Clippy skips both where
+`rust-version` is set below 1.81: leave it unset, or raise it. Each `#[allow]`
+the survey finds is a finding of its own: say why, or remove the exception.
 
 ## CI
 
@@ -165,5 +172,26 @@ pub struct Order {
 // expect: disallowed_methods
 pub fn today() -> chrono::NaiveDate {
     chrono::Utc::now().date_naive()
+}
+```
+
+An exception says why, and only where its lint fires:
+
+<!-- code: examples/bad/rust/allow_without_reason.rs -->
+```rust
+// expect: allow_attributes
+// expect: allow_attributes_without_reason
+#[allow(clippy::unwrap_used)]
+pub fn berlin() -> crate::Postcode {
+    crate::Postcode::parse("10115").unwrap()
+}
+```
+
+<!-- code: examples/bad/rust/expect_without_reason.rs -->
+```rust
+// expect: allow_attributes_without_reason
+#[expect(clippy::unwrap_used)]
+pub fn berlin() -> crate::Postcode {
+    crate::Postcode::parse("10115").unwrap()
 }
 ```

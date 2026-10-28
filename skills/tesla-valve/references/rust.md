@@ -17,6 +17,7 @@ compiler, and let clippy refuse what the compiler allows.
 | `.unwrap()` or `.expect()` on data from outside | a parse that returns a typed error | `unwrap_used` and `expect_used`, allowed in tests | a value the types already proved: `#[expect(clippy::unwrap_used, reason = "...")]` says why |
 | a loose struct deserialized, then checked field by field | deserialize straight into the domain type | serde: the derive is the check | the wire format differs from the domain: a wire type, then `TryFrom` |
 | the clock read deep inside the logic | read it at the spring and pass the date in | `disallowed_methods` | the one function that reads it, under `#[expect(clippy::disallowed_methods, reason = "...")]` |
+| `#[allow(clippy::...)]`, or an `#[expect]` that does not say why | `#[expect(lint, reason = "...")]` on the narrowest item | `allow_attributes` and `allow_attributes_without_reason`; an `#[expect]` whose lint stops firing warns | code a macro or a generator writes |
 
 ## A closed choice, parsed at the spring
 
