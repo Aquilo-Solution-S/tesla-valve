@@ -2,8 +2,8 @@
 
 | tool | holds | comes with |
 | --- | --- | --- |
-| rustc | every arm of a `match`, private fields, every field of a variant, a literal inside its type | the toolchain |
-| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason | the toolchain, as the `clippy` component |
+| rustc | every arm of a `match`, private fields, every field of a variant, a literal inside its type, no `unsafe` | the toolchain |
+| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason, no narrowing `as` | the toolchain, as the `clippy` component |
 | doc tests | the one `compile_fail` line per shape | `cargo test`, for a library target |
 
 ## The tools
@@ -39,6 +39,12 @@ struct_excessive_bools = "deny"
 disallowed_methods = "deny"
 allow_attributes = "deny"
 allow_attributes_without_reason = "deny"
+as_conversions = "deny"
+cast_possible_truncation = "deny"
+cast_sign_loss = "deny"
+
+[lints.rust]
+unsafe_code = "forbid"
 ```
 
 In `clippy.toml`, beside it. Name the clock of every time crate the project
@@ -66,6 +72,11 @@ into an `#[expect(..., reason = "...")]`. Clippy skips both where
 `rust-version` is set below 1.81: leave it unset, or raise it. Each `#[allow]`
 the survey finds is a finding of its own: say why, or remove the exception.
 
+The cast lints refuse `as` and point to `From` and `TryFrom`. Propose them
+with the count of their findings. `unsafe_code = "forbid"` goes only where the
+crate has no `unsafe` today. Where it keeps some, propose
+`undocumented_unsafe_blocks` and `multiple_unsafe_ops_per_block` instead.
+
 ## CI
 
 ```sh
@@ -85,7 +96,7 @@ Run `cargo clippy --all-targets -- -D warnings` in the copy. Rust compiles only
 the files a module names, so the copy also gets `mod bad;` in `lib.rs`.
 
 rustc refuses a missing arm, a backorder whose days are `None`, a literal out
-of range and a forged value:
+of range, a forged value and `unsafe`:
 
 <!-- code: examples/bad/rust/missing_arm.rs -->
 ```rust
@@ -127,6 +138,14 @@ pub fn forged() -> crate::Postcode {
 }
 ```
 
+<!-- code: examples/bad/rust/unsafe_forged_postcode.rs -->
+```rust
+// expect: unsafe-code
+pub fn forged() -> crate::Postcode {
+    unsafe { std::mem::transmute::<String, crate::Postcode>(String::from("hello")) }
+}
+```
+
 clippy refuses the rest:
 
 <!-- code: examples/bad/rust/catch_all_arm.rs -->
@@ -164,6 +183,14 @@ pub fn ship(express: bool, gift: bool) -> u8 {
 pub struct Order {
     pub paid: bool,
     pub shipped: bool,
+}
+```
+
+<!-- code: examples/bad/rust/restock_days_cast.rs -->
+```rust
+// expect: cast_possible_truncation
+pub fn backorder(raw: u64) -> crate::Stock {
+    crate::Stock::Backorder { restock_days: raw as u16 }
 }
 ```
 
