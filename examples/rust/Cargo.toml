@@ -18,4 +18,6 @@ expect_used = "deny"
 fn_params_excessive_bools = "deny"
 struct_excessive_bools = "deny"
 disallowed_methods = "deny"
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
 # endregion
