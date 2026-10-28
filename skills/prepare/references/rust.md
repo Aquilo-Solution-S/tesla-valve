@@ -3,7 +3,7 @@
 | tool | holds | comes with |
 | --- | --- | --- |
 | rustc | every arm of a `match`, private fields, every field of a variant, a literal inside its type, no `unsafe` | the toolchain |
-| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason, no narrowing `as`, no `From` that panics | the toolchain, as the `clippy` component |
+| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason, no narrowing `as`, no `From` that panics, no answer of a commit dropped | the toolchain, as the `clippy` component |
 | doc tests | the one `compile_fail` line per shape | `cargo test`, for a library target |
 
 ## The tools
@@ -43,6 +43,8 @@ as_conversions = "deny"
 cast_possible_truncation = "deny"
 cast_sign_loss = "deny"
 fallible_impl_from = "deny"
+let_underscore_must_use = "deny"
+unused_result_ok = "deny"
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -77,6 +79,12 @@ The cast lints refuse `as` and point to `From` and `TryFrom`. Propose them
 with the count of their findings. `unsafe_code = "forbid"` goes only where the
 crate has no `unsafe` today. Where it keeps some, propose
 `undocumented_unsafe_blocks` and `multiple_unsafe_ops_per_block` instead.
+
+`let_underscore_must_use` and `unused_result_ok` refuse the two quiet ways to
+drop a `Result`. A name such as `let _ignored =` still gets past both, so a
+review reads for it. `result_unit_err` is on by default and reads only
+functions other crates can call, so it has no bad file here: the copy names
+its bad file with a private `mod bad;`.
 
 ## CI
 
@@ -205,6 +213,36 @@ impl From<&str> for crate::Postcode {
             Err(crate::Invalid(reason)) => panic!("{reason}"),
         }
     }
+}
+```
+
+<!-- code: examples/bad/rust/discarded_commit.rs -->
+```rust
+// expect: let_underscore_must_use
+pub struct SoldOut;
+
+pub fn reserve(stock: &mut u16) -> Result<(), SoldOut> {
+    *stock = stock.checked_sub(1).ok_or(SoldOut)?;
+    Ok(())
+}
+
+pub fn place_order(stock: &mut u16) {
+    let _ = reserve(stock);
+}
+```
+
+<!-- code: examples/bad/rust/dropped_with_ok.rs -->
+```rust
+// expect: unused_result_ok
+pub struct SoldOut;
+
+pub fn reserve(stock: &mut u16) -> Result<(), SoldOut> {
+    *stock = stock.checked_sub(1).ok_or(SoldOut)?;
+    Ok(())
+}
+
+pub fn place_order(stock: &mut u16) {
+    reserve(stock).ok();
 }
 ```
 
