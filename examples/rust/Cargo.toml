@@ -20,4 +20,10 @@ struct_excessive_bools = "deny"
 disallowed_methods = "deny"
 allow_attributes = "deny"
 allow_attributes_without_reason = "deny"
+as_conversions = "deny"
+cast_possible_truncation = "deny"
+cast_sign_loss = "deny"
+
+[lints.rust]
+unsafe_code = "forbid"
 # endregion
