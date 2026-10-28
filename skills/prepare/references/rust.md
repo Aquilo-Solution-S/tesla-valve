@@ -3,7 +3,7 @@
 | tool | holds | comes with |
 | --- | --- | --- |
 | rustc | every arm of a `match`, private fields, every field of a variant, a literal inside its type, no `unsafe` | the toolchain |
-| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason, no narrowing `as` | the toolchain, as the `clippy` component |
+| clippy | no catch-all arm, no `unwrap` outside tests, no second `bool` parameter or field, no clock inside the logic, no exception without a reason, no narrowing `as`, no `From` that panics | the toolchain, as the `clippy` component |
 | doc tests | the one `compile_fail` line per shape | `cargo test`, for a library target |
 
 ## The tools
@@ -42,6 +42,7 @@ allow_attributes_without_reason = "deny"
 as_conversions = "deny"
 cast_possible_truncation = "deny"
 cast_sign_loss = "deny"
+fallible_impl_from = "deny"
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -191,6 +192,19 @@ pub struct Order {
 // expect: cast_possible_truncation
 pub fn backorder(raw: u64) -> crate::Stock {
     crate::Stock::Backorder { restock_days: raw as u16 }
+}
+```
+
+<!-- code: examples/bad/rust/from_that_panics.rs -->
+```rust
+// expect: fallible_impl_from
+impl From<&str> for crate::Postcode {
+    fn from(raw: &str) -> Self {
+        match crate::Postcode::parse(raw) {
+            Ok(postcode) => postcode,
+            Err(crate::Invalid(reason)) => panic!("{reason}"),
+        }
+    }
 }
 ```
 
