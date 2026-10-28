@@ -248,6 +248,14 @@ the only way in:
 /// ```compile_fail
 /// shop::Postcode(String::from("hello"));
 /// ```
+///
+/// ```compile_fail
+/// let _: shop::Postcode = Default::default();
+/// ```
+///
+/// ```compile_fail
+/// let _ = shop::Postcode::from(String::from("hello"));
+/// ```
 pub struct Postcode(String);
 
 impl Postcode {
@@ -329,7 +337,11 @@ unrepresentable*, from his 2010 talk on effective ML, written up as
 Rule 4 is Alexis King's
 [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/):
 check the data once, where it enters, by turning it into a type that keeps
-what the check found.
+what the check found. Her
+[Names are not type safety](https://lexi-lambda.github.io/blog/2020/11/01/names-are-not-type-safety/)
+draws the line rule 3 leans on: a value behind a constructor is only as safe as
+the module that builds it, while one built from parts that cannot be wrong
+needs no trusted module at all.
 
 What Tesla Valve adds is for the agent that writes the code. A shape counts
 only where something enforces it, so every rule names its enforcer, and the

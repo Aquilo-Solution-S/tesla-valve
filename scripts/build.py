@@ -108,6 +108,8 @@ SHARED = [
     "A read and a later write is a race.",
     "a reservation is released when the order is cancelled",
     "A value with no invariant stays a primitive.",
+    "Every way in counts: a default, a conversion from the raw value, a mutable accessor.",
+    "so no module has to be trusted to keep it valid.",
     "A shape counts only where this project's compiler or CI enforces it.",
     "Keep the runtime check wherever types are erased",
     "never a silent default",

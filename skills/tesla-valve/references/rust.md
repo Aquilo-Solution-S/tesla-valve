@@ -79,10 +79,12 @@ trybuild included, and split no crate to get one.
 
 ## One constructor, held by a doc test
 
-The second doc test fails the day someone makes the field public. Keep its body
-to the one line, because a `compile_fail` test passes on any error, and stable
-Rust does not check the error code. The first doc test compiles the same path,
-so a misspelled crate name cannot make the second one pass.
+The second doc test fails the day someone makes the field public, the third
+the day someone gives it a `Default`, the fourth the day a `From<String>` lets
+any string in. Keep each body to the one line, because a `compile_fail` test
+passes on any error, and stable Rust does not check the error code. The first
+doc test compiles the same path, so a misspelled crate name cannot make the
+second one pass.
 
 <!-- code: examples/rust/src/postcode.rs#postcode -->
 ````rust
@@ -94,6 +96,14 @@ so a misspelled crate name cannot make the second one pass.
 ///
 /// ```compile_fail
 /// shop::Postcode(String::from("hello"));
+/// ```
+///
+/// ```compile_fail
+/// let _: shop::Postcode = Default::default();
+/// ```
+///
+/// ```compile_fail
+/// let _ = shop::Postcode::from(String::from("hello"));
 /// ```
 pub struct Postcode(String);
 
@@ -123,6 +133,16 @@ impl<'de> Deserialize<'de> for Postcode {
     }
 }
 ```
+
+Privacy guards the field from other modules, not from the type's own. In it,
+a derived `Default` makes an empty postcode, a `From<String>` turns any string
+into one, and `DerefMut`, `AsMut<String>` or a `_mut` accessor changes one
+after `parse` passed it. The compiler accepts each of them. Keep the module
+small, give the type no `Default`, convert from the raw type only through
+`TryFrom` or `FromStr` that call `parse`, and hand out `&str`, never
+`&mut String`. `fallible_impl_from` refuses a `From` that panics or unwraps,
+though not one that calls `.expect()`; nothing refuses a `From` that cannot
+fail, which is why the doc tests above hold it.
 
 ## The clock
 

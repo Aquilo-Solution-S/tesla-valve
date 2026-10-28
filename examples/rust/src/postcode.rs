@@ -12,6 +12,14 @@ use crate::Invalid;
 /// ```compile_fail
 /// shop::Postcode(String::from("hello"));
 /// ```
+///
+/// ```compile_fail
+/// let _: shop::Postcode = Default::default();
+/// ```
+///
+/// ```compile_fail
+/// let _ = shop::Postcode::from(String::from("hello"));
+/// ```
 pub struct Postcode(String);
 
 impl Postcode {

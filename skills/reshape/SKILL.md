@@ -34,8 +34,9 @@ List every check and every test of shape in the scope.
   report lists the findings that keep a rule off.
 - Read for what no linter sees: a closed choice compared as a string, a
   `validate()` called after construction, a value the type leaves optional but
-  one state needs, a record parsed loose and checked field by field, a test
-  that tests only shape.
+  one state needs, a record parsed loose and checked field by field, a derived
+  default, a conversion that cannot fail or a mutable accessor on a type with
+  an invariant, a test that tests only shape.
 
 ## 3. Plan
 

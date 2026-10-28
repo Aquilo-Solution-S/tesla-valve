@@ -66,7 +66,10 @@ thing, so the map goes.
   matched case by case, without a catch-all.
 - **If it exists, it is valid.** The constructor is the only way in, and it
   returns the value or the reason it could not. No setter breaks it later, no
-  cast forges one. Nobody checks it again.
+  cast forges one. Nobody checks it again. Every way in counts: a default, a
+  conversion from the raw value, a mutable accessor. Where you can, build the
+  value from parts that cannot be wrong, an enum or a narrow integer, so no
+  module has to be trusted to keep it valid.
 - **Check once, at the spring.** Data from a user, a file, the network, another
   system, the database or the clock is parsed into its type where it enters,
   and trusted from there. Read the clock at the spring and pass it in. Your own
