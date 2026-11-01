@@ -29,7 +29,7 @@ inside it.
     "@types/node": "26.6.5",
     "eslint": "10.13.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.71.2"
+    "typescript-eslint": "8.72.0"
   }
 }
 ```
