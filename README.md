@@ -2,7 +2,10 @@
   <img src="assets/tesla-valve.svg" alt="A Tesla valve. Water flows freely from left to right. Flowing back, every loop turns it against itself.">
 </p>
 
-<h1 align="center">Tesla Valve</h1>
+<h1 align="center">
+  <img src="assets/logo.svg" width="72" alt=""><br>
+  Tesla Valve
+</h1>
 
 <p align="center">
   <em>No moving parts. The right path flows, and the wrong one works against itself.</em>
