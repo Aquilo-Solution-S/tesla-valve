@@ -1,6 +1,6 @@
 {
   "name": "tesla-valve",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Tesla Valve",
   "description": "Build code like a Tesla valve: shape over checks, check once at the spring, test the intent.",
   "author": {
