@@ -98,7 +98,15 @@ runtime checks a missing enforcer would replace.
 The third, [`reshape`](skills/reshape/SKILL.md), brings existing code into those
 shapes, in a scope you name and one stream at a time. Checks become shapes or
 move to the spring, and the tests the compiler now covers go, each naming what
-holds it now. How to start both in each host is in [INSTALL.md](INSTALL.md).
+holds it now.
+
+The fourth, [`survey`](skills/survey/SKILL.md), is the architecture review. You
+name a topic and a focus, and it follows each stream of that topic from spring
+to goal and reports where the flow is not natural: second channels, layers
+that only carry, streams that touch outside a contract, uneven quality, docs
+that say what the code does not do. Each finding cites its lines, names what
+it costs and has survived an attempt to refute it. It changes nothing. How to
+start all three in each host is in [INSTALL.md](INSTALL.md).
 
 ## Does it work?
 
