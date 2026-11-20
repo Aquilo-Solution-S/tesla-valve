@@ -69,10 +69,10 @@ A slice moves one stream: its type, its spring and its callers.
   shaped, never what it computes.
 - Add first: the spring test that feeds the bad data, and, where the toolchain
   checks one, the line that proves the wrong use does not compile. Delete
-  second: the check, each test the shape now covers, naming the enforcer
-  that does, and the comment that promised what the shape now holds. A comment
-  never goes before its shape lands: until then it is the only place the
-  intent is written.
+  second: the check, and each test the shape now covers, naming the enforcer
+  that does. Where the row's check is a comment, the comment goes here, and
+  never before its shape lands: until then it is the only place the intent is
+  written.
 - After each slice, show the diff and the checks passing, and go on when the
   user agrees.
 
