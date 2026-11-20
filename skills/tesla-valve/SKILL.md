@@ -216,9 +216,11 @@ channel beside the code, and nothing refuses it when it drifts.
   an incident showed), what the next change must not undo ("kept although
   nothing here uses it"), the name or relative link that lets a reader open
   the decision in its home. A comment that only says what the next line does
-  goes. Before you delete a sentence, ask what else says it: a shorter file
-  is not the goal, and the next change undoes what a deleted reason
-  explained.
+  goes. The test: could it be read off the code alone? Then it restates the
+  code. A fact about another system or the reason for the code ("the
+  warehouse sends the newest entry last") cannot, and stays. Before you
+  delete a sentence, ask what else says it: a shorter file is not the goal,
+  and the next change undoes what a deleted reason explained.
 
 ## Target, state, gap
 
@@ -234,23 +236,30 @@ A project says three things, and each has one home.
 - **The state** is the code, its types and its tests. No prose restates it: a
   README that lists what is implemented is wrong after the next commit.
 - **The gap** between the two is an issue in the tracker, and nowhere else:
-  not a `TODO`, not a "not yet" in a doc, not a skipped test. Nobody closes
-  those, and the next change reads them as the plan.
+  not a `TODO`, not a "not yet" in a doc, not a test skipped because the
+  feature is missing. Nobody closes those, and the next change reads them as
+  the plan.
 
 The target is read as "shall" and may promise what is not built. Words beside
 the code are read as "is" and may not. Neither says when.
 
 - **Everything else that states a rule points to its home, is generated from
   it, or is its executable form.** A README, a guide, a skill or an agent's
-  memory that restates it is a second home, and the two drift. A precedence
-  list between sources ("a ruling in an issue beats a record beats the
-  package doc") is the symptom of several homes: fold them into one and
-  delete the list.
+  memory that restates it is a second home, and the two drift. So is a value
+  copied by hand from one file into another, as under a comment that asks to
+  keep the two in step: one file reads it from the other. Where it cannot,
+  the two need a check in the gate that compares them: name it in your
+  reply. A precedence list between sources ("a ruling in an issue beats a
+  record beats the package doc") is the symptom of several homes: fold them
+  into the rule's home in the tree and delete the list.
 - **Only a decision moves the target.** It is written into the home in the
   commit that makes it, and the issue keeps the conversation. Never edit the
   target to fit what you built: "a cancelled order holds no stock" is not
   reworded to "is released within a day" because the release runs at night.
-  That is how a workaround becomes the rule.
+  That is how a workaround becomes the rule. Nor does this skill overrule a
+  rule of the project: where its guide asks for a status line on every
+  record, write the line, keep the ones that are there, and say in your
+  reply that the guide and this skill disagree. The project decides.
 - **What is built is derived, never written down.** The code names the rule
   it holds, as the test `cancel_releases` names the rule it tests, so a
   search for the name shows what holds it, and no list of what is done has
@@ -275,7 +284,10 @@ provider is not wired, another system's contract is not there.
   open one: one open issue per rule and symbol. It names the target (the
   home and the rule), the state (the file and symbol, and what it does
   instead), the obstacle, and done-when: the test that closes it. The issue
-  names the code, and the code does not name the issue.
+  names the code, and the code does not name the issue. The sentence that
+  carried the gap then leaves the tree: "no vectors until the provider is
+  wired" goes, and the rule it deferred, "the receiver gets vectors", stays
+  in its home as it shall be.
 - **Before you build on a rule, ask the tracker for its open gaps.** The tree
   says what is built, the tracker says what is missing. The project names the
   command that asks where its reader starts, as
