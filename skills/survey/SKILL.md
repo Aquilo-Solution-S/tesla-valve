@@ -194,10 +194,10 @@ In the chat. Write a file only when the user asks for one.
 3. **Rows for reshape:** the findings that are checks, in the plan table of the
    [reshape skill](../reshape/SKILL.md), with its columns (check, kind,
    becomes, held by, tests), so the user can hand them over as they are. A
-   promise in a comment that nothing holds, and that a type or a constraint
-   could hold, is a row: its check is the sentence. Words the code contradicts
-   get no row until the user has said which of the two is the bug. A finding
-   that is neither a check nor such a promise gets no row.
+   promise in a comment or a doc that nothing holds, and that a type or a
+   constraint could hold, is a row: its check is the sentence. Words the code
+   contradicts get no row until the user has said which of the two is the bug.
+   A finding that is neither a check nor such a promise gets no row.
 4. **What the survey did not read**, so no silence is taken for a clean result.
 
 The survey ends there. The user picks what happens next: reshape for the rows,

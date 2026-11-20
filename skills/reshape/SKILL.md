@@ -40,9 +40,9 @@ List every check and every test of shape in the scope.
 - Read the words as well: a comment or a doc in the scope that promises what a
   shape could hold ("never empty", "call only after `init`", "the only way a
   child is spawned"). Open what would hold it first. Held already, the
-  sentence is a copy and goes with no row. Contradicted by the code, it is a
-  finding for the user, not a row: one of the two is a bug. Held by nothing,
-  it is a row.
+  sentence is a copy: it gets no row, and it stays unless the user asks for it
+  to go. Contradicted by the code, it is a finding for the user, not a row:
+  one of the two is a bug. Held by nothing, it is a row.
 
 ## 3. Plan
 
