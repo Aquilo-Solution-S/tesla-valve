@@ -172,6 +172,37 @@ field; forty that call the test constructor do not.
   that prunes old backups needs no Backup type around a file name, and still a
   test that it keeps the newest seven.
 
+## Words beside the code
+
+A comment, a README and an instruction file are read by the next change as the
+rule, whether or not the code still does what they say. Prose is a second
+channel beside the code, and nothing refuses it when it drifts.
+
+- **Never write a promise nothing holds.** "The only way a child is spawned",
+  "never empty", "validated upstream" are true the day they are written and
+  copied for years. Where a type, a test or a constraint holds it, the words
+  are a copy. Where nothing does, they are a hope: make a shape hold it, or do
+  not say it. The urge to write one is a finding about the design: "call only
+  after init" asks why an uninitialised caller can reach it.
+- **A promise you read is a claim.** Before your code or your own comment
+  leans on one, open what would hold it: the type, the constraint, the test.
+  "Never empty" on a list is checked by reading its type and its constraint.
+  Where the words and the code disagree, one of them is the bug: find out
+  which before you build on either, and correct the words in the same change
+  when it is them. Never copy a promise onto new code unchecked.
+- **An instruction has one owner: the tool that acts on it.** A document that
+  lists what a command decides is a copy that drifts, and a patched list
+  drifts again. Ask the tool, not the summary. Where the tool cannot be
+  asked, that is the gap to close: one command that prints the answer, and
+  one line that names it where the reader starts.
+- **What only the words hold stays, where its reader looks:** the order a
+  function keeps on purpose, the recovery step in the runbook, the reason
+  from outside the code (a limit another system sets, a measurement, an
+  incident), what the next change must not undo ("kept although nothing here
+  uses it"), the reference that lets a reader open the decision. A comment
+  that only says what the next line does, or how the code used to be, goes.
+  Before you delete a sentence, ask what else says it.
+
 ## Rules you write
 
 Every line of a style guide, a review checklist or a prompt is one of three:

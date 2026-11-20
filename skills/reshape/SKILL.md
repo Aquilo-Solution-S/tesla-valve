@@ -37,6 +37,12 @@ List every check and every test of shape in the scope.
   one state needs, a record parsed loose and checked field by field, a derived
   default, a conversion that cannot fail or a mutable accessor on a type with
   an invariant, a test that tests only shape.
+- Read the words as well: a comment or a doc in the scope that promises what a
+  shape could hold ("never empty", "call only after `init`", "the only way a
+  child is spawned"). Open what would hold it first. Held already, the
+  sentence is a copy: it gets no row, and it stays unless the user asks for it
+  to go. Contradicted by the code, it is a finding for the user, not a row:
+  one of the two is a bug. Held by nothing, it is a row.
 
 ## 3. Plan
 
@@ -51,6 +57,7 @@ paragraph of explanation, or when its enforcer is missing. For the loose
 | `panic!("unknown stock status")` | bad data | `stock_of` refuses it | serde: unknown variant | a spring test feeds it an unknown status |
 | `panic!("backorder without restock days")` | wrong use | `Backorder { restock_days: u16 }` | the compiler: a missing field | its test goes; a spring test feeds a backorder without days |
 | `"in_stock"` spelled at every match | wrong use | `enum Stock`, matched without `_` | the compiler; clippy | its test goes |
+| `/// Never empty.` on `lines: Vec<Line>` | wrong use | `Lines`, built only from a first line and the rest | the compiler: no empty constructor | the comment goes; a spring test feeds an order without lines |
 
 The user picks the rows.
 
@@ -63,7 +70,9 @@ A slice moves one stream: its type, its spring and its callers.
 - Add first: the spring test that feeds the bad data, and, where the toolchain
   checks one, the line that proves the wrong use does not compile. Delete
   second: the check, and each test the shape now covers, naming the enforcer
-  that does.
+  that does. Where the row's check is a comment, the comment goes here, and
+  never before its shape lands: until then it is the only place the intent is
+  written.
 - After each slice, show the diff and the checks passing, and go on when the
   user agrees.
 
