@@ -129,7 +129,14 @@ one is load. A dimension with nothing to report is left out of the report.
 - **Said and built.** Where does a doc, a decision record, a comment or a name
   say what the code does not do? The words are a second channel, and the next
   change will trust them: `// validated upstream` above a value that nothing
-  upstream validates.
+  upstream validates. Do not judge a sentence by how it reads. For each
+  promise ("never empty", "the only caller") and each instruction ("register
+  it in the list") in the scope, open what would hold it: the type, the
+  constraint, the test, the tool that acts on it. Report three kinds: words
+  the code contradicts, and which of the two is the bug; words nothing holds;
+  and an instruction written in more than one place, with the one tool or
+  file that decides it. Name what only the words hold too (a recovery step, a
+  limit another system sets), so no cleanup deletes it.
 - **Tests.** Which intent has no test, above all across parts: a protocol,
   atomicity, recovery from a failure? Which check at a spring is never fed bad
   data? Which tests pin only a shape the compiler already holds?
@@ -187,7 +194,8 @@ In the chat. Write a file only when the user asks for one.
 3. **Rows for reshape:** the findings that are checks, in the plan table of the
    [reshape skill](../reshape/SKILL.md), with its columns (check, kind,
    becomes, held by, tests), so the user can hand them over as they are. A
-   finding that is not a check gets no row.
+   promise in a comment that a type or a constraint could hold is a row: its
+   check is the sentence. A finding that is neither gets no row.
 4. **What the survey did not read**, so no silence is taken for a clean result.
 
 The survey ends there. The user picks what happens next: reshape for the rows,
