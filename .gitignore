@@ -3,6 +3,7 @@ __pycache__/
 .claude/settings.local.json
 .venv/
 target/
+.lake/
 node_modules/
 dist/
 .mypy_cache/

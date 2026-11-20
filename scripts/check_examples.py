@@ -1,7 +1,7 @@
 """Checks that every example passes its own checks, and that every enforcer the
 references name refuses what they say it refuses.
 
-    python3 scripts/check_examples.py [rust] [go] [python] [typescript]
+    python3 scripts/check_examples.py [rust] [go] [python] [typescript] [lean]
 
 Each example under examples/<language>/ must pass clean. Then each file in
 examples/bad/<language>/ goes into a fresh copy of that example, one at a time.
@@ -34,6 +34,7 @@ class Language:
 CLIPPY = ["cargo", "clippy", "--all-targets", "--locked", "--", "-D", "warnings"]
 PYTHON_LINTS = [["pyright"], ["mypy", "."], ["ruff", "check"]]
 TYPESCRIPT_LINTS = [["npx", "tsc", "--noEmit"], ["npx", "eslint", "."]]
+LEAN_GATE = [["lake", "build", "--wfail"], ["lake", "exe", "audit"]]
 
 LANGUAGES = {
     "rust": Language(
@@ -58,10 +59,11 @@ LANGUAGES = {
         slot="src/bad.ts",
         linked=("node_modules",),
     ),
+    "lean": Language(checks=LEAN_GATE, lints=LEAN_GATE, slot="Spec/Bad.lean"),
 }
 
-NOT_COPIED = shutil.ignore_patterns("target", "node_modules", "dist", "__pycache__", ".*_cache")
-EXPECT = re.compile(r"^(?://|#) expect: (.+)$", re.MULTILINE)
+NOT_COPIED = shutil.ignore_patterns("target", "node_modules", "dist", "__pycache__", ".*_cache", ".lake")
+EXPECT = re.compile(r"^(?://|#|--) expect: (.+)$", re.MULTILINE)
 
 # Every copy of the Rust example builds into one target directory, so the
 # dependencies compile once.

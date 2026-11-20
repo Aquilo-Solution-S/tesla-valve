@@ -1,0 +1,15 @@
+name = "shop"
+defaultTargets = ["Spec", "audit"]
+
+# region: whole-spec
+# Every module under Spec/ is built, whether or not anything imports it.
+[[lean_lib]]
+name = "Spec"
+globs = ["Spec.+"]
+# endregion
+
+# The gate's own program. It is not part of the model, so it may do IO.
+[[lean_exe]]
+name = "audit"
+root = "Audit"
+supportInterpreter = true

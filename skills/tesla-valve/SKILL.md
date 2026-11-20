@@ -195,13 +195,91 @@ channel beside the code, and nothing refuses it when it drifts.
   drifts again. Ask the tool, not the summary. Where the tool cannot be
   asked, that is the gap to close: one command that prints the answer, and
   one line that names it where the reader starts.
+- **A sentence speaks about the tree or about the timeline.** About the tree:
+  what this is, what it must stay, and why. About the timeline: what it was,
+  what it will be, who decided it and when, which issue tracks it. Timeline
+  sentences leave the tree, because the next change reads them as the rule:
+  "this used to retry three times" gets the retry written back. Git and the
+  tracker keep the timeline. No word list decides which is which: "an agent
+  no longer registered" names a state the code handles, and stays. A reason
+  told as history keeps the reason and loses the story: "added after the
+  March outage, see #212" becomes "the gateway is not idempotent: a retry
+  here charges twice".
+- **A pointer goes from the changing to the lasting.** An issue names the rule
+  and the code. The code and the rule name no issue, person or date: a closed
+  issue leaves "until #212" behind, and a moved repository turns "#212" into
+  someone else's issue. Point to a rule by the name of its home, or by a
+  relative link.
 - **What only the words hold stays, where its reader looks:** the order a
   function keeps on purpose, the recovery step in the runbook, the reason
-  from outside the code (a limit another system sets, a measurement, an
-  incident), what the next change must not undo ("kept although nothing here
-  uses it"), the reference that lets a reader open the decision. A comment
-  that only says what the next line does, or how the code used to be, goes.
-  Before you delete a sentence, ask what else says it.
+  from outside the code (a limit another system sets, what a measurement or
+  an incident showed), what the next change must not undo ("kept although
+  nothing here uses it"), the name or relative link that lets a reader open
+  the decision in its home. A comment that only says what the next line does
+  goes. Before you delete a sentence, ask what else says it: a shorter file
+  is not the goal, and the next change undoes what a deleted reason
+  explained.
+
+## Target, state, gap
+
+A project says three things, and each has one home.
+
+- **The target** is each rule as it shall be. A rule lives in exactly one
+  home, chosen by what can check it: a type, a spec the compiler checks, the
+  config a tool applies, a gate. [Homes](references/homes.md) lists them by
+  kind of rule. The home states the rule and its why, never its progress
+  ("currently", "not yet", "until the migration lands") and never its story:
+  no status, person, date, commit, measurement or "superseded". Git and the
+  tracker keep those.
+- **The state** is the code, its types and its tests. No prose restates it: a
+  README that lists what is implemented is wrong after the next commit.
+- **The gap** between the two is an issue in the tracker, and nowhere else:
+  not a `TODO`, not a "not yet" in a doc, not a skipped test. Nobody closes
+  those, and the next change reads them as the plan.
+
+The target is read as "shall" and may promise what is not built. Words beside
+the code are read as "is" and may not. Neither says when.
+
+- **Everything else that states a rule points to its home, is generated from
+  it, or is its executable form.** A README, a guide, a skill or an agent's
+  memory that restates it is a second home, and the two drift. A precedence
+  list between sources ("a ruling in an issue beats a record beats the
+  package doc") is the symptom of several homes: fold them into one and
+  delete the list.
+- **Only a decision moves the target.** It is written into the home in the
+  commit that makes it, and the issue keeps the conversation. Never edit the
+  target to fit what you built: "a cancelled order holds no stock" is not
+  reworded to "is released within a day" because the release runs at night.
+  That is how a workaround becomes the rule.
+- **What is built is derived, never written down.** The code names the rule
+  it holds, as the test `cancel_releases` names the rule it tests, so a
+  search for the name shows what holds it, and no list of what is done has
+  to be kept. A rule nothing names is unbuilt, and an open gap issue says so.
+
+## At a gap
+
+A gap opens where the target asks for more than this change can build: a
+provider is not wired, another system's contract is not there.
+
+- **Land the largest slice that is complete in itself,** without breaking a
+  contract that holds today. Where the rest is missing, the code says so in
+  its shape: a typed refusal the contract allows, a narrower scope, the
+  option not offered. Never a stand-in that pretends to be the target
+  (vectors of zeros, so the call answers 200), never a comment, and no test
+  asserts the gap: `receiver_gets_vectors`, which expects
+  `503 // until #212`, is named for the target and passes while the target
+  is missing. Such a test is not deleted. It becomes the test of the
+  refusal: `no_provider_is_refused` asserts `Refusal::NoProvider`, which
+  the contract allows before and after the gap closes.
+- **File one gap issue,** labelled `gap`, after searching the tracker for an
+  open one: one open issue per rule and symbol. It names the target (the
+  home and the rule), the state (the file and symbol, and what it does
+  instead), the obstacle, and done-when: the test that closes it. The issue
+  names the code, and the code does not name the issue.
+- **Before you build on a rule, ask the tracker for its open gaps.** The tree
+  says what is built, the tracker says what is missing. The project names the
+  command that asks where its reader starts, as
+  `gh issue list --label gap --search "<rule>"`, or the gap is invisible.
 
 ## Rules you write
 
@@ -220,3 +298,6 @@ failure. Whatever has to be remembered will be forgotten.
 If the change added, moved or removed checks or tests, end with one line per
 shape or spring, not per test: what moved, and what holds it now (a shape, the
 spring, or the commit).
+
+If the change stopped at a gap, name the gap issue and the shape that says so
+in the code.

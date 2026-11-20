@@ -21,9 +21,10 @@ never in the middle of another task.
 ## 1. Survey
 
 Find the languages the project builds (`Cargo.toml`, `go.mod`,
-`pyproject.toml`, `package.json` with `tsconfig.json`), and read the reference
-for each: [Rust](references/rust.md), [Go](references/go.md),
-[TypeScript](references/typescript.md), [Python](references/python.md).
+`pyproject.toml`, `package.json` with `tsconfig.json`, `lakefile.toml`), and
+read the reference for each: [Rust](references/rust.md),
+[Go](references/go.md), [TypeScript](references/typescript.md),
+[Python](references/python.md), [Lean](references/lean.md).
 
 For each enforcer in the reference, find out whether the project has it, lacks
 it, or has it weaker: `strict` off, `default-signifies-exhaustive: true`, a

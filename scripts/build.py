@@ -43,7 +43,7 @@ QUOTE = re.compile(
     r"(?P<fence>`{3,})(?P<lang>[\w-]*)\n.*?^(?P=fence)$",
     re.MULTILINE | re.DOTALL,
 )
-REGION = re.compile(r"^\s*(?://|#) (?:region: (?P<name>[\w-]+)|endregion)\s*$")
+REGION = re.compile(r"^\s*(?://|#|--) (?:region: (?P<name>[\w-]+)|endregion)\s*$")
 problems = []
 
 
