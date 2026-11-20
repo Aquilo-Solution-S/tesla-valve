@@ -43,6 +43,6 @@ export function stockOf(json: string): Stock | Invalid {
 }
 // endregion
 
-function shippingDays(postcode: Postcode): number {
+export function shippingDays(postcode: Postcode): number {
   return postcode.code.startsWith("1") ? 2 : 3;
 }

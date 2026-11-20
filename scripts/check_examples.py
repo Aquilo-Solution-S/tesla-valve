@@ -37,7 +37,7 @@ CLIPPY = ["cargo", "clippy", "--all-targets", "--locked", "--", "-D", "warnings"
 PYTHON_LINTS = [["pyright"], ["mypy", "."], ["ruff", "check"]]
 TYPESCRIPT_LINTS = [["npx", "tsc", "--noEmit"], ["npx", "eslint", "."]]
 LEAN_GATE = [["lake", "build", "--wfail"], ["lake", "exe", "audit"]]
-# Writes the vectors the Python example replays. CI fails when they differ from the commit.
+# Writes the vectors the other examples replay. CI fails when they differ from the commit.
 LEAN_VECTORS = ["lake", "exe", "vectors"]
 
 LANGUAGES = {
@@ -67,7 +67,7 @@ LANGUAGES = {
         checks=[*LEAN_GATE, LEAN_VECTORS],
         lints=LEAN_GATE,
         slot="Spec/Bad.lean",
-        beside=("python",),
+        beside=("go", "python", "rust", "typescript"),
     ),
 }
 

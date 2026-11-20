@@ -11,8 +11,17 @@ def stockJson : Stock → String
   | .inStock => "{\"status\": \"in_stock\"}"
   | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
 
+/-- Where each codebase keeps the vectors its test replays. -/
+def replayedBy : List System.FilePath := [
+  "../go/testdata/delivery_days.json",
+  "../python/tests/delivery_days.json",
+  "../rust/src/delivery_days.json",
+  "../typescript/src/delivery_days.json",
+]
+
 def main : IO Unit := do
   let vectors := inputs.map fun (shipping, stock) =>
     s!"  \{\"shipping\": {shipping}, \"stock\": {stockJson stock}, \"days\": {deliveryDays shipping stock}}"
-  IO.FS.writeFile "../python/tests/delivery_days.json" s!"[\n{",\n".intercalate vectors}\n]\n"
+  for path in replayedBy do
+    IO.FS.writeFile path s!"[\n{",\n".intercalate vectors}\n]\n"
 -- endregion

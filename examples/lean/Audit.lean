@@ -140,7 +140,7 @@ def audit (library : Name) (scopes : List Scope) : IO UInt32 := do
         let some other := spec[used]? | continue
         if !scope.spec.isPrefixOf other.module || other.info matches .thmInfo _ || held.contains used then
           continue
-        held := held.insert used #[s!"with {root}"]
+        held := held.insert used #[s!"with {root}, {", ".intercalate (held.getD root #[]).toList}"]
         todo := (used, root) :: todo
     -- The map from the spec to this code, which owes every name of the scope.
     for (name, declared) in ordered do

@@ -192,13 +192,22 @@ def stockJson : Stock → String
   | .inStock => "{\"status\": \"in_stock\"}"
   | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
 
+/-- Where each codebase keeps the vectors its test replays. -/
+def replayedBy : List System.FilePath := [
+  "../go/testdata/delivery_days.json",
+  "../python/tests/delivery_days.json",
+  "../rust/src/delivery_days.json",
+  "../typescript/src/delivery_days.json",
+]
+
 def main : IO Unit := do
   let vectors := inputs.map fun (shipping, stock) =>
     s!"  \{\"shipping\": {shipping}, \"stock\": {stockJson stock}, \"days\": {deliveryDays shipping stock}}"
-  IO.FS.writeFile "../python/tests/delivery_days.json" s!"[\n{",\n".intercalate vectors}\n]\n"
+  for path in replayedBy do
+    IO.FS.writeFile path s!"[\n{",\n".intercalate vectors}\n]\n"
 ```
 
-And a test of the code parses and replays them:
+And a test of each codebase parses and replays them, here the one in Python:
 
 <!-- code: examples/python/tests/test_shop.py#replayed -->
 ```python
@@ -235,14 +244,19 @@ own, beside the audit. The audit itself is the same in every project:
 no scope lists is not tied to the code yet: the audit prints it, and no code
 has to name what it declares. -/
 def main : IO UInt32 := audit (library := `Spec) (scopes := [
+  { spec := `Spec.Stock, code := ["../go"] },
   { spec := `Spec.Stock, code := ["../python/shop", "../python/tests"] },
+  { spec := `Spec.Stock, code := ["../rust/src"] },
+  { spec := `Spec.Stock, code := ["../typescript/src"] },
 ])
 ```
 
 A scope names modules by prefix, so `Spec.Stock` is the file and the folder
 of that name, and it names the files and folders of the code that hold them.
-Each scope is checked on its own: a module that two codebases must keep has
-two scopes, and each codebase names every rule of it.
+Each scope is checked on its own: here four codebases must keep
+`Spec.Stock`, so it has four scopes, and each codebase names every rule of
+it. The audit reads only the paths a scope names, so no list says what it
+skips.
 
 A module no scope lists is not tied to the code: the audit prints
 `Spec.Reservation: no scope lists it`, and no code has to name what it
