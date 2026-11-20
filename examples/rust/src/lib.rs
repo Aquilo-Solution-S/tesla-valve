@@ -112,13 +112,12 @@ mod tests {
         days: u64,
     }
 
-    // @holds deliveryDays
     #[test]
     fn the_code_decides_the_days_the_spec_decides() {
         let today = date(2026, 10, 6);
         for code in ["10115", "20095"] {
             let postcode = Postcode::parse(code).unwrap();
-            // The spec writes this file: `lake exe vectors`, in examples/lean.
+            // @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
             let vectors: Vec<Vector> = serde_json::from_str(include_str!("delivery_days.json")).unwrap();
             let mut replayed = 0;
             for vector in vectors.into_iter().filter(|vector| vector.shipping == shipping_days(&postcode)) {

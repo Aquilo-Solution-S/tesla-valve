@@ -137,34 +137,48 @@ issue numbers go to git and the tracker.
 A declaration nothing consumes is a gap or it is dead. So the code names what
 it holds: `@holds <name>` beside the type, the function or the test that
 holds the declaration, in a comment, a docstring or the title of a test. The
-audit reads these and checks both ways. Every name the code cites is
-declared, so a rule that was renamed or deleted leaves no test that still
-claims it. And in the modules a scope lists, below, every declaration is
-held. A rule is held by its name alone: a test names the theorem. A type or
-a decision is also held where a held declaration uses it: in its statement,
-in the body of a decision, in what the constructors of a type take. So
-`Stock` is held with `deliveryDays`.
+audit reads these and checks both ways. Every name the code cites is a
+declaration of the spec or a program beside it, so a rule that was renamed
+or deleted leaves no test that still claims it. And in the modules a scope
+lists, below, every declaration is held. A rule is held by its name alone:
+a test names the theorem. A type or a decision is also held where a held
+declaration uses it: in its statement, in the body of a decision, in what
+the constructors of a type take. So `Stock` is held with `deliveryDays`.
+
+A program beside the model that writes into the code, an emitter or the
+writer of the vectors a test replays, is named in the same way, as
+`@holds Vectors`. It holds every type and decision its `main` uses, so the
+code names the one program and not each shape it carries. It holds no rule:
+a rule keeps a test that names it. The name stands where the code takes in
+what the program wrote, as beside the line that reads the vectors: when the
+code stops reading the file, the name goes with that line, and the audit
+refuses what only the program held.
 
 Owed a name is what the author named and did not mark `private`. A
 constructor and a field are not: they belong to their type. A lemma that
 only a proof needs is `private`, or stands in a module no scope lists.
 
 `lake exe audit` prints what holds each declaration, as
-`Spec.Stock: not_one_promise is held by ../python/tests/test_shop.py`. That
-output is the map from the spec to the code. It is derived on every run, and
-no file keeps it.
+`Spec.Stock: not_one_promise is held by ../python/tests/test_shop.py` and
+`Spec.Stock.Wire: stockJson is held with the program Vectors, by ../python/tests/test_shop.py`.
+That output is the map from the spec to the code. It is derived on every
+run, and no file keeps it.
 
 What the name proves depends on the tie, the strongest first:
 
-- **Emitted:** a shape generated into the code, with its `@holds`. The
-  project's gate generates it again and fails when the file differs from the
-  commit.
-- **Replayed:** a decision evaluated on generated inputs into vectors, which
-  a unit test of the code replays. The gate generates the vectors again, as
-  it does an emitted shape.
+- **Emitted:** a program generates a shape into the code, and the code
+  names the program where it takes the file in. The project's gate
+  generates the file again and fails when it differs from the commit.
+- **Replayed:** a program evaluates a decision on generated inputs into
+  vectors, and the unit test that replays them names the program. The gate
+  generates the vectors again, as it does an emitted shape.
 - **Named:** a test that holds a rule names it. The audit proves that the
   name is there and that the rule exists, not that the test shows the rule:
   a reader audits that, so this tie is the last resort.
+
+For a program the audit proves that the code names it and that its `main`
+uses the declaration. That the file in the commit is the one the program
+writes is proved by the gate's step that generates it again.
 
 A test that names a rule:
 
@@ -178,6 +192,17 @@ def test_a_backorder_never_arrives_sooner() -> None:
         assert delivery_date(Postcode("10115"), backorder, date(2026, 10, 6)) >= in_stock
 ```
 
+What the warehouse sends is a declaration of the spec too. No rule states
+it, so the program that writes it into the vectors is all that holds it:
+
+<!-- code: examples/lean/Spec/Stock/Wire.lean#wire -->
+```lean
+/-- A stock status, as the warehouse sends it. -/
+def stockJson : Stock → String
+  | .inStock => "{\"status\": \"in_stock\"}"
+  | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
+```
+
 A decision the code replays. A program beside the model writes the vectors:
 
 <!-- code: examples/lean/Vectors.lean#vectors -->
@@ -186,11 +211,6 @@ A decision the code replays. A program beside the model writes the vectors:
 def inputs : List (Nat × Stock) :=
   [2, 3].flatMap fun shipping =>
     [.inStock, .backorder 0, .backorder 1, .backorder 5, .backorder 65535].map (shipping, ·)
-
-/-- A stock status, as the warehouse sends it. -/
-def stockJson : Stock → String
-  | .inStock => "{\"status\": \"in_stock\"}"
-  | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
 
 /-- Where each codebase keeps the vectors its test replays. -/
 def replayedBy : List System.FilePath := [
@@ -218,14 +238,13 @@ class Vector(BaseModel):
     days: int
 
 
-# The spec writes this file: `lake exe vectors`, in examples/lean.
+# @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
 vectors_of = TypeAdapter(list[Vector]).validate_json
 VECTORS = vectors_of((Path(__file__).parent / "delivery_days.json").read_bytes())
 
 
 @pytest.mark.parametrize("postcode", [Postcode("10115"), Postcode("20095")])
 def test_the_code_decides_the_days_the_spec_decides(postcode: Postcode) -> None:
-    """@holds deliveryDays"""
     today = date(2026, 10, 6)
     replayed = [vector for vector in VECTORS if vector.shipping == shipping_days(postcode)]
     assert replayed

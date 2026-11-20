@@ -44,14 +44,13 @@ class Vector(BaseModel):
     days: int
 
 
-# The spec writes this file: `lake exe vectors`, in examples/lean.
+# @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
 vectors_of = TypeAdapter(list[Vector]).validate_json
 VECTORS = vectors_of((Path(__file__).parent / "delivery_days.json").read_bytes())
 
 
 @pytest.mark.parametrize("postcode", [Postcode("10115"), Postcode("20095")])
 def test_the_code_decides_the_days_the_spec_decides(postcode: Postcode) -> None:
-    """@holds deliveryDays"""
     today = date(2026, 10, 6)
     replayed = [vector for vector in VECTORS if vector.shipping == shipping_days(postcode)]
     assert replayed

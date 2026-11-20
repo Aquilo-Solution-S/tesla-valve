@@ -10,7 +10,7 @@ gate. What it may contain is in the tesla-valve skill's
 | `lake build --wfail` | no `sorry`: its warning fails the build | the toolchain |
 | the `Spec.+` glob | every module of the spec is built, imported or not | Lake |
 | an audit of the built spec | no `axiom`, `partial`, `unsafe`, `noncomputable` or `IO` in the model | a small program beside the spec |
-| the same audit, on the code | the code of a scope holds every declaration in the modules the scope lists, and every name the code cites is declared | the same program |
+| the same audit, on the code | the code of a scope holds every declaration in the modules the scope lists, and every name the code cites is a declaration of the spec or a program beside it | the same program |
 
 ## The tools
 
@@ -76,16 +76,21 @@ def refusal (env : Environment) (name : Name) (info : ConstantInfo) : Option Str
   else none
 ```
 
-The same program ties the spec to the code. The code names the declaration
-it holds with `@holds <name>`, and the project's own `Scopes.lean` names
-the library and says which code holds which modules, as the tesla-valve
-skill's
+The same program ties the spec to the code. The code names what it holds
+with `@holds <name>`: a declaration, or a program beside the spec whose
+output it takes in. The project's own `Scopes.lean` names the library and
+says which code holds which modules, as the tesla-valve skill's
 [Lean reference](../../tesla-valve/references/lean.md#one-part-of-the-spec-at-a-time)
 shows. Add a scope for each module the code already holds. With no scope
 this row of the table is off: report it so, and prove it with the first
 scope. The paths are read from the directory `lake` runs in. List the
 directories of the source, not a build output: a compiled file can carry a
 name its source no longer has.
+
+A program the code names is a module beside the spec that declares `main`
+and that the Lake file builds, as the root of `vectors`. The audit builds
+it before it reads what its `main` uses, so the `needs` of the audit lists
+the spec and no program.
 
 The program is
 [`Audit.lean`](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/examples/lean/Audit.lean)
@@ -106,6 +111,11 @@ a test replays, run it after these and fail on a difference:
 lake exe vectors
 git diff --exit-code
 ```
+
+The audit counts such a program as holding what it carries. That holds only
+where this step runs: without it the file in the commit can be older than
+the spec. Prove the step too: change the written file in the copy, and it
+fails.
 
 ## The proofs
 
@@ -172,15 +182,47 @@ theorem in_stock_takes_shipping_only (shipping : Nat) : deliveryDays shipping .i
   rfl
 ```
 
-And it refuses a name in the code that the spec does not declare. This bad
-file goes into the code:
+And it refuses a name in the code that is no declaration of the spec and no
+program beside it. This bad file goes into the code:
 
 <!-- code: examples/bad/lean/stale.py -->
 ```python
 # slot: ../python/tests/test_rush.py
-# expect: names rush_ships_today, which the spec does not declare
+# expect: names rush_ships_today, which is no declaration of the spec and no program beside it
 def test_a_rush_order_ships_today() -> None:
     """@holds rush_ships_today"""
+```
+
+It refuses a program the code names that does not build, because what it
+holds cannot be read. This bad file takes the place of the program:
+
+<!-- code: examples/bad/lean/broken_program.lean -->
+```lean
+-- slot: Vectors.lean
+-- expect: names Vectors, which does not build
+def main : IO Unit := "the vectors"
+```
+
+It refuses a root module, `Spec.lean` beside `Spec/`: the glob does not
+build it, and the audit would not read it.
+
+<!-- code: examples/bad/lean/root_module.lean -->
+```lean
+-- slot: Spec.lean
+-- expect: the spec is the modules under Spec/
+import Spec.Stock
+```
+
+It refuses modules that do not load as one model, as two that declare one
+name. Two programs under the library do that with `main`, so a program
+stands beside the library:
+
+<!-- code: examples/bad/lean/same_name.lean -->
+```lean
+-- slot: Spec/Rush.lean
+-- expect: its modules do not load as one model
+/-- A second decision of the same name, in a module that does not import the first. -/
+def deliveryDays (shipping : Nat) : Nat := shipping
 ```
 
 It refuses a model that acts instead of deciding, behind an alias too:

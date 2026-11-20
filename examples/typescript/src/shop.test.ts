@@ -43,13 +43,12 @@ test("a backorder is not promised the date of an item in stock", () => {
   assert.notDeepEqual(deliveryDate(berlin(), backorder, today), inStock);
 });
 
-// The spec writes this file: `lake exe vectors`, in examples/lean.
+// @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
 const written: unknown = JSON.parse(
   readFileSync(new URL("../src/delivery_days.json", import.meta.url), "utf8"),
 );
 const vectors = z.array(z.object({ shipping: z.int(), stock: Stock, days: z.int() })).parse(written);
 
-// @holds deliveryDays
 test("the code decides the days the spec decides", () => {
   const today = new Date("2026-10-06");
   for (const code of ["10115", "20095"]) {

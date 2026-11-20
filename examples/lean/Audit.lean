@@ -64,6 +64,34 @@ def statedIn (env : Environment) : ConstantInfo → Array Name
       ((env.find? ctor).map (·.type.getUsedConstants)).getD #[]
   | info => named info
 
+/-- What a program beside the spec carries into the code: all that its `main`
+uses, through types and bodies, and never through a rule. Or why the name is
+no such program. It is built first, so no build older than its source is read. -/
+def carried (library program : Name) : IO (Except String (Array Name)) := do
+  let unknown := .error "is no declaration of the spec and no program beside it"
+  if library.isPrefixOf program || !(← (modToFilePath "." program "lean").pathExists) then
+    return unknown
+  let lake := (← IO.getEnv "LAKE").getD "lake"
+  let built ← IO.Process.output { cmd := lake, args := #["build", "--log-level=error", s!"+{program}"] }
+  if built.exitCode != 0 then
+    let said := ((built.stdout ++ built.stderr).splitOn "\n").filter (!·.startsWith "trace:")
+    return .error s!"does not build:\n{"\n".intercalate said}"
+  let env ← importModules #[{ module := program }] {}
+  if !env.contains `main then return unknown
+  let mut seen : Std.HashSet Name := {}
+  let mut todo := [`main]
+  repeat
+    let name :: rest := todo | break
+    todo := rest
+    if seen.contains name then continue
+    seen := seen.insert name
+    let some info := env.find? name | continue
+    if info matches .thmInfo _ then continue
+    -- A partial function is opaque: what it uses is in its unsafe twin.
+    let twin := if info matches .opaqueInfo _ then [Compiler.mkUnsafeRecName name] else []
+    todo := twin ++ (statedIn env info).toList ++ todo
+  return .ok seen.toArray
+
 /-- Whether the author wrote a declaration's name: it stands in the source
 where the declaration does. `source` is the lines of its module. What the
 compiler named, as a derived instance or a notation, has another token there. -/
@@ -85,11 +113,13 @@ scope. A project calls this from a file of its own and leaves this one as it is.
 def audit (library : Name) (scopes : List Scope) : IO UInt32 := do
   let root := modToFilePath "." library "lean"
   if ← root.pathExists then
-    IO.eprintln s!"{root} is outside the glob {library}.+, so nothing builds it: move it under {library}/"
+    IO.eprintln s!"{root}: the spec is the modules under {library}/. Build them with the glob {library}.+, and move this one there or remove it"
     return 1
   initSearchPath (← findSysroot)
   let modules ← modulesUnder (root.withExtension "") library
-  let env ← importModules (modules.map ({ module := · })) {}
+  let env ← try importModules (modules.map ({ module := · })) {} catch reason =>
+    IO.eprintln s!"{library}: its modules do not load as one model: {reason}"
+    return 1
   let mut refused := 0
   let mut spec : Std.HashMap Name Declared := {}
   let mut sources : Std.HashMap Name (Array String) := {}
@@ -112,6 +142,8 @@ def audit (library : Name) (scopes : List Scope) : IO UInt32 := do
     spec := spec.insert name { module, info, owed }
   -- Each scope on its own: what its code names, and whether that holds its modules.
   let ordered := spec.toArray.qsort (·.1.toString < ·.1.toString)
+  let mut programs : Std.HashMap Name (Except String (Array Name)) := {}
+  let mut wrong : Std.HashSet String := {}
   for scope in scopes do
     if !modules.any scope.spec.isPrefixOf then
       IO.eprintln s!"{scope.spec}: no module of the spec is under it"
@@ -122,14 +154,29 @@ def audit (library : Name) (scopes : List Scope) : IO UInt32 := do
       for file in (← filesUnder path).qsort (·.toString < ·.toString) do
         let some text := String.fromUTF8? (← IO.FS.readBinFile file) | continue
         for name in cited text do
-          match spec[name]? with
-          | none =>
-            IO.eprintln s!"{file}: names {name}, which the spec does not declare"
-            refused := refused + 1
-          | some declared =>
+          if let some declared := spec[name]? then
             if scope.spec.isPrefixOf declared.module then
               held := held.insert name ((held.getD name #[]).push s!"by {file}")
               todo := (name, name) :: todo
+            continue
+          -- No declaration: a program, which holds the types and decisions it carries.
+          let read ← match programs[name]? with
+            | some read => pure read
+            | none => carried library name
+          programs := programs.insert name read
+          match read with
+          | .ok uses =>
+            for used in uses do
+              let some declared := spec[used]? | continue
+              if scope.spec.isPrefixOf declared.module && !(declared.info matches .thmInfo _) then
+                held := held.insert used ((held.getD used #[]).push s!"with the program {name}, by {file}")
+          | .error why =>
+            -- Said once, also where more than one scope reads the file.
+            let said := s!"{file}: names {name}, which {why}"
+            if !wrong.contains said then
+              wrong := wrong.insert said
+              IO.eprintln said
+              refused := refused + 1
     -- A type or a decision of the scope is held with what is stated in it. A rule
     -- is held by its name alone.
     repeat

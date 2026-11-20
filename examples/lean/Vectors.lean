@@ -1,15 +1,10 @@
-import Spec.Stock
+import Spec.Stock.Wire
 
 -- region: vectors
 /-- What the code replays: both shipping times it knows, in stock and on backorder. -/
 def inputs : List (Nat × Stock) :=
   [2, 3].flatMap fun shipping =>
     [.inStock, .backorder 0, .backorder 1, .backorder 5, .backorder 65535].map (shipping, ·)
-
-/-- A stock status, as the warehouse sends it. -/
-def stockJson : Stock → String
-  | .inStock => "{\"status\": \"in_stock\"}"
-  | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
 
 /-- Where each codebase keeps the vectors its test replays. -/
 def replayedBy : List System.FilePath := [

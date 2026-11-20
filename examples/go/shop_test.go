@@ -55,9 +55,8 @@ func TestABackorderIsNotPromisedTheDateOfAnItemInStock(t *testing.T) {
 	}
 }
 
-// @holds deliveryDays
 func TestTheCodeDecidesTheDaysTheSpecDecides(t *testing.T) {
-	// The spec writes this file: `lake exe vectors`, in examples/lean.
+	// @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
 	raw, err := os.ReadFile("testdata/delivery_days.json")
 	if err != nil {
 		t.Fatal(err)
