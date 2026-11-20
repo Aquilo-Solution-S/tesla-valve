@@ -38,17 +38,21 @@ name = "Spec"
 globs = ["Spec.+"]
 ```
 
-The audit is an executable in the same package and outside the model. It
-needs the library, so `lake exe audit` never reads a build that is older
-than the source:
+The audit is a program in the same package and outside the model. Its
+executable has a file of the project's own as its root, and needs the spec,
+so `lake exe audit` never reads a build that is older than the source:
 
 <!-- code: examples/lean/lakefile.toml#audit -->
 ```toml
-# The gate's own program. It is not part of the model, so it may do IO. It reads
-# what the build produced, so the spec is built before it runs.
+# The gate's own program. It is not part of the model, so it may do IO.
+[[lean_lib]]
+name = "Audit"
+
+# Its root is the project's own file, which names the library and the scopes.
+# It reads what the build produced, so the spec is built before it runs.
 [[lean_exe]]
 name = "audit"
-root = "Audit"
+root = "Scopes"
 needs = ["Spec"]
 supportInterpreter = true
 ```
@@ -73,8 +77,9 @@ def refusal (env : Environment) (name : Name) (info : ConstantInfo) : Option Str
 ```
 
 The same program ties the spec to the code. The code names the declaration
-it holds with `@holds <name>`, and the scopes at the top of the audit say
-which code holds which modules, as the tesla-valve skill's
+it holds with `@holds <name>`, and the project's own `Scopes.lean` names
+the library and says which code holds which modules, as the tesla-valve
+skill's
 [Lean reference](../../tesla-valve/references/lean.md#one-part-of-the-spec-at-a-time)
 shows. Add a scope for each module the code already holds. With no scope
 this row of the table is off: report it so, and prove it with the first
@@ -82,10 +87,10 @@ scope. The paths are read from the directory `lake` runs in. List the
 directories of the source, not a build output: a compiled file can carry a
 name its source no longer has.
 
-The whole program is in
-[the example](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/examples/lean/Audit.lean).
-Copy it, change `Spec` to the name of the project's library, and write the
-project's own scopes.
+The program is
+[`Audit.lean`](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/examples/lean/Audit.lean)
+in the example. Copy it as it is, and write `Scopes.lean` beside it. A later
+version of the audit then replaces that one file, and the scopes stay.
 
 ## CI
 

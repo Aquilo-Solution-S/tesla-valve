@@ -9,11 +9,15 @@ globs = ["Spec.+"]
 # endregion
 
 # region: audit
-# The gate's own program. It is not part of the model, so it may do IO. It reads
-# what the build produced, so the spec is built before it runs.
+# The gate's own program. It is not part of the model, so it may do IO.
+[[lean_lib]]
+name = "Audit"
+
+# Its root is the project's own file, which names the library and the scopes.
+# It reads what the build produced, so the spec is built before it runs.
 [[lean_exe]]
 name = "audit"
-root = "Audit"
+root = "Scopes"
 needs = ["Spec"]
 supportInterpreter = true
 # endregion

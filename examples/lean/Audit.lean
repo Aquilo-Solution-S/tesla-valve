@@ -1,19 +1,10 @@
 import Lean
 open Lean
 
--- region: scopes
-/-- A part of the spec, and the code that holds it. -/
+/-- A part of the spec, by the prefix of its modules, and the code that holds it. -/
 structure Scope where
   spec : Name
   code : List System.FilePath
-
-/-- Which code holds which modules of the spec. A module no scope lists is not
-tied to the code yet: the audit prints it, and no code has to name what it
-declares. -/
-def scopes : List Scope := [
-  { spec := `Spec.Stock, code := ["../python/shop", "../python/tests"] },
-]
--- endregion
 
 /-- Every module under a directory of the spec, read from the tree. -/
 partial def modulesUnder (dir : System.FilePath) (pre : Name) : IO (Array Name) := do
@@ -89,12 +80,15 @@ structure Declared where
   info : ConstantInfo
   owed : Bool
 
-def main : IO UInt32 := do
-  if ← System.FilePath.pathExists "Spec.lean" then
-    IO.eprintln "Spec.lean is outside the glob Spec.+, so nothing builds it: move it under Spec/"
+/-- Audits the spec that the library builds, and ties it to the code scope by
+scope. A project calls this from a file of its own and leaves this one as it is. -/
+def audit (library : Name) (scopes : List Scope) : IO UInt32 := do
+  let root := modToFilePath "." library "lean"
+  if ← root.pathExists then
+    IO.eprintln s!"{root} is outside the glob {library}.+, so nothing builds it: move it under {library}/"
     return 1
   initSearchPath (← findSysroot)
-  let modules ← modulesUnder "Spec" `Spec
+  let modules ← modulesUnder (root.withExtension "") library
   let env ← importModules (modules.map ({ module := · })) {}
   let mut refused := 0
   let mut spec : Std.HashMap Name Declared := {}
@@ -105,7 +99,7 @@ def main : IO UInt32 := do
   for (name, info) in env.constants.map₁.toList do
     let some idx := env.getModuleIdxFor? name | continue
     let module := env.header.moduleNames[idx.toNat]!
-    if !(`Spec).isPrefixOf module then continue
+    if !library.isPrefixOf module then continue
     -- Only what the compiler generated is skipped: a private name is the author's own.
     let written := privateToUserName name
     let authored := authored env (sources.getD module #[]) name

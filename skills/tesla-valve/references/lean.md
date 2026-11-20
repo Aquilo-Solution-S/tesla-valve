@@ -226,21 +226,17 @@ def test_the_code_decides_the_days_the_spec_decides(postcode: Postcode) -> None:
 
 ## One part of the spec at a time
 
-Which code holds which part of the spec is a list at the top of the audit:
+Which code holds which part of the spec is said in a file of the project's
+own, beside the audit. The audit itself is the same in every project:
 
-<!-- code: examples/lean/Audit.lean#scopes -->
+<!-- code: examples/lean/Scopes.lean#scopes -->
 ```lean
-/-- A part of the spec, and the code that holds it. -/
-structure Scope where
-  spec : Name
-  code : List System.FilePath
-
-/-- Which code holds which modules of the spec. A module no scope lists is not
-tied to the code yet: the audit prints it, and no code has to name what it
-declares. -/
-def scopes : List Scope := [
+/-- The library of the spec, and which code holds which of its modules. A module
+no scope lists is not tied to the code yet: the audit prints it, and no code
+has to name what it declares. -/
+def main : IO UInt32 := audit (library := `Spec) (scopes := [
   { spec := `Spec.Stock, code := ["../python/shop", "../python/tests"] },
-]
+])
 ```
 
 A scope names modules by prefix, so `Spec.Stock` is the file and the folder
