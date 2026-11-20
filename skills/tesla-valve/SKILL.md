@@ -92,8 +92,9 @@ the reference for its language: [Rust](references/rust.md),
 [Python](references/python.md).
 
 Before trusting a shape, find its enforcer in the project's config and CI.
-Where it is missing, keep the check, and tell the user that the prepare skill
-sets it up. Do not change tools, configs or CI in the middle of a task.
+Where it is missing, keep the check, tell the user that the prepare skill
+sets it up, and file the gap as [Homes](references/homes.md) says. Do not
+change tools, configs or CI in the middle of a task.
 
 ## On every check
 
@@ -263,6 +264,9 @@ the code are read as "is" and may not. Neither says when.
   it holds, as the test `cancel_releases` names the rule it tests, so a
   search for the name shows what holds it, and no list of what is done has
   to be kept. A rule nothing names is unbuilt, and an open gap issue says so.
+  Where the rules are declarations in a spec, a gate does that search for
+  the modules the project has put under it, and refuses a rule there that
+  the code does not name: [Lean](references/lean.md).
 
 ## At a gap
 
@@ -314,9 +318,10 @@ a `TODO` for what is missing), work by the skill and correct that line in
 the same change: left as it is, the next change follows the line and not
 the skill. Say in your reply which line you corrected. Correct the line you
 ran into, not the whole guide: the rest follows in a reshape the user
-starts. Two things hold against this skill: a rule that a gate of the
-project enforces, until the user changes the gate, and what the product
-shall do, which no skill moves.
+starts. One thing holds against this skill: a rule that a gate of the
+project enforces. Follow the gate and leave its guide line, because a change
+that fails the project's own gate lands nothing. Which of the two goes is
+the user's decision: file it as [Homes](references/homes.md) says.
 
 ## When you reply
 

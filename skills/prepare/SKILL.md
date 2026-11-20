@@ -76,3 +76,11 @@ One line per enforcer: what it holds, and whether it is now on and proven. Then
 the shapes that do not count yet, because their enforcer is off or its proof
 failed, with the findings that keep each rule off. Their runtime checks stay
 until it is on.
+
+What stays off is a gap, and the report does not outlast the chat. Each
+language has one gap issue for its enforcers, as the tesla-valve skill's
+[Homes](../tesla-valve/references/homes.md) says. Search for it, the closed
+ones too. One closed as not planned is the project's decision on the
+enforcers it names: they stay off, and the report says so. File or bring up
+to date the open one with every other enforcer that is off and what keeps it
+off, and close it when the report has none left.

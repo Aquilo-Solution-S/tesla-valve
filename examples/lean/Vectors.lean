@@ -1,0 +1,18 @@
+import Spec.Stock
+
+-- region: vectors
+/-- What the code replays: both shipping times it knows, in stock and on backorder. -/
+def inputs : List (Nat × Stock) :=
+  [2, 3].flatMap fun shipping =>
+    [.inStock, .backorder 0, .backorder 1, .backorder 5, .backorder 65535].map (shipping, ·)
+
+/-- A stock status, as the warehouse sends it. -/
+def stockJson : Stock → String
+  | .inStock => "{\"status\": \"in_stock\"}"
+  | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
+
+def main : IO Unit := do
+  let vectors := inputs.map fun (shipping, stock) =>
+    s!"  \{\"shipping\": {shipping}, \"stock\": {stockJson stock}, \"days\": {deliveryDays shipping stock}}"
+  IO.FS.writeFile "../python/tests/delivery_days.json" s!"[\n{",\n".intercalate vectors}\n]\n"
+-- endregion

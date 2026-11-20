@@ -127,3 +127,6 @@ jobs:
 
       - name: The example passes, and every enforcer refuses its bad file
         run: python3 scripts/check_examples.py lean
+
+      - name: The vectors the code replays are the ones the spec writes
+        run: git diff --exit-code

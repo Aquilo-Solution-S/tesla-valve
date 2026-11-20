@@ -39,10 +39,17 @@ gh issue list --label gap --state all --search "link check" --json number,title,
 
 One closed as not planned is the project's decision not to build the
 checker, and it is not filed again. Any other closed one is no answer: file
-a new one. An enforcer the prepare skill lists for the project's languages,
-a compiler setting or a lint, needs no issue: tell the user that prepare
-sets it up. Building a checker, or extending one that runs, is the user's
-decision, not a part of another task.
+a new one. The enforcers the prepare skill lists for a language, its
+compiler settings and lints, are one checker: one issue per language names
+those that are missing or off, and a run of prepare that reports each one on
+and proven closes it. Building a checker, or extending one that runs, is the
+user's decision, not a part of another task.
+
+So is changing a gate that enforces what the tesla-valve skill removes, as a
+lint that asks for a doc comment on every function, also where the comment
+restates the code. Until the user decides, the gate holds. It gets one issue
+in the same way, which names the gate and the rule it works against. Closed
+as not planned, the project keeps its gate.
 
 A pointer and a deferral do not wait for their checker: point to the home,
 and file what was deferred as a gap issue, also where no link check runs and

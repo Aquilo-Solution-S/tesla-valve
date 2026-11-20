@@ -134,15 +134,129 @@ issue numbers go to git and the tracker.
 
 ## Every declaration has a consumer
 
-A declaration nothing consumes is a gap or it is dead.
+A declaration nothing consumes is a gap or it is dead. So the code names what
+it holds: `@holds <name>` beside the type, the function or the test that
+holds the declaration, in a comment, a docstring or the title of a test. The
+audit reads these and checks both ways. Every name the code cites is
+declared, so a rule that was renamed or deleted leaves no test that still
+claims it. And in the modules a scope lists, below, every declaration is
+held. A rule is held by its name alone: a test names the theorem. A type or
+a decision is also held where a held declaration uses it: in its statement,
+in the body of a decision, in what the constructors of a type take. So
+`Stock` is held with `deliveryDays`.
 
-- **Emitted:** a shape generated into the code. The project's gate generates
-  it again and fails when the file differs from the commit.
-- **Replayed:** a decision evaluated on generated inputs into golden vectors,
-  which a unit test of the code replays. The gate generates the vectors
-  again, as it does an emitted shape.
-- **Named:** the test that holds a rule carries the declaration's name, and a
-  reader audits these. Only this one is manual, so it is the last resort.
+Owed a name is what the author named and did not mark `private`. A
+constructor and a field are not: they belong to their type. A lemma that
+only a proof needs is `private`, or stands in a module no scope lists.
+
+`lake exe audit` prints what holds each declaration, as
+`Spec.Stock: not_one_promise is held by ../python/tests/test_shop.py`. That
+output is the map from the spec to the code. It is derived on every run, and
+no file keeps it.
+
+What the name proves depends on the tie, the strongest first:
+
+- **Emitted:** a shape generated into the code, with its `@holds`. The
+  project's gate generates it again and fails when the file differs from the
+  commit.
+- **Replayed:** a decision evaluated on generated inputs into vectors, which
+  a unit test of the code replays. The gate generates the vectors again, as
+  it does an emitted shape.
+- **Named:** a test that holds a rule names it. The audit proves that the
+  name is there and that the rule exists, not that the test shows the rule:
+  a reader audits that, so this tie is the last resort.
+
+A test that names a rule:
+
+<!-- code: examples/python/tests/test_shop.py#named -->
+```python
+def test_a_backorder_never_arrives_sooner() -> None:
+    """@holds backorder_not_sooner"""
+    in_stock = delivery_date(Postcode("10115"), InStock(), date(2026, 10, 6))
+    for restock_days in (0, 1, 30):
+        backorder = Backorder(restock_days=restock_days)
+        assert delivery_date(Postcode("10115"), backorder, date(2026, 10, 6)) >= in_stock
+```
+
+A decision the code replays. A program beside the model writes the vectors:
+
+<!-- code: examples/lean/Vectors.lean#vectors -->
+```lean
+/-- What the code replays: both shipping times it knows, in stock and on backorder. -/
+def inputs : List (Nat × Stock) :=
+  [2, 3].flatMap fun shipping =>
+    [.inStock, .backorder 0, .backorder 1, .backorder 5, .backorder 65535].map (shipping, ·)
+
+/-- A stock status, as the warehouse sends it. -/
+def stockJson : Stock → String
+  | .inStock => "{\"status\": \"in_stock\"}"
+  | .backorder restockDays => s!"\{\"status\": \"backorder\", \"restock_days\": {restockDays}}"
+
+def main : IO Unit := do
+  let vectors := inputs.map fun (shipping, stock) =>
+    s!"  \{\"shipping\": {shipping}, \"stock\": {stockJson stock}, \"days\": {deliveryDays shipping stock}}"
+  IO.FS.writeFile "../python/tests/delivery_days.json" s!"[\n{",\n".intercalate vectors}\n]\n"
+```
+
+And a test of the code parses and replays them:
+
+<!-- code: examples/python/tests/test_shop.py#replayed -->
+```python
+class Vector(BaseModel):
+    model_config = ConfigDict(frozen=True, strict=True)
+    shipping: int
+    stock: Stock
+    days: int
+
+
+# The spec writes this file: `lake exe vectors`, in examples/lean.
+vectors_of = TypeAdapter(list[Vector]).validate_json
+VECTORS = vectors_of((Path(__file__).parent / "delivery_days.json").read_bytes())
+
+
+@pytest.mark.parametrize("postcode", [Postcode("10115"), Postcode("20095")])
+def test_the_code_decides_the_days_the_spec_decides(postcode: Postcode) -> None:
+    """@holds deliveryDays"""
+    today = date(2026, 10, 6)
+    replayed = [vector for vector in VECTORS if vector.shipping == shipping_days(postcode)]
+    assert replayed
+    for vector in replayed:
+        assert delivery_date(postcode, vector.stock, today) == today + timedelta(days=vector.days)
+```
+
+## One part of the spec at a time
+
+Which code holds which part of the spec is a list at the top of the audit:
+
+<!-- code: examples/lean/Audit.lean#scopes -->
+```lean
+/-- A part of the spec, and the code that holds it. -/
+structure Scope where
+  spec : Name
+  code : List System.FilePath
+
+/-- Which code holds which modules of the spec. A module no scope lists is not
+tied to the code yet: the audit prints it, and no code has to name what it
+declares. -/
+def scopes : List Scope := [
+  { spec := `Spec.Stock, code := ["../python/shop", "../python/tests"] },
+]
+```
+
+A scope names modules by prefix, so `Spec.Stock` is the file and the folder
+of that name, and it names the files and folders of the code that hold them.
+Each scope is checked on its own: a module that two codebases must keep has
+two scopes, and each codebase names every rule of it.
+
+A module no scope lists is not tied to the code: the audit prints
+`Spec.Reservation: no scope lists it`, and no code has to name what it
+declares. What the model must not contain is refused there as everywhere.
+So a spec that is already there comes under the code one module at a time.
+
+A rule that is ahead of the code stands in a module no scope lists, also
+where its neighbours are listed: in a listed module the audit refuses it
+until code names it. Its gap issue names it. The change that builds it adds
+the scope, or moves the rule under one.
 
 The whole spec builds in the gate, not only what an emitter imports: the
 library is the glob `Spec.+`, and a module nothing imports is still checked.

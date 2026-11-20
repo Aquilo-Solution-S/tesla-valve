@@ -1,5 +1,5 @@
 name = "shop"
-defaultTargets = ["Spec", "audit"]
+defaultTargets = ["Spec", "audit", "vectors"]
 
 # region: whole-spec
 # Every module under Spec/ is built, whether or not anything imports it.
@@ -8,8 +8,17 @@ name = "Spec"
 globs = ["Spec.+"]
 # endregion
 
-# The gate's own program. It is not part of the model, so it may do IO.
+# region: audit
+# The gate's own program. It is not part of the model, so it may do IO. It reads
+# what the build produced, so the spec is built before it runs.
 [[lean_exe]]
 name = "audit"
 root = "Audit"
+needs = ["Spec"]
 supportInterpreter = true
+# endregion
+
+# It writes the vectors the code replays, so it is outside the model too.
+[[lean_exe]]
+name = "vectors"
+root = "Vectors"

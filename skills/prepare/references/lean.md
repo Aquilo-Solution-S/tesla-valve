@@ -10,6 +10,7 @@ gate. What it may contain is in the tesla-valve skill's
 | `lake build --wfail` | no `sorry`: its warning fails the build | the toolchain |
 | the `Spec.+` glob | every module of the spec is built, imported or not | Lake |
 | an audit of the built spec | no `axiom`, `partial`, `unsafe`, `noncomputable` or `IO` in the model | a small program beside the spec |
+| the same audit, on the code | the code of a scope holds every declaration in the modules the scope lists, and every name the code cites is declared | the same program |
 
 ## The tools
 
@@ -38,8 +39,22 @@ globs = ["Spec.+"]
 ```
 
 The audit is an executable in the same package and outside the model. It
-reads the modules from the tree, loads what the build produced, and refuses a
-declaration of the spec for one of five reasons:
+needs the library, so `lake exe audit` never reads a build that is older
+than the source:
+
+<!-- code: examples/lean/lakefile.toml#audit -->
+```toml
+# The gate's own program. It is not part of the model, so it may do IO. It reads
+# what the build produced, so the spec is built before it runs.
+[[lean_exe]]
+name = "audit"
+root = "Audit"
+needs = ["Spec"]
+supportInterpreter = true
+```
+
+It reads the modules from the tree, loads what the build produced, and
+refuses a declaration of the spec for one of five reasons:
 
 <!-- code: examples/lean/Audit.lean#refusal -->
 ```lean
@@ -57,15 +72,34 @@ def refusal (env : Environment) (name : Name) (info : ConstantInfo) : Option Str
   else none
 ```
 
+The same program ties the spec to the code. The code names the declaration
+it holds with `@holds <name>`, and the scopes at the top of the audit say
+which code holds which modules, as the tesla-valve skill's
+[Lean reference](../../tesla-valve/references/lean.md#one-part-of-the-spec-at-a-time)
+shows. Add a scope for each module the code already holds. With no scope
+this row of the table is off: report it so, and prove it with the first
+scope. The paths are read from the directory `lake` runs in. List the
+directories of the source, not a build output: a compiled file can carry a
+name its source no longer has.
+
 The whole program is in
 [the example](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/examples/lean/Audit.lean).
-Copy it, and change `Spec` to the name of the project's library.
+Copy it, change `Spec` to the name of the project's library, and write the
+project's own scopes.
 
 ## CI
 
 ```sh
 lake build --wfail
 lake exe audit
+```
+
+Where a program beside the model writes a file the code reads, as the vectors
+a test replays, run it after these and fail on a difference:
+
+```sh
+lake exe vectors
+git diff --exit-code
 ```
 
 ## The proofs
@@ -119,7 +153,32 @@ unsafe def forgedDays (raw : Nat) : Nat := raw
 noncomputable def someDays : Nat := Classical.choice ⟨0⟩
 ```
 
-And it refuses a model that acts instead of deciding, behind an alias too:
+In a module a scope lists, it refuses a declaration no code names. The bad
+file goes under the scope, which its `slot:` line says:
+
+<!-- code: examples/bad/lean/unnamed.lean -->
+```lean
+-- slot: Spec/Stock/Rush.lean
+-- expect: no code under [../python/shop, ../python/tests] names in_stock_takes_shipping_only
+import Spec.Stock
+
+/-- An item in stock takes the shipping time and no more. -/
+theorem in_stock_takes_shipping_only (shipping : Nat) : deliveryDays shipping .inStock = shipping :=
+  rfl
+```
+
+And it refuses a name in the code that the spec does not declare. This bad
+file goes into the code:
+
+<!-- code: examples/bad/lean/stale.py -->
+```python
+# slot: ../python/tests/test_rush.py
+# expect: names rush_ships_today, which the spec does not declare
+def test_a_rush_order_ships_today() -> None:
+    """@holds rush_ships_today"""
+```
+
+It refuses a model that acts instead of deciding, behind an alias too:
 
 <!-- code: examples/bad/lean/io_in_the_model.lean -->
 ```lean

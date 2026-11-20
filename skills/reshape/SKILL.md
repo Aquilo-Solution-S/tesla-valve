@@ -23,8 +23,10 @@ whole repository at once.
 
 Find out which enforcers the project runs, in its config and its CI. A check or
 a test goes only where its replacement is enforced. Where an enforcer is
-missing, the checks it would replace stay: name them, and suggest the prepare
-skill. Configs and CI do not change here.
+missing, the checks it would replace stay: name them, suggest the prepare
+skill, and file the gap as
+[Homes](../tesla-valve/references/homes.md) says. Configs and CI do not
+change here.
 
 ## 2. Inventory
 
