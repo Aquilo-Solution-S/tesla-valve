@@ -205,9 +205,11 @@ In the chat. Write a file only when the user asks for one.
    constraint could hold, is a row: its check is the sentence. Words the code
    contradicts get no row until the user has said which of the two is the bug.
    A sentence about the timeline, a second home whose text agrees with the
-   first, and a gap in the tree are rows too, with the kinds the reshape
-   inventory names. Two homes that disagree get no row until the user has
-   said which one is the rule. A finding that is none of these gets no row.
+   first, a gap in the tree, a file that records a decision and a guide line
+   that asks for what the tesla-valve skill removes are rows too, with the
+   kinds the reshape inventory names. Two homes that disagree get no row
+   until the user has said which one is the rule. A finding that is none of
+   these gets no row.
 4. **What the survey did not read**, so no silence is taken for a clean result.
 
 The survey ends there. The user picks what happens next: reshape for the rows,

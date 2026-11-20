@@ -38,7 +38,10 @@ List every check and every test of shape in the scope.
   default, a conversion that cannot fail or a mutable accessor on a type with
   an invariant, a test that tests only shape.
 - Read the words as well, sentence by sentence: every comment and doc in the
-  scope. Each sentence is one of five.
+  scope. A file that records a decision (what was decided, by whom and when)
+  is one row before its sentences are read: its rules move to their homes
+  and the file goes, as [Homes](../tesla-valve/references/homes.md) says.
+  Every other sentence is one of six.
   - **A promise** a shape could hold ("never empty", "call only after
     `init`", "the only way a child is spawned"). Open what would hold it
     first. Held already, the sentence is a copy: it gets no row, and it stays
@@ -57,6 +60,9 @@ List every check and every test of shape in the scope.
   - **A gap in the tree:** an "until #212", a stand-in, a test that asserts
     what is missing. It is a row: it becomes the shape that says so, and one
     gap issue.
+  - **A line of the project's guide that asks for what the tesla-valve
+    skill removes,** as a `TODO` for what is not built yet. It is a row: the
+    line is corrected, as "Rules you write" there says.
   - **What only the words hold.** It stays as it is, and gets no row.
 
 ## 3. Plan
@@ -64,9 +70,8 @@ List every check and every test of shape in the scope.
 One row per check, written down before any change. The kind is one of the
 three in the tesla-valve skill, or "stays" when no shape holds without a
 paragraph of explanation, or when its enforcer is missing. A row for a
-sentence takes its kind from the inventory: timeline, second home, gap. For
-the loose
-`delivery_date` in the
+sentence takes its kind from the inventory: timeline, second home, gap,
+record, guide line. For the loose `delivery_date` in the
 [manifesto](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/MANIFESTO.md#one-step-in-code):
 
 | check | kind | becomes | held by | tests |
@@ -79,6 +84,8 @@ the loose
 | `// Cached for five minutes, see #212.` | timeline | `// The warehouse allows twelve calls a minute, so stock is cached for five.` | the words: nothing else holds the limit | none |
 | `Stock is in_stock or backorder.` in the README | second home | `The stock statuses are the variants of Stock.` | `enum Stock` is the list; the name, by a link check where the project runs one | none |
 | `assert_eq!(status, 503); // until #212` | gap | a test of the refusal: `no_provider_is_refused` asserts `Refusal::NoProvider`, without the comment; one gap issue | the tracker | the test of the refusal stays |
+| `docs/decisions/review.md`: `On 3 March we agreed that a review runs in a fresh session.` | record | `A review runs in a fresh session: the author's reasoning hides its own gaps.` in the guide; the file goes | the words: a judgment, in the file its followers read first | none |
+| `Mark what is not built yet with a TODO.` in the guide | guide line | `What is not built yet is a gap issue: gh issue list --label gap lists them.` | the tracker | none |
 
 The user picks the rows.
 

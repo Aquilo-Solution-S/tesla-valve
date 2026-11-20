@@ -26,18 +26,28 @@ its CI, or as the tool that acts on the input. Open those to find out: a
 spec, a lint table or a test in the tree that none of them runs does not
 count. Until one does, the rule stays what a judgment is: one short prose
 rule in one place. A new home nothing checks, as a spec no gate builds or a
-mockup no browser spec walks, is one more document that drifts. Name the
-gate to build in your reply. Building it, or extending one that runs, is the
-user's decision, not a part of another task.
+mockup no browser spec walks, is one more document that drifts.
 
-A missing checker is not a gap, and gets no issue. A gap issue is for a rule
-the code does not hold yet: "the receiver gets vectors", and no provider is
-wired. For a rule that is held and unchecked, naming the gate to build is
-all.
+The missing checker is a gap: one gap issue per checker, not per rule. It
+names the checker, what the project runs today, the rules that wait for it,
+and done-when: a file the checker refuses. A rule that newly waits is added
+to it. Search the closed issues too, as:
 
-The pointer row and the deferral row need no checker to be right: point to
-the home, and file what was deferred as a gap issue, whether or not a link
-check or a label is there.
+```sh
+gh issue list --label gap --state all --search "link check" --json number,title,stateReason
+```
+
+One closed as not planned is the project's decision not to build the
+checker, and it is not filed again. Any other closed one is no answer: file
+a new one. An enforcer the prepare skill lists for the project's languages,
+a compiler setting or a lint, needs no issue: tell the user that prepare
+sets it up. Building a checker, or extending one that runs, is the user's
+decision, not a part of another task.
+
+A pointer and a deferral do not wait for their checker: point to the home,
+and file what was deferred as a gap issue, also where no link check runs and
+no label exists yet. The link check that is missing is a gap of its own, as
+above.
 
 **A judgment has a home too:** one prose file, the one that those who must
 follow the rule read first (the agents' rules file, the project's guide, a
@@ -45,13 +55,18 @@ runbook, a skill). It states the rule, its why and one example. Where two
 files state it, that file keeps it and the other points to it. The steps a
 person or an agent takes by hand are such a rule, until a script takes them.
 
-**A record of a decision is not in the table:** nothing checks it. Its rules
-move, in the change that makes the decision or in a reshape the user starts:
-each rule a checker of this project holds to its home above, with its why,
-and every other one, a judgment, to the prose file just named, written as
-the rule and not as the record. "On 3 March we agreed that a review runs in
-a fresh session" becomes "a review runs in a fresh session: the author's
-reasoning hides its own gaps". Who decided, when, and the discussion are the
-issue and the commit. A record whose rules have all moved, or that a later
-one replaced, has nothing left to say: it goes with the last of them, and
-git keeps it.
+**A record of a decision is not in the table, and not in the tree.** Nothing
+checks it, and what it adds to its rules is timeline: who decided, when, and
+the discussion. The decision is the change to the home. Its record is the
+commit that makes the change and the issue that discussed it, or a decision
+ledger the project keeps outside the tree. So a change that decides a rule
+writes no record file.
+
+A record file that is already in the tree gives up its rules, in a reshape
+the user starts: each rule a checker of this project holds moves to its home
+above, with its why, and every other one, a judgment, to the prose file just
+named, written as the rule and not as the record. "On 3 March we agreed that
+a review runs in a fresh session" becomes "a review runs in a fresh session:
+the author's reasoning hides its own gaps". A design the record rejected
+stays with the rule, as what the next change must not undo. Then the file
+goes, and git keeps it.

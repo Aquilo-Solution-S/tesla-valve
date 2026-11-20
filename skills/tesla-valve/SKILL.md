@@ -248,18 +248,17 @@ the code are read as "is" and may not. Neither says when.
   memory that restates it is a second home, and the two drift. So is a value
   copied by hand from one file into another, as under a comment that asks to
   keep the two in step: one file reads it from the other. Where it cannot,
-  the two need a check in the gate that compares them: name it in your
-  reply. A precedence list between sources ("a ruling in an issue beats a
-  record beats the package doc") is the symptom of several homes: fold them
-  into the rule's home in the tree and delete the list.
+  the two need a check in the gate that compares them, and a missing one is
+  a gap, as [Homes](references/homes.md) says. A precedence list between
+  sources ("a ruling in an issue beats a record beats the package doc") is
+  the symptom of several homes: fold them into the rule's home in the tree
+  and delete the list.
 - **Only a decision moves the target.** It is written into the home in the
-  commit that makes it, and the issue keeps the conversation. Never edit the
-  target to fit what you built: "a cancelled order holds no stock" is not
-  reworded to "is released within a day" because the release runs at night.
-  That is how a workaround becomes the rule. Nor does this skill overrule a
-  rule of the project: where its guide asks for a status line on every
-  record, write the line, keep the ones that are there, and say in your
-  reply that the guide and this skill disagree. The project decides.
+  commit that makes it, and the issue keeps the conversation: no file in the
+  tree is the record of a decision. Never edit the target to fit what you
+  built: "a cancelled order holds no stock" is not reworded to "is released
+  within a day" because the release runs at night. That is how a workaround
+  becomes the rule.
 - **What is built is derived, never written down.** The code names the rule
   it holds, as the test `cancel_releases` names the rule it tests, so a
   search for the name shows what holds it, and no list of what is done has
@@ -287,7 +286,9 @@ provider is not wired, another system's contract is not there.
   names the code, and the code does not name the issue. The sentence that
   carried the gap then leaves the tree: "no vectors until the provider is
   wired" goes, and the rule it deferred, "the receiver gets vectors", stays
-  in its home as it shall be.
+  in its home as it shall be. A checker the project does not run is a gap
+  too, with one issue of its own: [Homes](references/homes.md) says what it
+  names and how to search for it.
 - **Before you build on a rule, ask the tracker for its open gaps.** The tree
   says what is built, the tracker says what is missing. The project names the
   command that asks where its reader starts, as
@@ -299,11 +300,23 @@ Every line of a style guide, a review checklist or a prompt is one of three:
 
 - **Enforced:** name the type, tool or gate that refuses the wrong version.
   A list each change must extend by hand is not an enforcer.
-- **Could be enforced:** name the gate to build.
+- **Could be enforced:** until its gate runs, the line is a judgment and is
+  kept like one. The gate to build is named where
+  [Homes](references/homes.md) says, not in the line.
 - **Judgment:** keep its why and one example.
 
 Delete the rest, but convert before cutting: a rule usually came from a real
 failure. Whatever has to be remembered will be forgotten.
+
+The project's own guide is such a text, and this skill applies to it. Where a
+line of it asks for what this skill removes (a status line on every record,
+a `TODO` for what is missing), work by the skill and correct that line in
+the same change: left as it is, the next change follows the line and not
+the skill. Say in your reply which line you corrected. Correct the line you
+ran into, not the whole guide: the rest follows in a reshape the user
+starts. Two things hold against this skill: a rule that a gate of the
+project enforces, until the user changes the gate, and what the product
+shall do, which no skill moves.
 
 ## When you reply
 
