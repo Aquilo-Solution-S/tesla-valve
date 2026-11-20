@@ -1,0 +1,12 @@
+[
+  {"shipping": 2, "stock": {"status": "in_stock"}, "days": 2},
+  {"shipping": 2, "stock": {"status": "backorder", "restock_days": 0}, "days": 2},
+  {"shipping": 2, "stock": {"status": "backorder", "restock_days": 1}, "days": 3},
+  {"shipping": 2, "stock": {"status": "backorder", "restock_days": 5}, "days": 7},
+  {"shipping": 2, "stock": {"status": "backorder", "restock_days": 65535}, "days": 65537},
+  {"shipping": 3, "stock": {"status": "in_stock"}, "days": 3},
+  {"shipping": 3, "stock": {"status": "backorder", "restock_days": 0}, "days": 3},
+  {"shipping": 3, "stock": {"status": "backorder", "restock_days": 1}, "days": 4},
+  {"shipping": 3, "stock": {"status": "backorder", "restock_days": 5}, "days": 8},
+  {"shipping": 3, "stock": {"status": "backorder", "restock_days": 65535}, "days": 65538}
+]

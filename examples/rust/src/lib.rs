@@ -85,6 +85,49 @@ mod tests {
         assert_eq!(delivery_date(&berlin, backorder, date(2026, 10, 6)), date(2026, 10, 13));
     }
 
+    // @holds backorder_not_sooner
+    #[test]
+    fn a_backorder_never_arrives_sooner() {
+        let berlin = Postcode::parse("10115").unwrap();
+        let today = date(2026, 10, 6);
+        let in_stock = delivery_date(&berlin, Stock::InStock, today);
+        for restock_days in [0, 1, 30] {
+            assert!(delivery_date(&berlin, Stock::Backorder { restock_days }, today) >= in_stock);
+        }
+    }
+
+    // @holds not_one_promise
+    #[test]
+    fn a_backorder_is_not_promised_the_date_of_an_item_in_stock() {
+        let berlin = Postcode::parse("10115").unwrap();
+        let today = date(2026, 10, 6);
+        let backorder = delivery_date(&berlin, Stock::Backorder { restock_days: 1 }, today);
+        assert_ne!(backorder, delivery_date(&berlin, Stock::InStock, today));
+    }
+
+    #[derive(Deserialize)]
+    struct Vector {
+        shipping: u64,
+        stock: Stock,
+        days: u64,
+    }
+
+    #[test]
+    fn the_code_decides_the_days_the_spec_decides() {
+        let today = date(2026, 10, 6);
+        for code in ["10115", "20095"] {
+            let postcode = Postcode::parse(code).unwrap();
+            // @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
+            let vectors: Vec<Vector> = serde_json::from_str(include_str!("delivery_days.json")).unwrap();
+            let mut replayed = 0;
+            for vector in vectors.into_iter().filter(|vector| vector.shipping == shipping_days(&postcode)) {
+                assert_eq!(delivery_date(&postcode, vector.stock, today), today + Days::new(vector.days));
+                replayed += 1;
+            }
+            assert!(replayed > 0, "no vector ships in the days of {code}");
+        }
+    }
+
     #[test]
     fn the_warehouse_spring_refuses_what_it_does_not_know() {
         for json in [

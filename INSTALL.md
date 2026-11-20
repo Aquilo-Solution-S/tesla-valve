@@ -81,6 +81,30 @@ agent at [`skills/prepare/SKILL.md`](skills/prepare/SKILL.md),
 [`skills/reshape/SKILL.md`](skills/reshape/SKILL.md) or
 [`skills/survey/SKILL.md`](skills/survey/SKILL.md) and ask it to follow it.
 
+## Say who owns the code
+
+Tesla Valve keeps a change to its task: it joins the streams the task
+touches, and leaves the rest of the code to `reshape`, which you start. It
+does not say who owns the code. If you want the agent to improve the
+structure it passes without being asked, say so in the project's own
+instruction file (`CLAUDE.md`, `AGENTS.md`):
+
+```text
+You are the owner and long-term maintainer of this codebase, and its design
+is up to you.
+```
+
+Anthropic [tested this sentence](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2#say-who-owns-the-code)
+with Claude Fable 5.2 on small coding tasks. With it, the model merged
+duplicated code in about 75 percent of runs, against under 10 percent
+without. It also wrote 70 to 80 percent more output, made changes nobody had
+asked for, and in some runs changed how an existing feature behaves. A rule
+that limits scope does not cancel it, and "no reshaping beyond the task" is
+such a rule. So add the sentence only where you want the wider change, and
+leave it out where you want the code changed as little as possible. Either
+way, read the diff and not only the summary: the model's closing summary
+often left out small changes.
+
 ## Uninstall
 
 | Host | Command |

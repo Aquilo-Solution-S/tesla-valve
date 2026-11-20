@@ -1,6 +1,7 @@
 """Builds the copy of AGENTS.md that Cursor loads, copies the plugin's version
 into every manifest, writes every quoted code block from the example it quotes,
-and checks that SKILL.md and AGENTS.md still say the same thing.
+and checks that SKILL.md and AGENTS.md still say the same thing and that every
+relative link in the Markdown resolves.
 
     python3 scripts/build.py
 
@@ -10,6 +11,7 @@ commit.
 
 import json
 import re
+import subprocess
 import sys
 import textwrap
 from pathlib import Path
@@ -43,7 +45,7 @@ QUOTE = re.compile(
     r"(?P<fence>`{3,})(?P<lang>[\w-]*)\n.*?^(?P=fence)$",
     re.MULTILINE | re.DOTALL,
 )
-REGION = re.compile(r"^\s*(?://|#) (?:region: (?P<name>[\w-]+)|endregion)\s*$")
+REGION = re.compile(r"^\s*(?://|#|--) (?:region: (?P<name>[\w-]+)|endregion)\s*$")
 problems = []
 
 
@@ -127,5 +129,38 @@ problems += [
     for name, text in (("AGENTS.md", rules), ("SKILL.md", skill))
     if " ".join(line.split()) not in " ".join(text.split())
 ]
+
+# A relative link is a pointer, and it is only right while its target is there.
+# Every one in the Markdown of this tree resolves, whether Markdown or an HTML
+# tag writes it: to a file, and to a heading in it where the link names one.
+# Git lists the tree, so .gitignore is the one place that says what is not
+# part of it.
+FENCE = re.compile(r"^(?P<fence>`{3,}).*?^(?P=fence)$", re.MULTILINE | re.DOTALL)
+INLINE = re.compile(r"`[^`\n]*`")
+LINK = re.compile(r'\[[^\]]*\]\((?P<markdown>[^)\s]+)(?:\s+"[^"]*")?\)|\b(?:src|href)="(?P<html>[^"]+)"')
+HEADING = re.compile(r"^#+ (.+)$", re.MULTILINE)
+
+
+def anchors(doc: Path) -> set[str]:
+    headings = HEADING.findall(FENCE.sub("", doc.read_text()))
+    return {re.sub(r"[^\w\- ]", "", heading.lower()).replace(" ", "-") for heading in headings}
+
+
+listed = subprocess.run(
+    ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "*.md"],
+    cwd=root, capture_output=True, text=True, check=True,
+).stdout.split("\0")
+for doc in (root / name for name in listed if name and (root / name).is_file()):
+    for link in LINK.finditer(INLINE.sub("", FENCE.sub("", doc.read_text()))):
+        target = link["markdown"] or link["html"]
+        if re.match(r"[a-z][a-z0-9+.-]*:", target):
+            continue
+        path, _, anchor = target.partition("#")
+        dest = doc.parent / path if path else doc
+        if not dest.exists():
+            problems.append(f"{doc.relative_to(root)} links to {target}, which is not there")
+        elif anchor and dest.suffix == ".md" and anchor not in anchors(dest):
+            problems.append(f"{doc.relative_to(root)} links to {target}, and {path or doc.name} has no such heading")
+
 if problems:
     sys.exit("\n".join(problems))

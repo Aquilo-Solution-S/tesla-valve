@@ -108,3 +108,25 @@ jobs:
 
       - name: The example passes, and every enforcer refuses its bad file
         run: python3 scripts/check_examples.py typescript
+
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the toolchain in lean-toolchain
+        run: |
+          version="$(sed 's/^.*:v//' examples/lean/lean-toolchain)"
+          curl --fail --silent --show-error --location --output "$RUNNER_TEMP/lean.tar.zst" \
+            "https://github.com/leanprover/lean4/releases/download/v$version/lean-$version-linux.tar.zst"
+          mkdir "$RUNNER_TEMP/lean"
+          tar --zstd --extract --file "$RUNNER_TEMP/lean.tar.zst" --directory "$RUNNER_TEMP/lean" --strip-components=1
+          echo "$RUNNER_TEMP/lean/bin" >> "$GITHUB_PATH"
+
+      - name: The example passes, and every enforcer refuses its bad file
+        run: python3 scripts/check_examples.py lean
+
+      - name: The vectors the code replays are the ones the spec writes
+        run: git diff --exit-code

@@ -92,8 +92,9 @@ the reference for its language: [Rust](references/rust.md),
 [Python](references/python.md).
 
 Before trusting a shape, find its enforcer in the project's config and CI.
-Where it is missing, keep the check, and tell the user that the prepare skill
-sets it up. Do not change tools, configs or CI in the middle of a task.
+Where it is missing, keep the check, tell the user that the prepare skill
+sets it up, and file the gap as [Homes](references/homes.md) says. Do not
+change tools, configs or CI in the middle of a task.
 
 ## On every check
 
@@ -195,13 +196,107 @@ channel beside the code, and nothing refuses it when it drifts.
   drifts again. Ask the tool, not the summary. Where the tool cannot be
   asked, that is the gap to close: one command that prints the answer, and
   one line that names it where the reader starts.
+- **A sentence speaks about the tree or about the timeline.** About the tree:
+  what this is, what it must stay, and why. About the timeline: what it was,
+  what it will be, who decided it and when, which issue tracks it. Timeline
+  sentences leave the tree, because the next change reads them as the rule:
+  "this used to retry three times" gets the retry written back. Git and the
+  tracker keep the timeline. No word list decides which is which: "an agent
+  no longer registered" names a state the code handles, and stays. A reason
+  told as history keeps the reason and loses the story: "added after the
+  March outage, see #212" becomes "the gateway is not idempotent: a retry
+  here charges twice".
+- **A pointer goes from the changing to the lasting.** An issue names the rule
+  and the code. The code and the rule name no issue, person or date: a closed
+  issue leaves "until #212" behind, and a moved repository turns "#212" into
+  someone else's issue. Point to a rule by the name of its home, or by a
+  relative link.
 - **What only the words hold stays, where its reader looks:** the order a
   function keeps on purpose, the recovery step in the runbook, the reason
-  from outside the code (a limit another system sets, a measurement, an
-  incident), what the next change must not undo ("kept although nothing here
-  uses it"), the reference that lets a reader open the decision. A comment
-  that only says what the next line does, or how the code used to be, goes.
-  Before you delete a sentence, ask what else says it.
+  from outside the code (a limit another system sets, what a measurement or
+  an incident showed), what the next change must not undo ("kept although
+  nothing here uses it"), the name or relative link that lets a reader open
+  the decision in its home. A comment that only says what the next line does
+  goes. The test: could it be read off the code alone? Then it restates the
+  code. A fact about another system or the reason for the code ("the
+  warehouse sends the newest entry last") cannot, and stays. Before you
+  delete a sentence, ask what else says it: a shorter file is not the goal,
+  and the next change undoes what a deleted reason explained.
+
+## Target, state, gap
+
+A project says three things, and each has one home.
+
+- **The target** is each rule as it shall be. A rule lives in exactly one
+  home, chosen by what can check it: a type, a spec the compiler checks, the
+  config a tool applies, a gate. [Homes](references/homes.md) lists them by
+  kind of rule. The home states the rule and its why, never its progress
+  ("currently", "not yet", "until the migration lands") and never its story:
+  no status, person, date, commit, measurement or "superseded". Git and the
+  tracker keep those.
+- **The state** is the code, its types and its tests. No prose restates it: a
+  README that lists what is implemented is wrong after the next commit.
+- **The gap** between the two is an issue in the tracker, and nowhere else:
+  not a `TODO`, not a "not yet" in a doc, not a test skipped because the
+  feature is missing. Nobody closes those, and the next change reads them as
+  the plan.
+
+The target is read as "shall" and may promise what is not built. Words beside
+the code are read as "is" and may not. Neither says when.
+
+- **Everything else that states a rule points to its home, is generated from
+  it, or is its executable form.** A README, a guide, a skill or an agent's
+  memory that restates it is a second home, and the two drift. So is a value
+  copied by hand from one file into another, as under a comment that asks to
+  keep the two in step: one file reads it from the other. Where it cannot,
+  the two need a check in the gate that compares them, and a missing one is
+  a gap, as [Homes](references/homes.md) says. A precedence list between
+  sources ("a ruling in an issue beats a record beats the package doc") is
+  the symptom of several homes: fold them into the rule's home in the tree
+  and delete the list.
+- **Only a decision moves the target.** It is written into the home in the
+  commit that makes it, and the issue keeps the conversation: no file in the
+  tree is the record of a decision. Never edit the target to fit what you
+  built: "a cancelled order holds no stock" is not reworded to "is released
+  within a day" because the release runs at night. That is how a workaround
+  becomes the rule.
+- **What is built is derived, never written down.** The code names the rule
+  it holds, as the test `cancel_releases` names the rule it tests, so a
+  search for the name shows what holds it, and no list of what is done has
+  to be kept. A rule nothing names is unbuilt, and an open gap issue says so.
+  Where the rules are declarations in a spec, a gate does that search for
+  the modules the project has put under it, and refuses a rule there that
+  the code does not name: [Lean](references/lean.md).
+
+## At a gap
+
+A gap opens where the target asks for more than this change can build: a
+provider is not wired, another system's contract is not there.
+
+- **Land the largest slice that is complete in itself,** without breaking a
+  contract that holds today. Where the rest is missing, the code says so in
+  its shape: a typed refusal the contract allows, a narrower scope, the
+  option not offered. Never a stand-in that pretends to be the target
+  (vectors of zeros, so the call answers 200), never a comment, and no test
+  asserts the gap: `receiver_gets_vectors`, which expects
+  `503 // until #212`, is named for the target and passes while the target
+  is missing. Such a test is not deleted. It becomes the test of the
+  refusal: `no_provider_is_refused` asserts `Refusal::NoProvider`, which
+  the contract allows before and after the gap closes.
+- **File one gap issue,** labelled `gap`, after searching the tracker for an
+  open one: one open issue per rule and symbol. It names the target (the
+  home and the rule), the state (the file and symbol, and what it does
+  instead), the obstacle, and done-when: the test that closes it. The issue
+  names the code, and the code does not name the issue. The sentence that
+  carried the gap then leaves the tree: "no vectors until the provider is
+  wired" goes, and the rule it deferred, "the receiver gets vectors", stays
+  in its home as it shall be. A checker the project does not run is a gap
+  too, with one issue of its own: [Homes](references/homes.md) says what it
+  names and how to search for it.
+- **Before you build on a rule, ask the tracker for its open gaps.** The tree
+  says what is built, the tracker says what is missing. The project names the
+  command that asks where its reader starts, as
+  `gh issue list --label gap --search "<rule>"`, or the gap is invisible.
 
 ## Rules you write
 
@@ -209,14 +304,30 @@ Every line of a style guide, a review checklist or a prompt is one of three:
 
 - **Enforced:** name the type, tool or gate that refuses the wrong version.
   A list each change must extend by hand is not an enforcer.
-- **Could be enforced:** name the gate to build.
+- **Could be enforced:** until its gate runs, the line is a judgment and is
+  kept like one. The gate to build is named where
+  [Homes](references/homes.md) says, not in the line.
 - **Judgment:** keep its why and one example.
 
 Delete the rest, but convert before cutting: a rule usually came from a real
 failure. Whatever has to be remembered will be forgotten.
+
+The project's own guide is such a text, and this skill applies to it. Where a
+line of it asks for what this skill removes (a status line on every record,
+a `TODO` for what is missing), work by the skill and correct that line in
+the same change: left as it is, the next change follows the line and not
+the skill. Say in your reply which line you corrected. Correct the line you
+ran into, not the whole guide: the rest follows in a reshape the user
+starts. One thing holds against this skill: a rule that a gate of the
+project enforces. Follow the gate and leave its guide line, because a change
+that fails the project's own gate lands nothing. Which of the two goes is
+the user's decision: file it as [Homes](references/homes.md) says.
 
 ## When you reply
 
 If the change added, moved or removed checks or tests, end with one line per
 shape or spring, not per test: what moved, and what holds it now (a shape, the
 spring, or the commit).
+
+If the change stopped at a gap, name the gap issue and the shape that says so
+in the code.

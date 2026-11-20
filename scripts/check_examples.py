@@ -1,12 +1,13 @@
 """Checks that every example passes its own checks, and that every enforcer the
 references name refuses what they say it refuses.
 
-    python3 scripts/check_examples.py [rust] [go] [python] [typescript]
+    python3 scripts/check_examples.py [rust] [go] [python] [typescript] [lean]
 
 Each example under examples/<language>/ must pass clean. Then each file in
 examples/bad/<language>/ goes into a fresh copy of that example, one at a time.
 The checks must fail, and their output must contain every `expect:` line the
-file names, so a bad file cannot pass on an unrelated error.
+file names, so a bad file cannot pass on an unrelated error. A bad file that
+belongs somewhere else in the copy names the place in a `slot:` line.
 """
 
 import os
@@ -26,14 +27,18 @@ examples = root / "examples"
 class Language:
     checks: list[list[str]]  # must all pass on the example
     lints: list[list[str]]  # run on each copy that carries a bad file
-    slot: str  # where the bad file goes in the copy
+    slot: str  # where a bad file goes in the copy, unless it names its own slot
     register: tuple[str, str] | None = None  # a file and the line it needs to see the bad file
     linked: tuple[str, ...] = ()  # directories the copy links instead of copying
+    beside: tuple[str, ...] = ()  # examples the checks read, copied next to the copy
 
 
 CLIPPY = ["cargo", "clippy", "--all-targets", "--locked", "--", "-D", "warnings"]
 PYTHON_LINTS = [["pyright"], ["mypy", "."], ["ruff", "check"]]
 TYPESCRIPT_LINTS = [["npx", "tsc", "--noEmit"], ["npx", "eslint", "."]]
+LEAN_GATE = [["lake", "build", "--wfail"], ["lake", "exe", "audit"]]
+# Writes the vectors the other examples replay. CI fails when they differ from the commit.
+LEAN_VECTORS = ["lake", "exe", "vectors"]
 
 LANGUAGES = {
     "rust": Language(
@@ -58,10 +63,17 @@ LANGUAGES = {
         slot="src/bad.ts",
         linked=("node_modules",),
     ),
+    "lean": Language(
+        checks=[*LEAN_GATE, LEAN_VECTORS],
+        lints=LEAN_GATE,
+        slot="Spec/Bad.lean",
+        beside=("go", "python", "rust", "typescript"),
+    ),
 }
 
-NOT_COPIED = shutil.ignore_patterns("target", "node_modules", "dist", "__pycache__", ".*_cache")
-EXPECT = re.compile(r"^(?://|#) expect: (.+)$", re.MULTILINE)
+NOT_COPIED = shutil.ignore_patterns("target", "node_modules", "dist", "__pycache__", ".*_cache", ".lake")
+EXPECT = re.compile(r"^(?://|#|--) expect: (.+)$", re.MULTILINE)
+SLOT = re.compile(r"^(?://|#|--) slot: (.+)$", re.MULTILINE)
 
 # Every copy of the Rust example builds into one target directory, so the
 # dependencies compile once.
@@ -87,9 +99,13 @@ def refuses(name: str, language: Language, bad: Path) -> tuple[bool, str]:
         shutil.copytree(examples / name, copy, ignore=NOT_COPIED)
         for directory in language.linked:
             (copy / directory).symlink_to(examples / name / directory)
-        (copy / language.slot).parent.mkdir(parents=True, exist_ok=True)
+        for other in language.beside:
+            shutil.copytree(examples / other, Path(tmp) / other, ignore=NOT_COPIED)
+        named = SLOT.search(source)
+        slot = copy / (named[1] if named else language.slot)
+        slot.parent.mkdir(parents=True, exist_ok=True)
         # Blank the expect lines, so a tool that quotes the source cannot match them.
-        (copy / language.slot).write_text(EXPECT.sub("", source))
+        slot.write_text(SLOT.sub("", EXPECT.sub("", source)))
         if language.register:
             path, line = language.register
             with (copy / path).open("a") as file:

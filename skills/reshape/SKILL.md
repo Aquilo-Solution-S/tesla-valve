@@ -23,8 +23,10 @@ whole repository at once.
 
 Find out which enforcers the project runs, in its config and its CI. A check or
 a test goes only where its replacement is enforced. Where an enforcer is
-missing, the checks it would replace stay: name them, and suggest the prepare
-skill. Configs and CI do not change here.
+missing, the checks it would replace stay: name them, suggest the prepare
+skill, and file the gap as
+[Homes](../tesla-valve/references/homes.md) says. Configs and CI do not
+change here.
 
 ## 2. Inventory
 
@@ -37,19 +39,41 @@ List every check and every test of shape in the scope.
   one state needs, a record parsed loose and checked field by field, a derived
   default, a conversion that cannot fail or a mutable accessor on a type with
   an invariant, a test that tests only shape.
-- Read the words as well: a comment or a doc in the scope that promises what a
-  shape could hold ("never empty", "call only after `init`", "the only way a
-  child is spawned"). Open what would hold it first. Held already, the
-  sentence is a copy: it gets no row, and it stays unless the user asks for it
-  to go. Contradicted by the code, it is a finding for the user, not a row:
-  one of the two is a bug. Held by nothing, it is a row.
+- Read the words as well, sentence by sentence: every comment and doc in the
+  scope. A file that records a decision (what was decided, by whom and when)
+  is one row before its sentences are read: its rules move to their homes
+  and the file goes, as [Homes](../tesla-valve/references/homes.md) says.
+  Every other sentence is one of six.
+  - **A promise** a shape could hold ("never empty", "call only after
+    `init`", "the only way a child is spawned"). Open what would hold it
+    first. Held already, the sentence is a copy: it gets no row, and it stays
+    unless the user asks for it to go. Contradicted by the code, it is a
+    finding for the user, not a row: one of the two is a bug. Held by
+    nothing, it is a row.
+  - **Timeline:** what the code was, what it will be, who decided it, which
+    issue tracks it. It is a row. Where it carries a reason nothing else
+    holds, it becomes that reason as a sentence about the tree. Otherwise it
+    goes.
+  - **A second home:** away from the code, it restates a rule whose home is
+    elsewhere, as a guide that lists the stock statuses the code accepts. It
+    is a row, and becomes a pointer to the home by name. Where the two
+    disagree, it is a finding for the user, not a row: which one is the rule
+    is a decision.
+  - **A gap in the tree:** an "until #212", a stand-in, a test that asserts
+    what is missing. It is a row: it becomes the shape that says so, and one
+    gap issue.
+  - **A line of the project's guide that asks for what the tesla-valve
+    skill removes,** as a `TODO` for what is not built yet. It is a row: the
+    line is corrected, as "Rules you write" there says.
+  - **What only the words hold.** It stays as it is, and gets no row.
 
 ## 3. Plan
 
 One row per check, written down before any change. The kind is one of the
 three in the tesla-valve skill, or "stays" when no shape holds without a
-paragraph of explanation, or when its enforcer is missing. For the loose
-`delivery_date` in the
+paragraph of explanation, or when its enforcer is missing. A row for a
+sentence takes its kind from the inventory: timeline, second home, gap,
+record, guide line. For the loose `delivery_date` in the
 [manifesto](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/MANIFESTO.md#one-step-in-code):
 
 | check | kind | becomes | held by | tests |
@@ -58,6 +82,12 @@ paragraph of explanation, or when its enforcer is missing. For the loose
 | `panic!("backorder without restock days")` | wrong use | `Backorder { restock_days: u16 }` | the compiler: a missing field | its test goes; a spring test feeds a backorder without days |
 | `"in_stock"` spelled at every match | wrong use | `enum Stock`, matched without `_` | the compiler; clippy | its test goes |
 | `/// Never empty.` on `lines: Vec<Line>` | wrong use | `Lines`, built only from a first line and the rest | the compiler: no empty constructor | the comment goes; a spring test feeds an order without lines |
+| `// Until the March cutover this also read the warehouse itself.` | timeline | goes: nothing here reads the warehouse | git | none |
+| `// Cached for five minutes, see #212.` | timeline | `// The warehouse allows twelve calls a minute, so stock is cached for five.` | the words: nothing else holds the limit | none |
+| `Stock is in_stock or backorder.` in the README | second home | `The stock statuses are the variants of Stock.` | `enum Stock` is the list; the name, by a link check where the project runs one | none |
+| `assert_eq!(status, 503); // until #212` | gap | a test of the refusal: `no_provider_is_refused` asserts `Refusal::NoProvider`, without the comment; one gap issue | the tracker | the test of the refusal stays |
+| `docs/decisions/review.md`: `On 3 March we agreed that a review runs in a fresh session.` | record | `A review runs in a fresh session: the author's reasoning hides its own gaps.` in the guide; the file goes | the words: a judgment, in the file its followers read first | none |
+| `Mark what is not built yet with a TODO.` in the guide | guide line | `What is not built yet is a gap issue: gh issue list --label gap lists them.` | the tracker | none |
 
 The user picks the rows.
 
@@ -73,6 +103,11 @@ A slice moves one stream: its type, its spring and its callers.
   that does. Where the row's check is a comment, the comment goes here, and
   never before its shape lands: until then it is the only place the intent is
   written.
+- A row that changes only words rides in the slice of its stream. A gap row
+  searches the tracker for an open issue first, files one where there is
+  none, with the parts the tesla-valve skill names under "At a gap", and
+  then lands the shape. The tree names no issue, and says nothing of "yet":
+  the shape is all it says.
 - After each slice, show the diff and the checks passing, and go on when the
   user agrees.
 
@@ -91,4 +126,5 @@ A slice moves one stream: its type, its spring and its callers.
 ## 6. Report
 
 One line per row of the plan, not per test: what the check was, and what holds
-it now (a shape, the spring, the commit), or why it stays.
+it now (a shape, the spring, the commit), or why it stays. A gap row names its
+issue.

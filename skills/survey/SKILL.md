@@ -67,7 +67,9 @@ Read three things, in this order.
 
 1. **What the project says about itself:** its architecture docs, its decision
    records, the instructions it gives its agents. These are claims the survey
-   tests, and decisions it does not reopen without a cost to show.
+   tests, and decisions it does not reopen without a cost to show. Ask its
+   tracker for the open gaps of the topic too: the tree says what is built,
+   the tracker says what is missing.
 2. **What holds:** the enforcers in its config and its CI. A rule that nothing
    enforces is a convention, whatever the docs call it.
 3. **The streams:** map each stream of the topic the way the tesla-valve skill
@@ -134,9 +136,14 @@ one is load. A dimension with nothing to report is left out of the report.
   it in the list") in the scope, open what would hold it: the type, the
   constraint, the test, the tool that acts on it. Report three kinds: words
   the code contradicts, and which of the two is the bug; words nothing holds;
-  and an instruction written in more than one place, with the one tool or
-  file that decides it. Name what only the words hold too (a recovery step, a
-  limit another system sets), so no cleanup deletes it.
+  and an instruction or a rule written in more than one place, with the one
+  tool or file that decides it, and what differs between the copies. Then
+  read each sentence once more for where it belongs, and report two more:
+  words about the timeline (what the code was or will be, who decided it,
+  which issue tracks it), which the next change reads as the rule; and a gap
+  written into the tree instead of the tracker (an "until #212", a stand-in,
+  a test that asserts what is missing). Name what only the words hold too (a
+  recovery step, a limit another system sets), so no cleanup deletes it.
 - **Tests.** Which intent has no test, above all across parts: a protocol,
   atomicity, recovery from a failure? Which check at a spring is never fed bad
   data? Which tests pin only a shape the compiler already holds?
@@ -197,7 +204,12 @@ In the chat. Write a file only when the user asks for one.
    promise in a comment or a doc that nothing holds, and that a type or a
    constraint could hold, is a row: its check is the sentence. Words the code
    contradicts get no row until the user has said which of the two is the bug.
-   A finding that is neither a check nor such a promise gets no row.
+   A sentence about the timeline, a second home whose text agrees with the
+   first, a gap in the tree, a file that records a decision and a guide line
+   that asks for what the tesla-valve skill removes are rows too, with the
+   kinds the reshape inventory names. Two homes that disagree get no row
+   until the user has said which one is the rule. A finding that is none of
+   these gets no row.
 4. **What the survey did not read**, so no silence is taken for a clean result.
 
 The survey ends there. The user picks what happens next: reshape for the rows,

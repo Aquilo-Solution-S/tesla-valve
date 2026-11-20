@@ -80,7 +80,10 @@ types are gone. The enforcers for each rule:
 
 Each language has a [working example](examples) that CI runs. It must pass
 clean, and every enforcer the docs name is fed a file it must refuse, so the
-docs cannot promise what the tools do not do.
+docs cannot promise what the tools do not do. The four examples are one shop,
+and its rules are one [spec in Lean](examples/lean): an audit in CI holds
+each example to it, by the tests that name its rules and by the vectors
+those tests replay.
 
 ## The prompt
 
