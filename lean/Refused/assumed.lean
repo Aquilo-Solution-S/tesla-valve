@@ -20,3 +20,8 @@ structure Lit where
 
 /-- A lit bulb whose invariant the compiler vouches for instead of a proof. -/
 def shown : Lit := ⟨.on, by native_decide⟩
+
+/-- A bulb whose deferred proof defaults to an assumption. -/
+structure Deferred where
+  light : Bulb
+  ok : lit light = true := by sorry

@@ -1,6 +1,6 @@
 name = "teslavalve"
 defaultTargets = ["TeslaValve", "Refused", "selftest"]
-# `lake test` shows that the check refuses each module under Refused/ for its own reason.
+# `lake test` exercises the refusals and the output commands.
 testDriver = "selftest"
 
 # The check and the view. A project requires this package and calls `TeslaValve.run` from a
@@ -11,11 +11,18 @@ name = "TeslaValve"
 # One module per refusal of the check. Each builds, and the selftest expects its refusal.
 [[lean_lib]]
 name = "Refused"
-globs = ["Refused.+"]
+globs = ["Refused.*"]
 
-# It reads what the build produced, so the refused modules are built before it runs.
+[[lean_lib]]
+name = "Accepted"
+globs = ["Accepted.*"]
+
+[[lean_lib]]
+name = "FixtureSupport"
+
+# It reads the compiled fixtures, so Lake builds them before it runs.
 [[lean_exe]]
 name = "selftest"
 root = "Selftest"
-needs = ["Refused"]
+needs = ["Refused", "Accepted"]
 supportInterpreter = true

@@ -1,6 +1,6 @@
+-- region: config
 import TeslaValve
 
--- region: config
 unsafe def main (args : List String) : IO UInt32 :=
   TeslaValve.run {
     ledger := `Shop

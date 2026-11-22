@@ -19,6 +19,12 @@ def words (name : Name) : String := Id.run do
     else out := out.push c
   return out
 
+/-- The constructor's spelling distinguishes cases whose names read the same in words. -/
+def caseLabel (name : Name) : String :=
+  match name with
+  | .str _ last => (Name.mkSimple last).toString
+  | _ => name.toString
+
 /-- A type's name in words, capitalized: `Reader` reads "Reader". -/
 def title (name : Name) : String :=
   let w := words name
@@ -56,7 +62,7 @@ partial def valuesOf (env : Environment) : Expr → List Expr
 def fieldTypes (type : Expr) (params : Nat) : List Expr :=
   match type, params with
   | .forallE _ _ body _, n + 1 => fieldTypes body n
-  | .forallE _ field body _, 0 => field :: fieldTypes body 0
+  | .forallE _ field body _, 0 => field.consumeTypeAnnotations :: fieldTypes body 0
   | _, _ => []
 
 /-- The items of a list the ledger computed, in order. -/
@@ -84,10 +90,10 @@ partial def render (env : Environment) (e : Expr) : String :=
   | .const ctor _ => match env.find? ctor with
     | some (.ctorInfo info) =>
       let fields := args.extract info.numParams args.size
-      if fields.isEmpty then words ctor
+      if fields.isEmpty then caseLabel ctor
       else
         let names := if isStructure env info.induct then getStructureFields env info.induct else #[]
-        if names.isEmpty then s!"{words ctor} ({", ".intercalate (fields.toList.map (render env))})"
+        if names.isEmpty then s!"{caseLabel ctor} ({", ".intercalate (fields.toList.map (render env))})"
         else
           let shown := ((names.toList.zip fields.toList).zip (fieldTypes info.type info.numParams)).filter
             fun (_, type) => !type.isAppOf ``Eq
@@ -107,7 +113,11 @@ def combinations (env : Environment) (types : List Expr) : List (List Expr) :=
 
 /-- A table with a header row. -/
 def table (header : List String) (rows : List (List String)) : String :=
-  let line (cells : List String) := "| " ++ " | ".intercalate cells ++ " |"
+  let escape (cell : String) :=
+    cell.replace "\\" "\\\\" |>.replace "|" "\\|" |>.replace "`" "\\`" |>.replace "*" "\\*"
+      |>.replace "_" "\\_" |>.replace "[" "\\[" |>.replace "<" "\\<" |>.replace "&" "\\&"
+      |>.replace "\r" "" |>.replace "\n" "<br>"
+  let line (cells : List String) := "| " ++ " | ".intercalate (cells.map escape) ++ " |"
   "\n".intercalate ([line header, line (header.map fun _ => "---")] ++ rows.map line)
 
 /-- The name of a type, in words. -/
@@ -124,6 +134,12 @@ def machine? (type : Expr) : Option (Expr × Expr) :=
   | (#[state, event], next) => if next == state && event != state then some (state, event) else none
   | _ => none
 
+/-- Mermaid's entity notation keeps punctuation inside a diagram label. -/
+def diagramLabel (s : String) : String :=
+  s.replace "#" "#35;" |>.replace "\"" "#34;" |>.replace "`" "#96;"
+    |>.replace "%" "#37;" |>.replace "<" "#60;" |>.replace ">" "#62;"
+    |>.replace "&" "#38;" |>.replace "\r" "#13;" |>.replace "\n" "#10;"
+
 /-- The view of one module. -/
 def viewModule (loaded : Loaded) (module : Name) : IO String := do
   let env := loaded.env
@@ -134,7 +150,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
   if doc.isEmpty then out := out.push s!"## {module}"
   -- A case or a field is drawn with its type, not on its own.
   let here := loaded.written.filter fun w =>
-    w.module == module && !(w.info matches .ctorInfo _) && !env.isProjectionFn w.name
+    w.module == module && w.standsAlone env
   -- The choices and shapes, with their cases and fields.
   for w in here do
     let .inductInfo type := w.info | continue
@@ -144,7 +160,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
         block := block.push (← item env (words field) (w.name ++ field))
     else
       for ctor in type.ctors do
-        block := block.push (← item env (words ctor) ctor)
+        block := block.push (← item env (caseLabel ctor) ctor)
     out := out.push ("\n".intercalate block.toList)
   -- The constants.
   for w in here do
@@ -152,32 +168,34 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     if !(arrows d.type).1.isEmpty then continue
     out := out.push (captioned s!"**{words w.name}** = {← evaluate loaded w.name []}" (← docOf env w.name))
   -- The decisions over the same inputs, in one table; a state machine as its diagram.
-  let decisions := here.filter fun w => match w.info with
-    | .defnInfo d => !(arrows d.type).1.isEmpty
-    | _ => false
+  let decisions := here.filterMap fun w => (w.decisionInputs loaded).map (w, ·)
   let mut drawn : Array Name := #[]
-  for w in decisions do
+  for (w, inputs) in decisions do
     if drawn.contains w.name then continue
-    let .defnInfo d := w.info | continue
-    let inputs := (arrows d.type).1.toList
-    if let some (state, event) := machine? d.type then
+    if let some (state, event) := machine? w.info.type then
       drawn := drawn.push w.name
-      let mut edges := #[]
+      let states := (valuesOf env state).toArray
+      let events := valuesOf env event
+      let labels := states.map (render env)
+      let mut diagram := labels.mapIdx fun i label => s!"  state \"{diagramLabel label}\" as s{i}"
       let mut refused := #[]
-      for s in valuesOf env state do
-        for e in valuesOf env event do
-          let answer ← loaded.meta (Meta.reduce (mkAppN (mkConst w.name) #[s, e]))
+      for i in [:states.size] do
+        for e in events do
+          let answer ← loaded.meta (Meta.reduce (mkAppN (mkConst w.name) #[states[i]!, e]))
           match answer.getAppFn with
-          | .const ``Except.error _ => refused := refused.push [render env s, render env e, render env answer]
-          | _ => edges := edges.push s!"  {render env s |>.replace " " "_"} --> {render env answer |>.replace " " "_"} : {render env e}"
+          | .const ``Except.error _ => refused := refused.push [labels[i]!, render env e, render env answer]
+          | _ =>
+            let next := if answer.isAppOf ``Except.ok then answer.appArg! else answer
+            let some target := states.idxOf? next
+              | throw <| IO.userError s!"{w.name}: transition returned no state"
+            diagram := diagram.push s!"  s{i} --> s{target} : {diagramLabel (render env e)}"
       out := out.push (captioned s!"**{words w.name}**" (← docOf env w.name))
-      out := out.push ("```mermaid\nstateDiagram-v2\n" ++ "\n".intercalate edges.toList ++ "\n```")
+      out := out.push ("```mermaid\nstateDiagram-v2\n" ++ "\n".intercalate diagram.toList ++ "\n```")
       if !refused.isEmpty then
         out := out.push (table [typeWords state, typeWords event, "answer"] refused.toList)
       continue
-    let group := decisions.filter fun other => match other.info with
-      | .defnInfo o => (arrows o.type).1.toList == inputs && (machine? o.type).isNone
-      | _ => false
+    let group := (decisions.filter fun (other, args) =>
+      args == inputs && (machine? other.info.type).isNone).map (·.1)
     drawn := drawn ++ group.map (·.name)
     let mut rows := #[]
     for combination in combinations env inputs do

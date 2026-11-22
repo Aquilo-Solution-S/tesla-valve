@@ -19,8 +19,9 @@ and test vectors.
 
 A ledger value is a closed choice, a shape, a `Nat`, a `Bool`, a `String`,
 a `List` or `Option` of a value, or an `Except` with a closed refusal
-choice and a value. Use strings for exact keys or other values a system
-reads. Give a rule its own declaration.
+choice and a value. An `Option` cannot directly contain another `Option`.
+Use strings for exact keys or other values a system reads. Give a rule its
+own declaration.
 
 Each ledger declaration has a one-line docstring. Give a case or field one
 where its name leaves out a condition or a bound. Give a module its title in
@@ -64,7 +65,10 @@ and the docstrings it has. It refuses `unsafe`, `axiom`, `partial`,
 `noncomputable`, IO, and proofs that depend on `sorry`, `native_decide` or
 an axiom beyond Lean's own. A proof library may use an opaque type to leave
 its representation unspecified. An outside fact goes in the hypotheses of
-the theorem that uses it.
+the theorem that uses it. The gate inspects retained default tactics for
+`sorry`, `admit` and `native_decide`. Lean discards proof-library `example`
+bodies after elaboration, so use `lake build --wfail` to catch their proof
+warnings.
 
 A backorder carries a natural number and adds it to the shipping time. The
 shop keeps that decision and its proofs in `Spec.Stock`.
@@ -102,7 +106,9 @@ end Spec
 
 Link a rule by its full Lean name in backticks beside the code or test that
 holds it. A link that starts with a library root must resolve to a
-declaration, namespace or module in every tracked file the check scans.
+declaration, module or namespace in a configured library in every tracked
+file the check scans. A namespace counts when it contains a declaration of
+that library. A root module is checked alongside its submodules.
 The same syntax works in a docstring.
 
 <!-- code: examples/python/tests/test_shop.py#named -->
@@ -121,7 +127,8 @@ name, or be stated in a declaration that is. Constructors and fields
 belong to their type. A theorem counts only when
 the code names the theorem itself. A decision that names a type in its
 statement or body holds the type too. A full name in code counts for a
-scope without backticks, as it does inside `ledger!`.
+scope without backticks, as it does inside `ledger!`. A longer name
+that contains the full name does not satisfy the scope.
 
 Each scope is checked on its own. The shop has four scopes for `Spec.Stock`,
 one for each language. A module outside the scopes still passes the Lean
@@ -130,10 +137,15 @@ exclusion pathspec to keep generated files out of a scope.
 
 ## What the ledger gives the code
 
-`lake exe shop emit rust` prints a `ledger!` macro. It has one arm per ledger
-constant with a Rust literal: `Nat`, `Bool`, `String`, `List` as an array, or
-`Option`. The compiler refuses an unknown name. Commit the generated file and
-have the gate regenerate and compare it.
+`lake exe shop emit rust` prints a `ledger!` macro. It exports `Nat`,
+`Bool`, `String`, and `List` and `Option` whose element types also have Rust
+literals. A list becomes an array. A `Nat` above `u128::MAX` fails emission.
+The Rust consumer owns the representation of closed choices, shapes and
+`Except` values, and links those constants by their Lean names. A ledger
+with no Rust literals still emits a macro. Exported names use dotted ASCII
+identifier tokens, including leading underscores. The compiler refuses an
+unknown name. Commit the generated file and have the gate regenerate and
+compare it.
 
 <!-- code: examples/rust/src/lib.rs#shipping-days -->
 ```rust

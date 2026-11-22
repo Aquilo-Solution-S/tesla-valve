@@ -18,7 +18,8 @@ Require the [teslavalve Lake package](../../../lean) and commit
 `lake-manifest.json`. The example uses a path in the same repository. Use a
 glob for each library so the build includes modules nothing imports.
 A project can start with a proof library and add ledger modules as rules
-fit the forms.
+fit the forms. Use `Library.*` if the library has a root module as well as
+submodules.
 
 <!-- code: examples/lean/lakefile.toml#libraries -->
 ```toml
@@ -55,6 +56,8 @@ quotes them.
 
 <!-- code: examples/lean/Main.lean#config -->
 ```lean
+import TeslaValve
+
 unsafe def main (args : List String) : IO UInt32 :=
   TeslaValve.run {
     ledger := `Shop
@@ -99,7 +102,8 @@ git diff --exit-code HEAD
 Run `lake build` and `lake test` in the tool's
 [`lean/`](../../../lean) package. The selftest checks every
 [`Refused/`](../../../lean/Refused) module for its own refusal. It checks
-which restrictions also hold in a proof library.
+which restrictions also hold in a proof library, and exercises the output
+commands on an accepted ledger.
 
 Exercise the project's wiring in a separate Git checkout. Add the file to
 the index where the gate can see it. A bad code file links a missing rule.

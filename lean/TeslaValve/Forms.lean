@@ -18,7 +18,8 @@ The ledger allows seven forms, so that a view can draw all of it by evaluation:
 - a rejected design: a rule named `not_…`, which shows the alternative breaks the ledger.
 
 A ledger value is a closed choice, a shape, `Nat`, `Bool`, a `String`, a `List` or an `Option`
-of a value, or an `Except` of a closed choice and a value. A string spells what another
+of a value, or an `Except` of a closed choice and a value. An `Option` cannot directly
+contain another `Option`. A string spells what another
 system reads exactly, such as a key; a rule is a declaration, never a string.
 
 The Lean is the documentation. Every declaration has a docstring of one line that says
@@ -30,16 +31,16 @@ such as who ruled a rule and when: git and the issue keep that.
 
 A rule is linked by its full name in backticks, as `Shop.Stock.reserve`, in a docstring of
 the ledger and in every file of the repository alike. The check refuses a link that
-names neither a declaration, a namespace nor a module of the ledger or of a proof library
-beside it.
+does not resolve to a declaration, module or namespace owned by a configured library.
+A namespace counts when it contains a declaration of that library.
 
 A scope ties modules to the code that holds them: every declaration of its modules is named,
 by its full name, in a file under the scope's paths, or is stated in one that is, as a
 choice is in the decision over it. A rule, a theorem, is held by its name alone.
 
-A proof library holds the rules that need more than the forms, such as an induction over a
-graph: its structures, classes and instances are its own business, and the check holds it
-to its proofs and its docstrings alone. -/
+A proof library holds rules that need more than the forms, such as induction over a graph.
+It uses ordinary Lean types and definitions. The checker audits its proofs and docstrings,
+and refuses unsafe, partial, noncomputable or IO declarations. -/
 
 namespace TeslaValve
 
@@ -167,6 +168,26 @@ partial def closed (loaded : Loaded) : Expr → Bool
     | _ => false
   | _ => false
 
+/-- Whether every name a term uses is the ledger's own or among the allowed ones. -/
+def within (loaded : Loaded) (allowed : List Name) (term : Expr) : Bool :=
+  term.getUsedConstants.all fun name => loaded.owns name || allowed.contains name
+
+/-- A decision's body matches its arguments. An alias or a function that computes a
+different thing to match does not have that form. -/
+partial def matchesInputs (env : Environment) (term : Expr) (inputs : Nat) : Bool :=
+  match term.consumeMData with
+  | .lam _ _ body _ => matchesInputs env body inputs
+  | body => match Meta.isMatcherAppCore? env body with
+    | some matcher =>
+      let discrs := body.getAppArgs.extract matcher.getFirstDiscrPos matcher.getFirstAltPos
+      body.getAppNumArgs == matcher.arity && discrs.any (fun
+        | .bvar i => i < inputs
+        | _ => false)
+    | none => false
+
+def bodyInForm (loaded : Loaded) (d : DefinitionVal) (inputs : Array Expr) : Bool :=
+  within loaded operations d.value && (inputs.isEmpty || matchesInputs loaded.env d.value inputs.size)
+
 mutual
 /-- A ledger value: a closed choice (`Bool` among them), a shape, `Nat`, a `String`, a `List`
 or an `Option` of a value, or an `Except` of a closed choice and a value. -/
@@ -174,7 +195,7 @@ partial def value (loaded : Loaded) : Expr → Bool
   | .const ``Nat [] => true
   | .const ``String [] => true
   | type@(.const name []) => closed loaded type || shape loaded name
-  | .app (.const ``Option [_]) inner => value loaded inner
+  | .app (.const ``Option [_]) inner => !inner.isAppOf ``Option && value loaded inner
   | .app (.const ``List [_]) inner => value loaded inner
   | .app (.app (.const ``Except [_, _]) refusal) inner => closed loaded refusal && value loaded inner
   | _ => false
@@ -186,19 +207,30 @@ partial def shape (loaded : Loaded) (name : Name) : Bool :=
   match loaded.env.find? name with
   | some (.inductInfo type) =>
     type.numParams == 0 && type.numIndices == 0 && !type.isRec &&
-    type.ctors.all fun ctor => (loaded.env.find? ctor).any fun info => fields info.type
+    type.ctors.all fun ctor => (loaded.env.find? ctor).any fun info => fields 0 info.type
   | _ => false
 where
   /-- Each field of a constructor's type, through to the shape it makes. -/
-  fields : Expr → Bool
-    | .forallE _ field rest _ => (!field.hasLooseBVars && value loaded field || invariant field) && fields rest
-    | _ => true
-  /-- `ok : decision fields = true`, where the decision is the ledger's. -/
-  invariant : Expr → Bool
-    | .app (.app (.app (.const ``Eq [_]) (.const ``Bool [])) check) (.const ``Bool.true []) =>
-      (match check.getAppFn with | .const decision _ => loaded.owns decision | _ => false) &&
-      check.getAppArgs.all (·.isBVar)
-    | _ => false
+  fields : Nat → Expr → Bool
+    | count, .forallE fieldName field rest _ =>
+      let type := field.consumeTypeAnnotations
+      ((!type.hasLooseBVars && value loaded type) ||
+        (fieldName == `ok && invariant count type)) && fields (count + 1) rest
+    | _, _ => true
+  /-- The invariant applies a decision returning Bool to preceding fields. -/
+  invariant : Nat → Expr → Bool
+    | count, .app (.app (.app (.const ``Eq [_]) (.const ``Bool [])) check) (.const ``Bool.true []) => Id.run do
+      let .const decision [] := check.getAppFn | return false
+      let some (.defnInfo d) := loaded.env.find? decision | return false
+      let (inputs, result) := arrows d.type
+      return loaded.owns decision && !isPrivateName decision && !isNoncomputable loaded.env decision &&
+        getReducibilityStatusCore loaded.env decision != .reducible && d.levelParams.isEmpty &&
+        !inputs.isEmpty && inputs.all (closed loaded) && result == mkConst ``Bool &&
+        bodyInForm loaded d inputs &&
+        check.getAppNumArgs == inputs.size && check.getAppArgs.all (fun
+          | .bvar i => i < count
+          | _ => false)
+    | _, _ => false
 end
 
 /-- Whether a type takes a type as an argument, as `{α : Type} → α → α` does. -/
@@ -206,24 +238,73 @@ partial def takesType : Expr → Bool
   | .forallE _ arg body _ => (arrows arg).2.isSort || takesType body
   | _ => false
 
+/-- The forms for constants and decisions share the result types and allowed operations. -/
+def definitionForm (loaded : Loaded) (d : DefinitionVal) : Option Refusal :=
+  let (args, result) := arrows d.type
+  if takesType d.type then some .isPolymorphic
+  else if !args.all (closed loaded) then some .openInput
+  else if !value loaded result then some .openValue
+  else if !bodyInForm loaded d args then some .operation
+  else none
+
+/-- A decision and its finite inputs, as used by both output commands. -/
+def Written.decisionInputs (w : Written) (loaded : Loaded) : Option (List Expr) := do
+  guard (w.standsAlone loaded.env)
+  let .defnInfo d := w.info | none
+  let inputs := (arrows d.type).1
+  guard (!inputs.isEmpty && (definitionForm loaded d).isNone)
+  return inputs.toList
+
 /-- Whether a constant is meta code: syntax, a macro, a notation or an elaborator, each of
 a type of Lean's own. A proof's term may name Lean's lemmas, as one by `omega` does. -/
 def isMetaCode (info : ConstantInfo) : Bool :=
   info.type.getUsedConstants.any (`Lean).isPrefixOf
 
-/-- Whether every name a term uses is the ledger's own or among the allowed ones. -/
-def within (loaded : Loaded) (allowed : List Name) (term : Expr) : Bool :=
-  term.getUsedConstants.all fun name => loaded.owns name || allowed.contains name
+/-- An inductive's field types live on its constructors. -/
+def declarationTypes (env : Environment) (info : ConstantInfo) : Array Expr :=
+  match info with
+  | .inductInfo type => #[info.type] ++ type.ctors.toArray.filterMap (fun ctor =>
+      (env.find? ctor).map (·.type))
+  | _ => #[info.type]
 
-/-- Whether a constant rests on `sorry`, `native_decide` or an axiom beyond Lean's three,
-through anything it names: a proof the compiler split off, as an invariant's, too. -/
+/-- Default tactics remain in the types of parameters and constructor fields. -/
+def defaultTactics (env : Environment) (info : ConstantInfo) : Array Name :=
+  (declarationTypes env info).flatMap fun type => binders type #[]
+where
+  binders : Expr → Array Name → Array Name
+    | .forallE _ arg rest _, names =>
+      match arg.getAutoParamTactic? with
+      | some (.const tactic _) => binders rest (names.push tactic)
+      | _ => binders rest names
+    | _, names => names
+
+/-- Default tactics have syntax until a caller uses the default and Lean elaborates it. -/
+def assumedDefault (env : Environment) (tactic : Name) : Bool :=
+  match (Elab.evalSyntaxConstant env {} tactic).run with
+  | .ok stx => (stx.find? fun s =>
+      s.isOfKind ``Parser.Term.sorry || s.isOfKind ``Parser.Tactic.tacticSorry ||
+      s.isOfKind ``Parser.Tactic.tacticAdmit || s.isOfKind ``Parser.Tactic.nativeDecide).isSome
+  | .error _ => true
+
+/-- Whether a constant rests on more than Lean's axioms through what it names. -/
 def rests (name : Name) : CoreM Bool := do
   return (← collectAxioms name).any (!leansAxioms.contains ·)
 
-/-- Whether a constant names IO, in its type or in its value. -/
-def doesIO (info : ConstantInfo) : Bool :=
-  (info.type.getUsedConstants ++ (info.value?.map (·.getUsedConstants)).getD #[]).any
-    (· ∈ [``IO, ``EIO, ``BaseIO])
+/-- Whether the declaration uses IO in a value, a type, or a definition of a type it uses. -/
+partial def doesIO (env : Environment) (info : ConstantInfo) : Bool :=
+  let names := (declarationTypes env info).flatMap Expr.getUsedConstants ++
+    (info.value?.map Expr.getUsedConstants).getD #[]
+  usesIO {} names.toList
+where
+  usesIO (seen : Std.HashSet Name) : List Name → Bool
+    | [] => false
+    | name :: more =>
+      if name ∈ [``IO, ``EIO, ``BaseIO] then true
+      else if seen.contains name then usesIO seen more
+      else
+        let alias := (env.find? name).filter fun i => (arrows i.type).2.isSort
+        let used := (alias.bind (·.value?)).map Expr.getUsedConstants |>.getD #[]
+        usesIO (seen.insert name) (used.toList ++ more)
 
 /-- Why a declaration its author wrote is refused, if it is: the first reason. In a proof
 library only the reasons that hold there count. -/
@@ -240,7 +321,7 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : C
     (.isMeta, isMetaCode info),
     (.isInstance, Meta.isInstanceCore env name),
     (.isNoncomputable, isNoncomputable env name),
-    (.doesIO, doesIO info),
+    (.doesIO, doesIO env info),
     (.isPolymorphic, !info.levelParams.isEmpty)]
   if let some (why, _) := basic.find? fun (why, holds) => holds && (!inProofs || why.inProofs) then
     return some why
@@ -251,15 +332,9 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : C
       if isClass env name then some .isClass
       else if isStructure env name then (if shape loaded name then none else some .openShape)
       else if closed loaded (.const name []) then none else some .openChoice
-    | .defnInfo def_ =>
+    | .defnInfo d =>
       if getReducibilityStatusCore env name == .reducible then some .isAbbrev
-      else
-        let (args, result) := arrows def_.type
-        if takesType def_.type then some .isPolymorphic
-        else if !args.all (closed loaded) then some .openInput
-        else if !value loaded result then some .openValue
-        else if !within loaded operations def_.value then some .operation
-        else none
+      else definitionForm loaded d
     | .thmInfo rule =>
       if takesType rule.type then some .isPolymorphic
       else if within loaded (operations ++ logic) rule.type then none else some .statement
@@ -275,23 +350,30 @@ structure Refused where
   name : Name
   why : Refusal
 
-/-- The names a docstring links: each code span that starts with one of the roots and a dot. -/
-def links (roots : List Name) (doc : String) : List Name := Id.run do
-  let mut found := []
-  let mut inside := false
-  for span in doc.splitOn "`" do
-    if inside && roots.any (span.startsWith s!"{·}.") && !span.contains ' ' then
-      found := span.toName :: found
-    inside := !inside
-  return found
+/-- The names a text links: complete Lean identifiers between backticks. -/
+def links (env : Environment) (roots : List Name) (text : String) : List Name :=
+  spans ((text.splitOn "`").drop 1)
+where
+  spans : List String → List Name
+    | span :: _ :: more =>
+      let input := Parser.mkInputContext span "link"
+      let name := (readName env input).filter fun (name, stop) =>
+        input.atEnd stop && roots.any (fun root => root != name && root.isPrefixOf name)
+      match name with
+      | some (name, _) => name :: spans more
+      | none => spans more
+    | _ => []
 
-/-- Whether a name is a declaration, a namespace or a module of the loaded libraries. -/
-def resolves (env : Environment) (name : Name) : Bool :=
-  env.contains name || env.isNamespace name || (env.getModuleIdx? name).isSome
+/-- Whether a name is a declaration, namespace or module belonging to a configured library. -/
+def resolves (loaded : Loaded) (name : Name) : Bool :=
+  let all := loaded.modules ++ loaded.proofs
+  all.contains name ||
+    if let some module := moduleOf loaded.env name then all.contains module
+    else loaded.env.isNamespace name && loaded.written.any (name.isPrefixOf ·.name)
 
 /-- Whether a docstring links a name that does not resolve. -/
-def dangles (env : Environment) (roots : List Name) (doc : String) : Bool :=
-  (links roots doc).any (!resolves env ·)
+def dangles (loaded : Loaded) (doc : String) : Bool :=
+  (links loaded.env loaded.roots doc).any (!resolves loaded ·)
 
 /-- Whether characters spell a date, as `2026-11-12` or `12.11.2026`. -/
 def isDate : List Char → Bool
@@ -307,8 +389,8 @@ def dated (text : String) : Bool := Id.run do
   return false
 
 /-- Why a declaration's docstring is refused, if it is. -/
-def docRefusal (env : Environment) (roots : List Name) (doc : String) : Option Refusal :=
-  if dangles env roots doc then some .dangling
+def docRefusal (loaded : Loaded) (doc : String) : Option Refusal :=
+  if dangles loaded doc then some .dangling
   else if doc.trimAscii.toString.contains '\n' then some .wordy
   else if dated doc then some .dated
   else none
@@ -319,14 +401,18 @@ allow, each proof that rests on more than Lean's axioms, each `example`, and eac
 docstring outside its form, a module's too. -/
 def refusals (loaded : Loaded) : IO (Array Refused) := do
   let mut found := #[]
+  let mut defaults : Std.HashSet Name := {}
   for written in loaded.written do
     let doc ← findDocString? loaded.env written.name
     let ofLedger := loaded.modules.contains written.module
     -- A case or a field takes the form of its type, and its docstring is its author's call.
-    let why ← if written.info matches .ctorInfo _ || loaded.env.isProjectionFn written.name then
-        pure none
-      else loaded.meta (refusal loaded written (inProofs := !ofLedger))
-    let why := why.orElse fun _ => doc.bind (docRefusal loaded.env loaded.roots)
+    let why ← if written.standsAlone loaded.env then do
+        let tactics := defaultTactics loaded.env written.info
+        defaults := tactics.foldl (·.insert ·) defaults
+        if tactics.any (assumedDefault loaded.env) then pure (some .assumed)
+        else loaded.meta (refusal loaded written (inProofs := !ofLedger))
+      else pure none
+    let why := why.orElse fun _ => doc.bind (docRefusal loaded)
     if let some why := why then
       found := found.push { module := written.module, name := privateToUserName written.name, why }
   for (module, name, info) in loaded.made do
@@ -338,7 +424,7 @@ def refusals (loaded : Loaded) : IO (Array Refused) := do
       | .app (.const ``DecidableEq _) (.const type []) => loaded.owns type
       | _ => false
     let why : Option Refusal ←
-      if isMetaCode info then pure (some .isMeta)
+      if isMetaCode info && !defaults.contains name then pure (some .isMeta)
       -- What `deriving` makes for a type of the ledger: only `DecidableEq`.
       else if !name.isInternal && Meta.isInstanceCore loaded.env name && !ofLedger then pure (some .isInstance)
       else if ← loaded.meta (rests name) then pure (some .assumed)
@@ -350,7 +436,7 @@ def refusals (loaded : Loaded) : IO (Array Refused) := do
     found := found.push { module, name := Name.mkSimple s!"example at line {pos.line}", why := .isExample }
   for module in loaded.modules ++ loaded.proofs do
     let docs := (getModuleDoc? loaded.env module).map (·.toList.map (·.doc)) |>.getD []
-    if docs.any (dangles loaded.env loaded.roots) then
+    if docs.any (dangles loaded) then
       found := found.push { module, name := module, why := .dangling }
     else if docs.any dated then
       found := found.push { module, name := module, why := .dated }
@@ -363,31 +449,58 @@ def placeInRepository : IO String := do
     throw <| IO.userError s!"git rev-parse: {place.stderr.trimAscii}"
   return place.stdout.trimAscii.toString
 
-/-- Each name that starts with one of the roots in the repository's tracked files under
-`paths`, with the file and line it stands on: in backticks, or, where `backticked` is false,
-wherever it stands, as in `ledger!(Shop.Stock.maxPerOrder)`. -/
-def mentions (roots : List Name) (paths : Array String) (backticked : Bool := true) :
+/-- Complete Lean names in text, where a surrounding single quote does not become a prime. -/
+def namesIn (env : Environment) (roots : List Name) (text : String) : Array Name := Id.run do
+  let input := Parser.mkInputContext text "scope"
+  let mut pos := 0
+  let mut previous := ' '
+  let mut found := #[]
+  while !input.atEnd pos do
+    let c := input.get pos
+    if (isIdFirst c || isIdBeginEscape c) &&
+        (!(isIdRest previous) || previous == '\'') && previous != '.' then
+      if let some (name, stop) := readName env input pos then
+        let name := if previous == '\'' && (input.extract pos stop).endsWith "'" then
+          match name with
+          | .str pre part => pre.str (part.dropEnd 1).toString
+          | _ => name
+        else name
+        if roots.any (fun root => root != name && root.isPrefixOf name) then
+          found := found.push name
+        previous := (stop.prev text).get text
+        pos := stop
+        continue
+    previous := c
+    pos := input.next pos
+  return found
+
+/-- Each full name under a configured root in tracked files, with its path and line. Git
+selects the candidate lines and Lean reads the names. -/
+def mentions (loaded : Loaded) (paths : Array String) (backticked : Bool := true) :
     IO (Array (String × Name)) := do
-  if roots.isEmpty then return #[]
+  if loaded.roots.isEmpty then return #[]
   let top ← IO.Process.output { cmd := "git", args := #["rev-parse", "--show-toplevel"] }
   if top.exitCode != 0 then
     throw <| IO.userError s!"git rev-parse: {top.stderr.trimAscii}"
-  let tick := if backticked then "`" else ""
+  let patterns := loaded.roots.toArray.flatMap fun root =>
+    #["-e", root.getRoot.toString]
   let grep ← IO.Process.output {
     cmd := "git", cwd := top.stdout.trimAscii.toString,
-    args := #["grep", "-n", "-I", "-o", "-E", s!"{tick}({"|".intercalate (roots.map toString)})\\.[A-Za-z0-9_.']+{tick}", "--"] ++ paths }
+    args := #["grep", "-n", "-I", "-z", "-F"] ++ patterns ++ #["--"] ++ paths }
   -- `git grep` exits 1 when nothing matches, and above 1 when it could not search.
   if grep.exitCode > 1 then
     throw <| IO.userError s!"git grep: {grep.stderr.trimAscii}"
-  return grep.stdout.splitOn "\n" |>.filter (· != "") |>.toArray.map fun line =>
-    let parts := line.splitOn ":"
-    let found := if backticked then (parts.getLast!.drop 1 |>.dropEnd 1).toString else parts.getLast!
-    -- A name that ends a sentence keeps its full stop out.
-    (":".intercalate parts.dropLast, (found.dropEndWhile (· == '.')).toString.toName)
+  return grep.stdout.splitOn "\n" |>.toArray.flatMap fun line =>
+    match line.splitOn "\x00" with
+    | [file, number, text] =>
+      let names := if backticked then (links loaded.env loaded.roots text).toArray
+        else namesIn loaded.env loaded.roots text
+      names.map (s!"{file}:{number}", ·)
+    | _ => #[]
 
 /-- The mentions under `paths` whose name does not resolve. -/
-def dangling (env : Environment) (roots : List Name) (paths : Array String) : IO (Array (String × Name)) :=
-  return (← mentions roots paths).filter fun (_, name) => !resolves env name
+def dangling (loaded : Loaded) (paths : Array String) : IO (Array (String × Name)) :=
+  return (← mentions loaded paths).filter fun (_, name) => !resolves loaded name
 
 /-- A part of the ledger or of a proof library, by the prefix of its modules, and the paths
 of the repository whose files hold it, relative to the repository's top: a generated file
@@ -414,7 +527,7 @@ what the compiler made belong to their declaration. -/
 def unheld (loaded : Loaded) (scope : Scope) : IO (Array Written) := do
   let env := loaded.env
   let mut held : Std.HashSet Name := {}
-  let mut todo := ((← mentions loaded.roots scope.code.toArray (backticked := false)).map (·.2)).toList
+  let mut todo := ((← mentions loaded scope.code.toArray (backticked := false)).map (·.2)).toList
   repeat
     let name :: rest := todo | break
     todo := rest
@@ -427,7 +540,7 @@ def unheld (loaded : Loaded) (scope : Scope) : IO (Array Written) := do
     todo := further.toList ++ todo
   return loaded.written.filter fun w =>
     scope.rules.isPrefixOf w.module && !held.contains w.name &&
-    !isPrivateName w.name && !(w.info matches .ctorInfo _) && !env.isProjectionFn w.name &&
+    !isPrivateName w.name && w.standsAlone env &&
     !Meta.isInstanceCore env w.name
 
 /-- What a project checks: its ledger, the proof libraries beside it, the scopes that tie them
@@ -451,13 +564,13 @@ def check (config : Config) : IO UInt32 := do
   let loaded ← config.load
   -- A project may start from its proofs, before its ledger has a module.
   if loaded.modules.isEmpty && loaded.proofs.isEmpty then
-    IO.eprintln s!"{config.ledger}: no module under {config.ledger}/, so nothing is checked"
+    IO.eprintln s!"{config.ledger}: no ledger or proof module was found"
     return 1
   let refused ← refusals loaded
   for r in refused do
     IO.eprintln s!"error: {r.module}: {r.name} {r.why.says}"
   let unscanned := config.unscanned.toArray.map (s!":!{·}")
-  let unresolved ← dangling loaded.env loaded.roots (#["."] ++ unscanned)
+  let unresolved ← dangling loaded (#["."] ++ unscanned)
   for (place, name) in unresolved do
     IO.eprintln s!"error: {place}: links `{name}`, which neither the ledger nor a proof library declares"
   let all := loaded.modules ++ loaded.proofs

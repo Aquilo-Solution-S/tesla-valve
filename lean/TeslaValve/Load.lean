@@ -17,63 +17,69 @@ partial def modulesUnder (dir : System.FilePath) (pre : Name) : IO (Array Name) 
       found := found.push (pre.str (entry.path.fileStem.getD ""))
   return found
 
-/-- The modules of a library: every file under its directory. -/
+/-- The modules of a library: its root file and every file under its directory. -/
 def modulesOf (library : Name) : IO (Array Name) := do
-  let dir := (modToFilePath "." library "lean").withExtension ""
-  if !(← dir.isDir) then return #[]
-  modulesUnder dir library
+  let file := modToFilePath "." library "lean"
+  let dir := file.withExtension ""
+  let root := if ← file.pathExists then #[library] else #[]
+  if ← dir.isDir then return root ++ (← modulesUnder dir library)
+  return root
 
 /-- The module a declaration stands in. -/
 def moduleOf (env : Environment) (name : Name) : Option Name := do
   let idx ← env.getModuleIdxFor? name
   env.header.moduleNames[idx.toNat]?
 
-/-- The name a text starts with, read as Lean reads it: dotted, a part of it in `«»`
-where it is no identifier. -/
-def leadingName (text : String) : Name := Id.run do
-  let mut name := ""
-  let mut quoted := false
-  for c in text.toList do
-    if c == '«' then quoted := true
-    else if c == '»' then quoted := false
-    else if !(quoted || isIdRest c || c == '.') then break
-    name := name.push c
-  return (name.dropEndWhile (· == '.')).toString.toName
+/-- Reads one identifier with Lean's lexer, including dotted and escaped components. -/
+def readName (env : Environment) (input : Parser.InputContext) (pos : String.Pos.Raw := 0) :
+    Option (Name × String.Pos.Raw) := do
+  let start := (Parser.mkParserState input.inputString).setPos pos
+  let result := (Parser.rawIdentFn false).run input { env, options := {} } default start
+  guard !result.hasError
+  let .ident _ _ name _ := result.stxStack.back | none
+  return (name, result.pos)
 
 /-- Where a declaration's name stands in its module, if the author wrote it there. What
 the compiler made, as a derived instance or a matcher, has another token there. -/
 def authoredAt (env : Environment) (source : Array String) (name : Name) : Option Position := do
   let ranges ← declRangeExt.find? env name
   let stands := ranges.selectionRange.pos
-  let token := leadingName ((source[stands.line - 1]?.getD "").drop stands.column).toString
+  let text := ((source[stands.line - 1]?.getD "").drop stands.column).toString
+  let (token, _) ← readName env (Parser.mkInputContext text "ledger")
   let token := token.replacePrefix `_root_ .anonymous
   if !token.isAnonymous && token.isSuffixOf (privateToUserName name) then some stands else none
 
-/-- Whether a place in the source is the `DecidableEq` of a `deriving` clause, where the
-instance that clause derives and its function stand. A handwritten instance stands at
-`instance`. -/
-def derivesDecidableEq (source : Array String) (stands : Position) : Bool :=
-  let line := source[stands.line - 1]?.getD ""
-  let before := (line.take stands.column).toString
-  leadingName (line.drop stands.column).toString == `DecidableEq && (before.splitOn "deriving").length > 1
+/-- The evidence attached to source commands by the parser. Lean drops examples after
+checking them. It places derived instances at the class names inside deriving clauses. -/
+structure SourceForms where
+  examples : Array Position := #[]
+  derivingClauses : Array (Position × Position) := #[]
 
-/-- Where a module's source holds an `example`. Lean checks one and drops it, so the
-build holds nothing of it for the check to read. -/
-def examplesIn (env : Environment) (text : String) : IO (Array Position) := do
+partial def SourceForms.record (input : Parser.InputContext) (forms : SourceForms) : Syntax → SourceForms
+  | stx@(.node _ kind args) => Id.run do
+    let mut forms := forms
+    if let (some start, some stop) := (stx.getPos?, stx.getTailPos?) then
+      let pos := input.fileMap.toPosition start
+      if kind == ``Parser.Command.example then
+        forms := { forms with examples := forms.examples.push pos }
+      else if kind == ``Parser.Command.optDeriving && start < stop then
+        forms := { forms with derivingClauses := forms.derivingClauses.push (pos, input.fileMap.toPosition stop) }
+    return args.foldl (SourceForms.record input) forms
+  | _ => forms
+
+def sourceForms (env : Environment) (text : String) : IO SourceForms := do
   let input := Parser.mkInputContext text "ledger"
   let (_, start, log) ← Parser.parseHeader input
   let mut state := start
   let mut messages := log
-  let mut found := #[]
+  let mut forms := {}
   repeat
     let (command, next, logged) := Parser.parseCommand input { env, options := {} } state messages
+    if Parser.isTerminalCommand command then break
     state := next
     messages := logged
-    if Parser.isTerminalCommand command then break
-    -- An `example` may stand inside another command, as in a `mutual` block.
-    if let some stated := command.find? (·.isOfKind ``Parser.Command.example) then
-      if let some pos := stated.getPos? then found := found.push (input.fileMap.toPosition pos)
-  return found
+    forms := forms.record input command
+  return forms
 
 /-- A declaration as its author wrote it. -/
 structure Written where
@@ -81,6 +87,9 @@ structure Written where
   name : Name
   info : ConstantInfo
   pos : Position
+
+def positionBefore (a b : Position) : Bool :=
+  a.line < b.line || (a.line == b.line && a.column < b.column)
 
 /-- What the libraries hold, loaded from the build: the ledger's modules and the proof
 modules, the declarations written in their source, in source order, every other constant
@@ -105,10 +114,13 @@ def load (modules : Array Name) (proofs : Array Name := #[]) (roots : List Name 
   let env ← importModules (all.map ({ module := · })) {} (loadExts := true)
   let mut sources : Std.HashMap Name (Array String) := {}
   let mut examples := #[]
+  let mut derivingClauses : Std.HashMap Name (Array (Position × Position)) := {}
   for module in all do
     let text ← IO.FS.readFile (modToFilePath "." module "lean")
     sources := sources.insert module (text.splitOn "\n").toArray
-    examples := examples ++ (← examplesIn env text).map (module, ·)
+    let forms ← sourceForms env text
+    examples := examples ++ forms.examples.map (module, ·)
+    derivingClauses := derivingClauses.insert module forms.derivingClauses
   let mut constants := #[]
   for (name, info) in env.constants.map₁.toList do
     let some module := moduleOf env name | continue
@@ -120,7 +132,7 @@ def load (modules : Array Name) (proofs : Array Name := #[]) (roots : List Name 
   let mut made := #[]
   for (module, name, info) in constants do
     -- A constant with a place in the source was written there, as an anonymous
-    -- instance is, unless a `deriving DecidableEq` clause made it, or it
+    -- instance is, unless a deriving clause made it, or it
     -- serves a declaration whose name it extends, as the axiom of a `native_decide` does.
     let serves := Id.run do
       let mut pre := name.getPrefix
@@ -131,17 +143,22 @@ def load (modules : Array Name) (proofs : Array Name := #[]) (roots : List Name 
     match named module name, declRangeExt.find? env name with
     | some stands, _ => written := written.push { module, name, info, pos := stands }
     | none, some ranges =>
-      if serves || derivesDecidableEq (sources.getD module #[]) ranges.range.pos then
+      if serves || (derivingClauses.getD module #[]).any (fun (start, stop) =>
+        !positionBefore ranges.range.pos start && positionBefore ranges.range.pos stop) then
         made := made.push (module, name, info)
       else written := written.push { module, name, info, pos := ranges.selectionRange.pos }
     | none, none => made := made.push (module, name, info)
   let order (a b : Written) := a.module.toString < b.module.toString ||
-    (a.module == b.module && (a.pos.line < b.pos.line || (a.pos.line == b.pos.line && a.pos.column < b.pos.column)))
+    (a.module == b.module && positionBefore a.pos b.pos)
   return { env, modules, proofs, roots, written := written.qsort order, made, examples }
 
 /-- Whether a declaration stands in one of the ledger's modules. -/
 def Loaded.owns (loaded : Loaded) (name : Name) : Bool :=
   (moduleOf loaded.env name).any loaded.modules.contains
+
+/-- Whether a written declaration stands on its own. Cases and fields belong to their type. -/
+def Written.standsAlone (written : Written) (env : Environment) : Bool :=
+  !(written.info matches .ctorInfo _) && !env.isProjectionFn written.name
 
 /-- Runs a meta program against the loaded environment. -/
 def Loaded.meta (loaded : Loaded) (x : MetaM α) : IO α := do
