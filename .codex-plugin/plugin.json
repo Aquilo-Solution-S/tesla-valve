@@ -1,6 +1,6 @@
 {
   "name": "tesla-valve",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Build code like a Tesla valve: shape over checks, check once at the spring, test the intent.",
   "author": {
     "name": "Aquilo Solution.S GmbH",
