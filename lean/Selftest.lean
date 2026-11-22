@@ -35,8 +35,24 @@ def selftest : IO UInt32 := do
   if (← (mentions [`Refused] #[":(nonsense)x"]).toBaseIO) matches .ok _ then
     IO.eprintln "error: a git grep that fails is read as no links"
     failed := failed + 1
+  -- The same modules as a proof library: a refusal that holds there still refuses its module,
+  -- and one that does not refuses nothing there.
+  let asProofs ← refusals { loaded with modules := #[], proofs := modules }
+  for why in Refusal.all do
+    let module := `Refused ++ Name.mkSimple why.name
+    let here := asProofs.filter (·.module == module)
+    if why.inProofs && !here.any (·.why == why) then
+      IO.eprintln s!"error: {module}: as a proof library, the check does not refuse it as {why.name}"
+      failed := failed + 1
+    if !why.inProofs && here.any (·.why == why) then
+      IO.eprintln s!"error: {module}: as a proof library, the check refuses it as {why.name}"
+      failed := failed + 1
+  for r in asProofs do
+    if !r.why.inProofs then
+      IO.eprintln s!"error: {r.module}: {r.name} is refused in a proof library as {r.why.name}, which holds only in the ledger"
+      failed := failed + 1
   if failed == 0 then
-    IO.println s!"Refused: each of the {Refusal.all.length} refusals is shown by its module"
+    IO.println s!"Refused: each of the {Refusal.all.length} refusals is shown by its module, in the ledger and in a proof library"
     return 0
   return 1
 

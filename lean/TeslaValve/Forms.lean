@@ -44,6 +44,7 @@ inductive Refusal where
   | isAxiom
   | isPartial
   | isNoncomputable
+  | doesIO
   | isPolymorphic
   | isInstance
   | isClass
@@ -82,6 +83,7 @@ def Refusal.says : Refusal → String
   | .isAxiom => "is an axiom: an outside fact is a hypothesis of the rule that needs it"
   | .isPartial => "is partial or opaque: a decision of the ledger ends and evaluates"
   | .isNoncomputable => "is noncomputable: a decision of the ledger evaluates"
+  | .doesIO => "does IO: what the ledger states holds without running anything"
   | .isPolymorphic => "takes a type or a universe: the ledger's forms are about its own types"
   | .isInstance => "is an instance: only `deriving DecidableEq` makes one"
   | .isClass => "is a class"
@@ -99,6 +101,34 @@ def Refusal.says : Refusal → String
   | .dangling => "links a name in its docstring that neither the ledger nor a proof library declares"
   | .wordy => "has a docstring of more than one line: the Lean says the rest"
   | .dated => "has a date, as 2026-11-12 or 12.11.2026, in its docstring: git and the issue keep the history"
+
+/-- Whether a refusal holds in a proof library too, whose structures, classes and examples
+are its own business: what holds there is that every proof is a proof and every docstring
+in its form. -/
+def Refusal.inProofs : Refusal → Bool
+  | .isPrivate => false
+  | .isUnsafe => true
+  | .isAxiom => true
+  | .isPartial => true
+  | .isNoncomputable => true
+  | .doesIO => true
+  | .isPolymorphic => false
+  | .isInstance => false
+  | .isClass => false
+  | .isAbbrev => false
+  | .isMeta => false
+  | .isExample => false
+  | .openChoice => false
+  | .openShape => false
+  | .openInput => false
+  | .openValue => false
+  | .operation => false
+  | .statement => false
+  | .assumed => true
+  | .undocumented => false
+  | .dangling => true
+  | .wordy => true
+  | .dated => true
 
 /-- Operations a decision or a constant may use beside the ledger's own declarations. -/
 def operations : List Name := [
@@ -181,19 +211,31 @@ through anything it names: a proof the compiler split off, as an invariant's, to
 def rests (name : Name) : CoreM Bool := do
   return (← collectAxioms name).any (!leansAxioms.contains ·)
 
-/-- Why a declaration its author wrote is refused, if it is: the first reason. -/
-def refusal (loaded : Loaded) (written : Written) : CoreM (Option Refusal) := do
+/-- Whether a constant names IO, in its type or in its value. -/
+def doesIO (info : ConstantInfo) : Bool :=
+  (info.type.getUsedConstants ++ (info.value?.map (·.getUsedConstants)).getD #[]).any
+    (· ∈ [``IO, ``EIO, ``BaseIO])
+
+/-- Why a declaration its author wrote is refused, if it is: the first reason. In a proof
+library only the reasons that hold there count. -/
+def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : CoreM (Option Refusal) := do
   let env := loaded.env
   let name := written.name
   let info := written.info
-  if isPrivateName name then return some .isPrivate
-  if info.isUnsafe then return some .isUnsafe
-  if info matches .axiomInfo _ then return some .isAxiom
-  if info matches .opaqueInfo _ then return some .isPartial
-  if isMetaCode info then return some .isMeta
-  if Meta.isInstanceCore env name then return some .isInstance
-  if isNoncomputable env name then return some .isNoncomputable
-  if !info.levelParams.isEmpty then return some .isPolymorphic
+  let basic : List (Refusal × Bool) := [
+    (.isPrivate, isPrivateName name),
+    (.isUnsafe, info.isUnsafe),
+    (.isAxiom, info matches .axiomInfo _),
+    (.isPartial, info matches .opaqueInfo _),
+    (.isMeta, isMetaCode info),
+    (.isInstance, Meta.isInstanceCore env name),
+    (.isNoncomputable, isNoncomputable env name),
+    (.doesIO, doesIO info),
+    (.isPolymorphic, !info.levelParams.isEmpty)]
+  if let some (why, _) := basic.find? fun (why, holds) => holds && (!inProofs || why.inProofs) then
+    return some why
+  if inProofs then
+    return if ← rests name then some .assumed else none
   let form : Option Refusal := match info with
     | .inductInfo _ =>
       if isClass env name then some .isClass
@@ -269,8 +311,7 @@ def refusals (loaded : Loaded) : IO (Array Refused) := do
     -- A case or a field takes the form of its type, and its docstring is its author's call.
     let why ← if written.info matches .ctorInfo _ || loaded.env.isProjectionFn written.name then
         pure none
-      else if ofLedger then loaded.meta (refusal loaded written)
-      else do pure (if ← loaded.meta (rests written.name) then some .assumed else none)
+      else loaded.meta (refusal loaded written (inProofs := !ofLedger))
     let why := why.orElse fun _ => doc.bind (docRefusal loaded.env loaded.roots)
     if let some why := why then
       found := found.push { module := written.module, name := privateToUserName written.name, why }
@@ -291,6 +332,7 @@ def refusals (loaded : Loaded) : IO (Array Refused) := do
     if let some why := why then
       found := found.push { module, name := privateToUserName name, why }
   for (module, pos) in loaded.examples do
+    if !loaded.modules.contains module then continue
     found := found.push { module, name := Name.mkSimple s!"example at line {pos.line}", why := .isExample }
   for module in loaded.modules ++ loaded.proofs do
     let docs := (getModuleDoc? loaded.env module).map (·.toList.map (·.doc)) |>.getD []
