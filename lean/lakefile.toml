@@ -1,5 +1,6 @@
 name = "teslavalve"
-defaultTargets = ["TeslaValve", "Refused", "selftest"]
+version = "0.4.0"
+defaultTargets = ["TeslaValve", "selftest"]
 # `lake test` exercises the refusals and the output commands.
 testDriver = "selftest"
 
@@ -8,21 +9,13 @@ testDriver = "selftest"
 [[lean_lib]]
 name = "TeslaValve"
 
-# One module per refusal of the check. Each builds, and the selftest expects its refusal.
+# The driver reads these compiled fixtures by module name.
 [[lean_lib]]
-name = "Refused"
-globs = ["Refused.*"]
+name = "LedgerTests"
+globs = ["TeslaValve.Test.Accepted.*", "TeslaValve.Test.Refused.*"]
 
-[[lean_lib]]
-name = "Accepted"
-globs = ["Accepted.*"]
-
-[[lean_lib]]
-name = "FixtureSupport"
-
-# It reads the compiled fixtures, so Lake builds them before it runs.
 [[lean_exe]]
 name = "selftest"
-root = "Selftest"
-needs = ["Refused", "Accepted"]
+root = "TeslaValve.Test.Selftest"
+needs = ["LedgerTests"]
 supportInterpreter = true

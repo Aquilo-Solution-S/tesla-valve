@@ -78,10 +78,10 @@ with a strict checker and lint rules, and keeps the runtime check wherever the
 types are gone. The enforcers for each rule:
 [hard and soft languages](MANIFESTO.md#hard-and-soft-languages).
 
-Each language has a [working example](examples) that CI runs. It must pass
-clean, and every enforcer the docs name is fed a file it must refuse, so the
-docs cannot promise what the tools do not do. The four examples are one shop,
-with a [ledger and proofs in Lean](examples/lean). Tests name the rules they
+Each language has a [working example](examples) that CI runs. CI feeds the
+Rust, Go, Python and TypeScript enforcers files they must refuse. Lean's
+`lake test` exercises the ledger tool's refusals. The four examples are one
+shop, with a [ledger and proofs in Lean](examples/lean). Tests name the rules they
 hold and replay the vectors Lean writes. Rust reads shipping constants from
 the ledger. CI checks the links and scopes and regenerates the files.
 

@@ -1,8 +1,8 @@
-import Accepted
+import TeslaValve.Test.Accepted
 
 /-! Decision outputs and full-name scope references. -/
 
-namespace Accepted.Probe
+namespace TeslaValve.Test.Accepted.Probe
 
 /-- The two statuses. -/
 inductive State where
@@ -44,8 +44,10 @@ def window : State → Window
 /-- A description when the event carries a colour. -/
 def description : Event → Option String
   | .toggle => none
-  | .paint .red => some "red"
-  | .paint .blue => some "blue"
+  | .paint colour =>
+    match colour with
+    | .red => some "red"
+    | .blue => some "blue"
 
 /-- Paint or toggle the status. -/
 def advance (state : State) (event : Event) : State :=
@@ -74,4 +76,35 @@ def absentState : Option State := none
 /-- An outcome with a choice of refusal. -/
 def saved : Except State Nat := .ok 1
 
-end Accepted.Probe
+/-- Apply an event, with blue paint refused. -/
+def applyEvent (state : State) (event : Event) : Except Colour State :=
+  match event with
+  | .toggle | .paint .red => .ok (advance state event)
+  | .paint .blue => .error .blue
+
+/-- The first natural number above the JavaScript exact integer range that needs rounding. -/
+def wideNumber : Bool → Nat
+  | true => 9007199254740993
+  | false => 0
+
+/-- Counts available to the Rust consumer. -/
+def counts : List Nat := [2, 3]
+
+/-- A count the Rust consumer can omit. -/
+def maybeCount : Option Nat := some 2
+
+/-- A missing count in Rust. -/
+def noCount : Option Nat := none
+
+/-- Spelling with quotes, Markdown punctuation and control characters. -/
+def exactText : String := "\"\\\n|_*\u202e\u0085"
+
+/-- A shape with punctuation in a field label. -/
+structure TextShape where
+  «*flag*» : Bool
+
+/-- A case with punctuation in its label. -/
+inductive Label where
+  | «a*b»
+
+end TeslaValve.Test.Accepted.Probe

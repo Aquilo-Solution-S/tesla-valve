@@ -1,8 +1,8 @@
 /-! A ledger root must be audited even when a submodule imports it. -/
 
-namespace Refused
+namespace TeslaValve.Test.Refused
 
 /-- A claim with no proof in the root module. -/
 axiom rootAxiom : False
 
-end Refused
+end TeslaValve.Test.Refused

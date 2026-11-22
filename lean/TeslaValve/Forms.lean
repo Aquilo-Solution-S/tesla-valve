@@ -9,7 +9,8 @@ The ledger allows seven forms, so that a view can draw all of it by evaluation:
   `ok : decision fields = true`;
 - a constant: a `def` of a ledger value, such as a number;
 - a decision: a `def` whose inputs are closed choices and whose body matches them,
-  case by case, into ledger values;
+  case by case, into ledger values, naming the constructor of each closed-choice
+  discriminant in every alternative, including nested matches;
 - a state machine: a decision `State → Event → State`, or `State → Event → Except Refusal State`
   where an event can be refused, whose events are a choice of their own; its name says what it
   decides;
@@ -32,7 +33,8 @@ such as who ruled a rule and when: git and the issue keep that.
 A rule is linked by its full name in backticks, as `Shop.Stock.reserve`, in a docstring of
 the ledger and in every file of the repository alike. The check refuses a link that
 does not resolve to a declaration, module or namespace owned by a configured library.
-A namespace counts when it contains a declaration of that library.
+A namespace counts when it contains a declaration of that library. Links to
+compiler-generated declarations are refused.
 
 A scope ties modules to the code that holds them: every declaration of its modules is named,
 by its full name, in a file under the scope's paths, or is stated in one that is, as a
@@ -40,11 +42,16 @@ choice is in the decision over it. A rule, a theorem, is held by its name alone.
 
 A proof library holds rules that need more than the forms, such as induction over a graph.
 It uses ordinary Lean types and definitions. The checker audits its proofs and docstrings,
-and refuses unsafe, partial, noncomputable or IO declarations. -/
+and refuses unsafe, partial, noncomputable or IO declarations.
+
+The check guards against mistakes in trusted source. It relies on Lean's declaration
+ranges and authored name prefixes to distinguish generated declarations, and on kernel
+checking for proofs. Source that tampers with that metadata or sets
+`debug.skipKernelTC` is outside that guarantee. -/
 
 namespace TeslaValve
 
-/-- Why the check refuses a declaration. Each has its module under `Refused/`. -/
+/-- Why the check refuses a declaration. Each has its module under `TeslaValve/Test/Refused/`. -/
 inductive Refusal where
   | isPrivate
   | isUnsafe
@@ -80,7 +87,7 @@ elab "every_refusal" : term => do
 /-- Every refusal, in the order the type declares them. -/
 def Refusal.all : List Refusal := every_refusal
 
-/-- A refusal's own name, as `isPrivate`: the name of the module under `Refused/` that shows it. -/
+/-- A refusal's own name, as `isPrivate`: the name of the module under `TeslaValve/Test/Refused/` that shows it. -/
 def Refusal.name (why : Refusal) : String := ((reprStr why).splitOn ".").getLast!
 
 /-- What a refusal says, after the declaration's name. -/
@@ -94,7 +101,7 @@ def Refusal.says : Refusal → String
   | .isPolymorphic => "takes a type or a universe: the ledger's forms are about its own types"
   | .isInstance => "is an instance: only `deriving DecidableEq` makes one"
   | .isClass => "is a class"
-  | .isAbbrev => "is an abbrev: one name per thing"
+  | .isAbbrev => "is an abbrev or has a reducibility override: use an ordinary def"
   | .isMeta => "is meta code (syntax, a macro, a notation or an elaborator)"
   | .isExample => "is an example: a rule is a theorem, which others name and the view draws"
   | .openChoice => "is a choice with parameters, indices or recursion, or a case that carries what is not a closed choice"
@@ -172,8 +179,31 @@ partial def closed (loaded : Loaded) : Expr → Bool
 def within (loaded : Loaded) (allowed : List Name) (term : Expr) : Bool :=
   term.getUsedConstants.all fun name => loaded.owns name || allowed.contains name
 
-/-- A decision's body matches its arguments. An alias or a function that computes a
-different thing to match does not have that form. -/
+/-- The binder types of a matcher, whose alternatives return the motive applied
+to their original patterns. Explicit or-patterns have a binder per pattern. -/
+private partial def binders : Expr → Array Expr
+  | .forallE _ type rest _ => #[type] ++ binders rest
+  | _ => #[]
+
+private partial def binderResult : Expr → Expr
+  | .forallE _ _ rest _ => binderResult rest
+  | result => result
+
+private def hasCatchAll (loaded : Loaded) (name : Name) : Bool := Id.run do
+  let some matcher := Meta.getMatcherInfoCore? loaded.env name | return false
+  let some info := loaded.env.find? name | return true
+  let types := binders info.type
+  let discrs := types.extract matcher.getFirstDiscrPos matcher.getFirstAltPos
+  for alt in types.extract matcher.getFirstAltPos matcher.arity do
+    let patterns := (binderResult alt).getAppArgs
+    for i in [:discrs.size] do
+      if closed loaded discrs[i]! && !(patterns[i]?.any fun pattern =>
+          (loaded.env.find? pattern.getAppFn.constName).any (· matches .ctorInfo _)) then
+        return true
+  return false
+
+/-- A decision starts by matching an input. Each match in the body must name the
+constructor of each closed-choice discriminant explicitly. -/
 partial def matchesInputs (env : Environment) (term : Expr) (inputs : Nat) : Bool :=
   match term.consumeMData with
   | .lam _ _ body _ => matchesInputs env body inputs
@@ -186,7 +216,9 @@ partial def matchesInputs (env : Environment) (term : Expr) (inputs : Nat) : Boo
     | none => false
 
 def bodyInForm (loaded : Loaded) (d : DefinitionVal) (inputs : Array Expr) : Bool :=
-  within loaded operations d.value && (inputs.isEmpty || matchesInputs loaded.env d.value inputs.size)
+  within loaded operations d.value && (inputs.isEmpty ||
+    (matchesInputs loaded.env d.value inputs.size &&
+      !d.value.getUsedConstants.any (hasCatchAll loaded)))
 
 mutual
 /-- A ledger value: a closed choice (`Bool` among them), a shape, `Nat`, a `String`, a `List`
@@ -224,7 +256,7 @@ where
       let some (.defnInfo d) := loaded.env.find? decision | return false
       let (inputs, result) := arrows d.type
       return loaded.owns decision && !isPrivateName decision && !isNoncomputable loaded.env decision &&
-        getReducibilityStatusCore loaded.env decision != .reducible && d.levelParams.isEmpty &&
+        getReducibilityStatusCore loaded.env decision == .semireducible && d.levelParams.isEmpty &&
         !inputs.isEmpty && inputs.all (closed loaded) && result == mkConst ``Bool &&
         bodyInForm loaded d inputs &&
         check.getAppNumArgs == inputs.size && check.getAppArgs.all (fun
@@ -290,7 +322,7 @@ def assumedDefault (env : Environment) (tactic : Name) : Bool :=
 def rests (name : Name) : CoreM Bool := do
   return (← collectAxioms name).any (!leansAxioms.contains ·)
 
-/-- Whether the declaration uses IO in a value, a type, or a definition of a type it uses. -/
+/-- Whether the declaration uses IO in a value, a type, or the aliases and constructor fields of a type it uses. -/
 partial def doesIO (env : Environment) (info : ConstantInfo) : Bool :=
   let names := (declarationTypes env info).flatMap Expr.getUsedConstants ++
     (info.value?.map Expr.getUsedConstants).getD #[]
@@ -299,11 +331,15 @@ where
   usesIO (seen : Std.HashSet Name) : List Name → Bool
     | [] => false
     | name :: more =>
-      if name ∈ [``IO, ``EIO, ``BaseIO] then true
+      if name ∈ [``IO, ``EIO, ``BaseIO, ``IO.RealWorld, ``EStateM] then true
       else if seen.contains name then usesIO seen more
       else
-        let alias := (env.find? name).filter fun i => (arrows i.type).2.isSort
-        let used := (alias.bind (·.value?)).map Expr.getUsedConstants |>.getD #[]
+        let used := match env.find? name with
+          | some (info@(.inductInfo _)) => (declarationTypes env info).flatMap Expr.getUsedConstants
+          | some info => if (binderResult info.type).isSort then
+              (info.value? (allowOpaque := true)).map Expr.getUsedConstants |>.getD #[]
+            else #[]
+          | none => #[]
         usesIO (seen.insert name) (used.toList ++ more)
 
 /-- Why a declaration its author wrote is refused, if it is: the first reason. In a proof
@@ -333,7 +369,7 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : C
       else if isStructure env name then (if shape loaded name then none else some .openShape)
       else if closed loaded (.const name []) then none else some .openChoice
     | .defnInfo d =>
-      if getReducibilityStatusCore env name == .reducible then some .isAbbrev
+      if getReducibilityStatusCore env name != .semireducible then some .isAbbrev
       else definitionForm loaded d
     | .thmInfo rule =>
       if takesType rule.type then some .isPolymorphic
@@ -368,7 +404,7 @@ where
 def resolves (loaded : Loaded) (name : Name) : Bool :=
   let all := loaded.modules ++ loaded.proofs
   all.contains name ||
-    if let some module := moduleOf loaded.env name then all.contains module
+    if loaded.env.contains name then loaded.written.any (·.name == name)
     else loaded.env.isNamespace name && loaded.written.any (name.isPrefixOf ·.name)
 
 /-- Whether a docstring links a name that does not resolve. -/
@@ -449,7 +485,7 @@ def placeInRepository : IO String := do
     throw <| IO.userError s!"git rev-parse: {place.stderr.trimAscii}"
   return place.stdout.trimAscii.toString
 
-/-- Complete Lean names in text, where a surrounding single quote does not become a prime. -/
+/-- Complete Lean names in text, starting at an identifier boundary. -/
 def namesIn (env : Environment) (roots : List Name) (text : String) : Array Name := Id.run do
   let input := Parser.mkInputContext text "scope"
   let mut pos := 0
@@ -458,13 +494,8 @@ def namesIn (env : Environment) (roots : List Name) (text : String) : Array Name
   while !input.atEnd pos do
     let c := input.get pos
     if (isIdFirst c || isIdBeginEscape c) &&
-        (!(isIdRest previous) || previous == '\'') && previous != '.' then
+        !isIdRest previous && previous != '.' then
       if let some (name, stop) := readName env input pos then
-        let name := if previous == '\'' && (input.extract pos stop).endsWith "'" then
-          match name with
-          | .str pre part => pre.str (part.dropEnd 1).toString
-          | _ => name
-        else name
         if roots.any (fun root => root != name && root.isPrefixOf name) then
           found := found.push name
         previous := (stop.prev text).get text
@@ -473,6 +504,10 @@ def namesIn (env : Environment) (roots : List Name) (text : String) : Array Name
     previous := c
     pos := input.next pos
   return found
+
+/-- The first line of Rust output identifies generated files during a scope scan. -/
+def rustBanner : String :=
+  "// Generated by the ledger's `emit rust`. Rust literals by their full Lean names."
 
 /-- Each full name under a configured root in tracked files, with its path and line. Git
 selects the candidate lines and Lean reads the names. -/
@@ -484,30 +519,48 @@ def mentions (loaded : Loaded) (paths : Array String) (backticked : Bool := true
     throw <| IO.userError s!"git rev-parse: {top.stderr.trimAscii}"
   let patterns := loaded.roots.toArray.flatMap fun root =>
     #["-e", root.getRoot.toString]
+  let patterns := if backticked then patterns else patterns ++ #["-e", rustBanner]
   let grep ← IO.Process.output {
     cmd := "git", cwd := top.stdout.trimAscii.toString,
     args := #["grep", "-n", "-I", "-z", "-F"] ++ patterns ++ #["--"] ++ paths }
   -- `git grep` exits 1 when nothing matches, and above 1 when it could not search.
   if grep.exitCode > 1 then
     throw <| IO.userError s!"git grep: {grep.stderr.trimAscii}"
-  return grep.stdout.splitOn "\n" |>.toArray.flatMap fun line =>
+  let lines := (grep.stdout.splitOn "\n").filterMap fun line =>
     match line.splitOn "\x00" with
-    | [file, number, text] =>
+    | [file, number, text] => some (file, number, text)
+    | _ => none
+  let generated : Std.HashSet String := if backticked then {} else
+    lines.foldl (fun files (file, number, text) =>
+      if number == "1" && text.trimAsciiEnd == rustBanner.toSlice then files.insert file else files) {}
+  return lines.toArray.flatMap fun (file, number, text) =>
+    if generated.contains file then #[] else
       let names := if backticked then (links loaded.env loaded.roots text).toArray
         else namesIn loaded.env loaded.roots text
       names.map (s!"{file}:{number}", ·)
-    | _ => #[]
 
 /-- The mentions under `paths` whose name does not resolve. -/
 def dangling (loaded : Loaded) (paths : Array String) : IO (Array (String × Name)) :=
   return (← mentions loaded paths).filter fun (_, name) => !resolves loaded name
 
 /-- A part of the ledger or of a proof library, by the prefix of its modules, and the paths
-of the repository whose files hold it, relative to the repository's top: a generated file
-among them is excluded, as `:!src/ledger.rs`, since it names what it holds nowhere. -/
+of the repository whose files hold it, relative to the repository's top. The `emit rust`
+output names every constant it exports, so the scan skips files with its banner. -/
 structure Scope where
   rules : Name
   code : List String
+
+/-- Git treats an empty list and a list of exclusions as starting from every file. -/
+private def positivePathspec (path : String) : Bool :=
+  if path.isEmpty || path == ":" then false
+  else if path.startsWith ":(" then
+    match (path.drop 2).toString.splitOn ")" with
+    | magic :: _ :: _ => !(magic.splitOn ",").contains "exclude"
+    | _ => false
+  else if path.startsWith ":" then
+    let magic := (path.drop 1).toString.toList.takeWhile (fun c => c ∈ ['!', '^', '/'])
+    !magic.any (fun c => c == '!' || c == '^')
+  else true
 
 /-- What a declaration is stated in: its type and body, or the fields of its cases; a case
 stands for its type. -/
@@ -525,6 +578,8 @@ def statedIn (env : Environment) (info : ConstantInfo) : Array Name :=
 names and what that is stated in; a rule only by its name. A case, a field, an instance and
 what the compiler made belong to their declaration. -/
 def unheld (loaded : Loaded) (scope : Scope) : IO (Array Written) := do
+  if !scope.code.any positivePathspec then
+    throw <| IO.userError s!"the scope {scope.rules} needs a positive code pathspec"
   let env := loaded.env
   let mut held : Std.HashSet Name := {}
   let mut todo := ((← mentions loaded scope.code.toArray (backticked := false)).map (·.2)).toList

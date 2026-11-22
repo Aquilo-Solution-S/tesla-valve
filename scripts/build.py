@@ -28,14 +28,24 @@ alwaysApply: true
 
 {rules}""")
 
-# The version is named once, in the Claude manifest. Codex and Cursor read
-# their own manifests, so they get a copy.
+# The Claude manifest supplies the version for the other manifests and Lean require.
 version = json.loads((root / ".claude-plugin" / "plugin.json").read_text())["version"]
 for path in (root / ".codex-plugin" / "plugin.json", root / ".cursor-plugin" / "plugin.json"):
     manifest = json.loads(path.read_text())
     manifest.pop("version", None)
     manifest = {"name": manifest.pop("name"), "version": version, **manifest}
     path.write_text(json.dumps(manifest, indent=2) + "\n")
+
+lakefile = root / "lean" / "lakefile.toml"
+lakefile.write_text(re.sub(
+    r'(^name = "teslavalve"\n)(?:version = "[^"]+"\n)?',
+    rf'\g<1>version = "{version}"\n', lakefile.read_text(), count=1, flags=re.MULTILINE,
+))
+lean_setup = root / "skills" / "prepare" / "references" / "lean.md"
+lean_setup.write_text(re.sub(
+    r'(^git = "https://github\.com/Aquilo-Solution-S/tesla-valve"\n)(?:rev = "[^"]+"\n)?',
+    rf'\g<1>rev = "v{version}"\n', lean_setup.read_text(), count=1, flags=re.MULTILINE,
+))
 
 # A code block under `<!-- code: examples/<file>#<region> -->` is the region of
 # that file between `region: <name>` and `endregion`, or the whole file when no

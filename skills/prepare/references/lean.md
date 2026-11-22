@@ -15,8 +15,18 @@ leanprover/lean4:v4.35.0
 ```
 
 Require the [teslavalve Lake package](../../../lean) and commit
-`lake-manifest.json`. The example uses a path in the same repository. Use a
-glob for each library so the build includes modules nothing imports.
+`lake-manifest.json`. A project outside this repository uses the tagged package.
+
+```toml
+[[require]]
+name = "teslavalve"
+git = "https://github.com/Aquilo-Solution-S/tesla-valve"
+rev = "v0.4.0"
+subDir = "lean"
+```
+
+The example uses a path in the same repository. Use a glob for each library
+so the build includes modules nothing imports.
 A project can start with a proof library and add ledger modules as rules
 fit the forms. Use `Library.*` if the library has a root module as well as
 submodules.
@@ -49,8 +59,7 @@ supportInterpreter = true
 ```
 
 The program calls `TeslaValve.run` with the ledger, any proof libraries, and
-the scopes. A scope's paths are relative to the Git root. Add the generated
-Rust file as an exclusion. Use `unscanned` for the tool's own example links
+the scopes. A scope's paths are relative to the Git root. The scope scan skips generated Rust by its banner. Use `unscanned` for the tool's own example links
 and for the intentionally broken links in the fixtures and the guide that
 quotes them.
 
@@ -65,9 +74,9 @@ unsafe def main (args : List String) : IO UInt32 :=
     scopes := [
       { rules := `Spec.Stock, code := ["examples/go"] },
       { rules := `Spec.Stock, code := ["examples/python/shop", "examples/python/tests"] },
-      { rules := `Spec.Stock, code := ["examples/rust/src", ":!examples/rust/src/ledger.rs"] },
+      { rules := `Spec.Stock, code := ["examples/rust/src"] },
       { rules := `Spec.Stock, code := ["examples/typescript/src"] },
-      { rules := `Shop.Shipping, code := ["examples/rust/src", ":!examples/rust/src/ledger.rs"] },
+      { rules := `Shop.Shipping, code := ["examples/rust/src"] },
     ]
     -- The tool has its own examples. The preparation guide quotes the broken links.
     unscanned := ["lean", "examples/bad/lean", "skills/prepare/references/lean.md"]
@@ -101,7 +110,7 @@ git diff --exit-code HEAD
 
 Run `lake build` and `lake test` in the tool's
 [`lean/`](../../../lean) package. The selftest checks every
-[`Refused/`](../../../lean/Refused) module for its own refusal. It checks
+[`Refused/`](../../../lean/TeslaValve/Test/Refused) module for its own refusal. It checks
 which restrictions also hold in a proof library, and exercises the output
 commands on an accepted ledger.
 

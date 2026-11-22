@@ -42,10 +42,6 @@ def docOf (env : Environment) (name : Name) : IO String := do
 def captioned (label doc : String) : String :=
   if doc.isEmpty then label else s!"{label}: {doc}"
 
-/-- A case or a field as a list item: its words, and its docstring where it has one. -/
-def item (env : Environment) (label : String) (name : Name) : IO String := do
-  return "- " ++ captioned label (← docOf env name)
-
 /-- Every value of a closed choice, case by case in the order they are declared. -/
 partial def valuesOf (env : Environment) : Expr → List Expr
   | .const ``Bool [] => [mkConst ``Bool.true, mkConst ``Bool.false]
@@ -65,58 +61,72 @@ def fieldTypes (type : Expr) (params : Nat) : List Expr :=
   | .forallE _ field body _, 0 => field.consumeTypeAnnotations :: fieldTypes body 0
   | _, _ => []
 
-/-- The items of a list the ledger computed, in order. -/
-partial def listItems (e : Expr) : List Expr :=
-  match e.getAppFn, e.getAppArgs with
-  | .const ``List.cons _, #[_, head, tail] => head :: listItems tail
-  | _, _ => []
+/-- A shape's named values, omitting its invariant proof. -/
+def shapeFields (env : Environment) (info : ConstructorVal) (fields : Array Expr) : List (Name × Expr) :=
+  let names := getStructureFields env info.induct
+  ((names.toList.zip fields.toList).zip (fieldTypes info.type info.numParams)).filterMap
+    fun (field, type) => if type.isAppOf ``Eq then none else some field
 
-/-- A value the ledger computed, in words. A shape shows its fields and not its invariant,
-which is a proof. -/
-partial def render (env : Environment) (e : Expr) : String :=
+/-- The items of a list the ledger computed, in order. -/
+partial def listItems (e : Expr) : Except String (List Expr) :=
+  match e.getAppFn, e.getAppArgs with
+  | .const ``List.nil _, #[_] => .ok []
+  | .const ``List.cons _, #[_, head, tail] => (listItems tail).map (head :: ·)
+  | _, _ => .error s!"{e} did not reduce to a list"
+
+/-- A value the ledger computed, in words. A shape shows its fields without its proof. -/
+partial def render (env : Environment) (e : Expr) : Except String String := do
   let args := e.getAppArgs
   match e.getAppFn with
-  | .const ``Option.none _ => "—"
-  | .const ``Option.some _ => render env args.back!
-  | .const ``Except.ok _ => render env args.back!
-  | .const ``Except.error _ => s!"refused: {render env args.back!}"
-  | .const ``Bool.true _ => "yes"
-  | .const ``Bool.false _ => "no"
-  | .const ``OfNat.ofNat _ => render env (args[1]?.getD e)
-  | .lit (.natVal n) => toString n
-  | .lit (.strVal s) => s.quote
-  | .const ``List.nil _ => "[]"
-  | .const ``List.cons _ => s!"[{", ".intercalate ((listItems e).map (render env))}]"
+  | .const ``Option.none _ => return "—"
+  | .const ``Option.some _ | .const ``Except.ok _ => render env args.back!
+  | .const ``Except.error _ => return s!"refused: {← render env args.back!}"
+  | .const ``Bool.true _ => return "yes"
+  | .const ``Bool.false _ => return "no"
+  | .const ``OfNat.ofNat _ => render env args[1]!
+  | .lit (.natVal n) => return toString n
+  | .lit (.strVal s) => return s.quote
+  | .const ``List.nil _ | .const ``List.cons _ =>
+    return s!"[{", ".intercalate (← (← listItems e).mapM (render env))}]"
   | .const ctor _ => match env.find? ctor with
     | some (.ctorInfo info) =>
       let fields := args.extract info.numParams args.size
-      if fields.isEmpty then caseLabel ctor
-      else
-        let names := if isStructure env info.induct then getStructureFields env info.induct else #[]
-        if names.isEmpty then s!"{caseLabel ctor} ({", ".intercalate (fields.toList.map (render env))})"
-        else
-          let shown := ((names.toList.zip fields.toList).zip (fieldTypes info.type info.numParams)).filter
-            fun (_, type) => !type.isAppOf ``Eq
-          ", ".intercalate (shown.map fun ((field, v), _) => s!"{words field}: {render env v}")
-    | _ => toString e
-  | _ => toString e
+      if isStructure env info.induct then
+        return ", ".intercalate (← (shapeFields env info fields).mapM fun (field, v) =>
+          return s!"{words field}: {← render env v}")
+      else if fields.isEmpty then return caseLabel ctor
+      else return s!"{caseLabel ctor} ({", ".intercalate (← fields.toList.mapM (render env))})"
+    | _ => throw s!"{e} did not reduce to a ledger value"
+  | _ => throw s!"{e} did not reduce to a ledger value"
+
+/-- Gives a failed value conversion the name of the declaration that produced it. -/
+def computed (name : Name) (answer : Except String α) : IO α :=
+  match answer with
+  | .ok value => pure value
+  | .error why => throw <| IO.userError s!"{name}: {why}"
 
 /-- What a decision answers for each of its inputs. -/
-def evaluate (loaded : Loaded) (decision : Name) (inputs : List Expr) : IO String :=
-  loaded.meta do
-    let answer ← Meta.reduce (mkAppN (mkConst decision) inputs.toArray)
-    return render loaded.env answer
+def evaluate (loaded : Loaded) (decision : Name) (inputs : List Expr) : IO String := do
+  let answer ← loaded.reduce decision inputs.toArray
+  computed decision (render loaded.env answer)
 
 /-- Every combination of one value per type. -/
 def combinations (env : Environment) (types : List Expr) : List (List Expr) :=
   types.foldr (fun type rest => (valuesOf env type).flatMap fun v => rest.map (v :: ·)) [[]]
 
+/-- Escape a value or label for Markdown prose or a table cell. -/
+def escape (text : String) : String :=
+  text.replace "\\" "\\\\" |>.replace "|" "\\|" |>.replace "`" "\\`" |>.replace "*" "\\*"
+    |>.replace "_" "\\_" |>.replace "[" "\\[" |>.replace "<" "\\<" |>.replace "&" "\\&"
+    |>.replace ">" "\\>" |>.replace "#" "\\#" |>.replace "~" "\\~"
+    |>.replace "\r" "" |>.replace "\n" "<br>"
+
+/-- A case or a field as a list item. -/
+def item (env : Environment) (label : String) (name : Name) : IO String := do
+  return "- " ++ captioned (escape label) (← docOf env name)
+
 /-- A table with a header row. -/
 def table (header : List String) (rows : List (List String)) : String :=
-  let escape (cell : String) :=
-    cell.replace "\\" "\\\\" |>.replace "|" "\\|" |>.replace "`" "\\`" |>.replace "*" "\\*"
-      |>.replace "_" "\\_" |>.replace "[" "\\[" |>.replace "<" "\\<" |>.replace "&" "\\&"
-      |>.replace "\r" "" |>.replace "\n" "<br>"
   let line (cells : List String) := "| " ++ " | ".intercalate (cells.map escape) ++ " |"
   "\n".intercalate ([line header, line (header.map fun _ => "---")] ++ rows.map line)
 
@@ -147,14 +157,14 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
   let doc := (getModuleDoc? env module).map (·.toList.map (·.doc)) |>.getD []
   for d in doc do
     out := out.push ("\n".intercalate ((d.trimAscii.toString.splitOn "\n").map fun l => if l.startsWith "#" then "#" ++ l else l))
-  if doc.isEmpty then out := out.push s!"## {module}"
+  if doc.isEmpty then out := out.push s!"## {escape module.toString}"
   -- A case or a field is drawn with its type, not on its own.
   let here := loaded.written.filter fun w =>
     w.module == module && w.standsAlone env
   -- The choices and shapes, with their cases and fields.
   for w in here do
     let .inductInfo type := w.info | continue
-    let mut block := #[captioned s!"**{title w.name}**" (← docOf env w.name), ""]
+    let mut block := #[captioned s!"**{escape (title w.name)}**" (← docOf env w.name), ""]
     if isStructure env w.name then
       for field in getStructureFields env w.name do
         block := block.push (← item env (words field) (w.name ++ field))
@@ -166,7 +176,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
   for w in here do
     let .defnInfo d := w.info | continue
     if !(arrows d.type).1.isEmpty then continue
-    out := out.push (captioned s!"**{words w.name}** = {← evaluate loaded w.name []}" (← docOf env w.name))
+    out := out.push (captioned s!"**{escape (words w.name)}** = {escape (← evaluate loaded w.name [])}" (← docOf env w.name))
   -- The decisions over the same inputs, in one table; a state machine as its diagram.
   let decisions := here.filterMap fun w => (w.decisionInputs loaded).map (w, ·)
   let mut drawn : Array Name := #[]
@@ -176,20 +186,21 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
       drawn := drawn.push w.name
       let states := (valuesOf env state).toArray
       let events := valuesOf env event
-      let labels := states.map (render env)
+      let labels ← computed w.name (states.mapM (render env))
       let mut diagram := labels.mapIdx fun i label => s!"  state \"{diagramLabel label}\" as s{i}"
       let mut refused := #[]
       for i in [:states.size] do
         for e in events do
-          let answer ← loaded.meta (Meta.reduce (mkAppN (mkConst w.name) #[states[i]!, e]))
+          let eventLabel ← computed w.name (render env e)
+          let answer ← loaded.reduce w.name #[states[i]!, e]
           match answer.getAppFn with
-          | .const ``Except.error _ => refused := refused.push [labels[i]!, render env e, render env answer]
+          | .const ``Except.error _ => refused := refused.push [labels[i]!, eventLabel, ← computed w.name (render env answer)]
           | _ =>
             let next := if answer.isAppOf ``Except.ok then answer.appArg! else answer
             let some target := states.idxOf? next
               | throw <| IO.userError s!"{w.name}: transition returned no state"
-            diagram := diagram.push s!"  s{i} --> s{target} : {diagramLabel (render env e)}"
-      out := out.push (captioned s!"**{words w.name}**" (← docOf env w.name))
+            diagram := diagram.push s!"  s{i} --> s{target} : {diagramLabel eventLabel}"
+      out := out.push (captioned s!"**{escape (words w.name)}**" (← docOf env w.name))
       out := out.push ("```mermaid\nstateDiagram-v2\n" ++ "\n".intercalate diagram.toList ++ "\n```")
       if !refused.isEmpty then
         out := out.push (table [typeWords state, typeWords event, "answer"] refused.toList)
@@ -199,14 +210,14 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     drawn := drawn ++ group.map (·.name)
     let mut rows := #[]
     for combination in combinations env inputs do
-      let mut row := combination.map (render env)
+      let mut row ← computed w.name (combination.mapM (render env))
       for g in group do
         row := row ++ [← evaluate loaded g.name combination]
       rows := rows.push row
     out := out.push (table (inputs.map typeWords ++ group.toList.map (words ·.name)) rows.toList)
     let mut legend := #[]
     for g in group do
-      legend := legend.push ("- " ++ captioned (words g.name) (← docOf env g.name))
+      legend := legend.push ("- " ++ captioned (escape (words g.name)) (← docOf env g.name))
     out := out.push ("\n".intercalate legend.toList)
   -- The rules and the rejected designs.
   for w in here do
@@ -214,8 +225,8 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     let doc ← docOf env w.name
     match w.name with
     | .str _ last =>
-      if last.startsWith "not_" then out := out.push (captioned s!"✗ **{words (Name.mkSimple (last.drop 4).toString)}**, rejected" doc)
-      else out := out.push (captioned s!"✓ **{words w.name}**" doc)
+      if last.startsWith "not_" then out := out.push (captioned s!"✗ **{escape (words (Name.mkSimple (last.drop 4).toString))}**, rejected" doc)
+      else out := out.push (captioned s!"✓ **{escape (words w.name)}**" doc)
     | _ => pure ()
   return "\n\n".intercalate out.toList
 
@@ -226,11 +237,11 @@ def viewProofs (loaded : Loaded) (module : Name) : IO String := do
   let doc := (getModuleDoc? env module).map (·.toList.map (·.doc)) |>.getD []
   for d in doc do
     out := out.push ("\n".intercalate ((d.trimAscii.toString.splitOn "\n").map fun l => if l.startsWith "#" then "#" ++ l else l))
-  if doc.isEmpty then out := out.push s!"## {module}"
+  if doc.isEmpty then out := out.push s!"## {escape module.toString}"
   for w in loaded.written do
     if w.module != module then continue
     let .thmInfo _ := w.info | continue
-    out := out.push (captioned s!"✓ **{words w.name}**" (← docOf env w.name))
+    out := out.push (captioned s!"✓ **{escape (words w.name)}**" (← docOf env w.name))
   return "\n\n".intercalate out.toList
 
 /-- Draws the ledger and its proof libraries as Markdown. -/

@@ -1,6 +1,6 @@
 /-! A ledger with a constant of a type the Rust consumer defines. -/
 
-namespace Accepted
+namespace TeslaValve.Test.Accepted
 
 /-- The colours. -/
 inductive Colour where
@@ -10,4 +10,4 @@ inductive Colour where
 /-- The default colour. -/
 def defaultColour : Colour := .blue
 
-end Accepted
+end TeslaValve.Test.Accepted

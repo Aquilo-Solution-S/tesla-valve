@@ -16,3 +16,9 @@ def isRed : Light → Bool
 
 /-- An alias of a decision. -/
 def alias := isRed
+
+/-- A light with three colours. -/
+inductive TrafficLight where
+  | red
+  | amber
+  | green

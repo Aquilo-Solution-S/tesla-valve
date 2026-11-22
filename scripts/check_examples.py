@@ -62,7 +62,7 @@ LANGUAGES = {
         linked=("node_modules",),
     ),
     "lean": Language(
-        checks=LEAN_GATE,
+        checks=[*LEAN_GATE, ["lake", "exe", "shop", "view"], ["lake", "exe", "shop", "emit", "vectors"]],
         lints=LEAN_GATE,
         slot="Spec/Stock/Unheld.lean",
         beside=("go", "python", "rust", "typescript"),

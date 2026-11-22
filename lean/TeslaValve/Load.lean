@@ -166,6 +166,10 @@ def Loaded.meta (loaded : Loaded) (x : MetaM α) : IO α := do
   let (a, _) ← (x.run' {} {}).toIO ctx { env := loaded.env }
   return a
 
+/-- Computes every value field of a declaration's result, including implicit fields. -/
+def Loaded.reduce (loaded : Loaded) (name : Name) (inputs : Array Expr := #[]) : IO Expr :=
+  loaded.meta (Meta.reduce (mkAppN (mkConst name) inputs) (explicitOnly := false))
+
 /-- The arguments of a function type and its result. It stops at a dependent arrow,
 which is then the result. -/
 partial def arrows (type : Expr) : Array Expr × Expr :=

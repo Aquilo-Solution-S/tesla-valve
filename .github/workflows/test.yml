@@ -116,11 +116,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Check that the tool and example pin the same Lean version
+        run: cmp lean/lean-toolchain examples/lean/lean-toolchain
+
       - name: Install the toolchain in lean-toolchain
         run: |
-          version="$(sed 's/^.*:v//' examples/lean/lean-toolchain)"
+          version="$(sed 's/^.*:v//' lean/lean-toolchain)"
           curl --fail --silent --show-error --location --output "$RUNNER_TEMP/lean.tar.zst" \
             "https://github.com/leanprover/lean4/releases/download/v$version/lean-$version-linux.tar.zst"
+          printf '%s  %s\n' '7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d' \
+            "$RUNNER_TEMP/lean.tar.zst" | sha256sum -c
           mkdir "$RUNNER_TEMP/lean"
           tar --zstd --extract --file "$RUNNER_TEMP/lean.tar.zst" --directory "$RUNNER_TEMP/lean" --strip-components=1
           echo "$RUNNER_TEMP/lean/bin" >> "$GITHUB_PATH"
@@ -128,7 +133,7 @@ jobs:
       - name: Build the ledger tool and run its selftest
         working-directory: lean
         run: |
-          lake build
+          lake build --wfail
           lake test
 
       - name: The example passes, and its emitted files match the commit

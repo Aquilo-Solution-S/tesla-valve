@@ -17,6 +17,10 @@ and test vectors.
 | Theorem | A proved rule about the ledger. |
 | Rejected design | A theorem named `not_…` that shows which rule an alternative breaks. |
 
+At each match on a closed choice, name the constructor in every alternative.
+An or-pattern can share a body across explicitly named constructors. A
+constructor pattern can bind fields for use in the body or in a nested match.
+
 A ledger value is a closed choice, a shape, a `Nat`, a `Bool`, a `String`,
 a `List` or `Option` of a value, or an `Except` with a closed refusal
 choice and a value. An `Option` cannot directly contain another `Option`.
@@ -102,13 +106,19 @@ theorem not_one_promise : ∃ shipping restockDays,
 end Spec
 ```
 
+`check` guards against mistakes in trusted source. It relies on Lean's
+declaration ranges and authored name prefixes to identify generated declarations,
+and on kernel checking for proofs. Source that tampers with that metadata or
+sets `debug.skipKernelTC` is outside that guarantee.
+
 ## Links and scopes
 
 Link a rule by its full Lean name in backticks beside the code or test that
 holds it. A link that starts with a library root must resolve to a
 declaration, module or namespace in a configured library in every tracked
 file the check scans. A namespace counts when it contains a declaration of
-that library. A root module is checked alongside its submodules.
+that library. The checker refuses links to compiler-generated names. A root
+module is checked alongside its submodules.
 The same syntax works in a docstring.
 
 <!-- code: examples/python/tests/test_shop.py#named -->
@@ -132,14 +142,16 @@ that contains the full name does not satisfy the scope.
 
 Each scope is checked on its own. The shop has four scopes for `Spec.Stock`,
 one for each language. A module outside the scopes still passes the Lean
-checks. Add a scope as soon as its code holds the declarations. Use a Git
-exclusion pathspec to keep generated files out of a scope.
+checks. Add a scope as soon as its code holds the declarations. Each scope
+needs a positive Git pathspec. The scope scan skips files with the `emit rust`
+banner, since those files name every constant they export.
 
 ## What the ledger gives the code
 
 `lake exe shop emit rust` prints a `ledger!` macro. It exports `Nat`,
 `Bool`, `String`, and `List` and `Option` whose element types also have Rust
-literals. A list becomes an array. A `Nat` above `u128::MAX` fails emission.
+literals. A list becomes an array. Nested lists and a `Nat` above `u128::MAX`
+fail emission.
 The Rust consumer owns the representation of closed choices, shapes and
 `Except` values, and links those constants by their Lean names. A ledger
 with no Rust literals still emits a macro. Exported names use dotted ASCII
@@ -163,6 +175,15 @@ pub fn shipping_days(postcode: &Postcode) -> u64 {
 `lake exe shop emit vectors` prints JSON. Each ledger decision's full name
 maps to rows with an `in` array and an `out` value, one for every combination
 of inputs. Replay the rows against the code that implements the decision.
+
+- A case is a string, such as `"cancelled"`.
+- A case with payload is an object keyed by the case, such as `{"paint":["red"]}`.
+- A shape is an object of its fields, omitting the proof field `ok`.
+- An `Option` is `null` or the encoded value.
+- An `Except` is an object with one key, `ok` or `error`, and its encoded value.
+
+JSON `Nat` values above `2^53` retain their exact digits. A JavaScript reader
+must parse them as big integers to preserve their precision.
 
 A proof-library decision can have inputs outside the forms. The shop's
 separate `vectors` program chooses inputs for `Spec.deliveryDays`. Each
