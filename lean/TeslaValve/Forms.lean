@@ -30,7 +30,8 @@ such as who ruled a rule and when: git and the issue keep that.
 
 A rule is linked by its full name in backticks, as `Shop.Stock.reserve`, in a docstring of
 the ledger and in every file of the repository alike. The check refuses a link that
-names neither a declaration nor a namespace of the ledger or of a proof library beside it.
+names neither a declaration, a namespace nor a module of the ledger or of a proof library
+beside it.
 
 A scope ties modules to the code that holds them: every declaration of its modules is named,
 by its full name, in a file under the scope's paths, or is stated in one that is, as a
@@ -234,7 +235,8 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : C
     (.isPrivate, isPrivateName name),
     (.isUnsafe, info.isUnsafe),
     (.isAxiom, info matches .axiomInfo _),
-    (.isPartial, info matches .opaqueInfo _),
+    -- An opaque type is how a proof library says it does not care what a thing is.
+    (.isPartial, info matches .opaqueInfo _ && !(inProofs && info.type.isSort)),
     (.isMeta, isMetaCode info),
     (.isInstance, Meta.isInstanceCore env name),
     (.isNoncomputable, isNoncomputable env name),
@@ -283,9 +285,13 @@ def links (roots : List Name) (doc : String) : List Name := Id.run do
     inside := !inside
   return found
 
-/-- Whether a docstring links a name that is neither a declaration nor a namespace. -/
+/-- Whether a name is a declaration, a namespace or a module of the loaded libraries. -/
+def resolves (env : Environment) (name : Name) : Bool :=
+  env.contains name || env.isNamespace name || (env.getModuleIdx? name).isSome
+
+/-- Whether a docstring links a name that does not resolve. -/
 def dangles (env : Environment) (roots : List Name) (doc : String) : Bool :=
-  (links roots doc).any fun name => !env.contains name && !env.isNamespace name
+  (links roots doc).any (!resolves env ·)
 
 /-- Whether characters spell a date, as `2026-11-12` or `12.11.2026`. -/
 def isDate : List Char → Bool
@@ -379,9 +385,9 @@ def mentions (roots : List Name) (paths : Array String) (backticked : Bool := tr
     -- A name that ends a sentence keeps its full stop out.
     (":".intercalate parts.dropLast, (found.dropEndWhile (· == '.')).toString.toName)
 
-/-- The mentions under `paths` whose name the environment neither declares nor opens. -/
+/-- The mentions under `paths` whose name does not resolve. -/
 def dangling (env : Environment) (roots : List Name) (paths : Array String) : IO (Array (String × Name)) :=
-  return (← mentions roots paths).filter fun (_, name) => !env.contains name && !env.isNamespace name
+  return (← mentions roots paths).filter fun (_, name) => !resolves env name
 
 /-- A part of the ledger or of a proof library, by the prefix of its modules, and the paths
 of the repository whose files hold it, relative to the repository's top: a generated file
