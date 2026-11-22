@@ -6,6 +6,7 @@ import TeslaValve.Test.FixtureSupport
 inductive Position where
   /-- Up. -/
   | up
+  | down
   deriving DecidableEq
 
 /-- A link to an imported declaration `TeslaValve.Test.Refused.Foreign.imported`. -/

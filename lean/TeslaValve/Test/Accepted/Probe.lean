@@ -21,15 +21,15 @@ structure Window where
   count : Nat
   active : Bool
 
-/-- Whether a flag allows a window. -/
-def allowed : Bool → Bool
-  | true => true
-  | false => false
+/-- Whether a colour allows a window. -/
+def allowed : Colour → Bool
+  | .red => true
+  | .blue => false
 
 /-- A window whose flag passes the decision. -/
 structure AllowedWindow where
-  active : Bool
-  ok : allowed active = true
+  colour : Colour
+  ok : allowed colour = true
 
 /-- The text for each status. -/
 def label : State → String
@@ -74,20 +74,24 @@ def itemβ : State := .«a b»
 /-- The status for a different consumer. -/
 def notHeld : State := .aB
 
-/-- A list of choices with no items. -/
-def emptyStates : List State := []
+/-- A list of available statuses. -/
+def availableStates : List State := [.aB]
 
-/-- An optional choice with no value. -/
-def absentState : Option State := none
+/-- The suggested status. -/
+def suggestedState : Option State := some .aB
 
 /-- An outcome with a choice of refusal. -/
 def saved : Except State Nat := .ok 1
 
+/-- The reason paint was refused. -/
+inductive PaintRefusal where
+  | blueUnsupported
+
 /-- Apply an event, with blue paint refused. -/
-def applyEvent (state : State) (event : Event) : Except Colour State :=
+def applyEvent (state : State) (event : Event) : Except PaintRefusal State :=
   match event with
   | .toggle | .paint .red => .ok (advance state event)
-  | .paint .blue => .error .blue
+  | .paint .blue => .error .blueUnsupported
 
 /-- The first natural number above the JavaScript exact integer range that needs rounding. -/
 def wideNumber : Bool → Nat
@@ -100,8 +104,8 @@ def counts : List Nat := [2, 3]
 /-- A count the Rust consumer can omit. -/
 def maybeCount : Option Nat := some 2
 
-/-- A missing count in Rust. -/
-def noCount : Option Nat := none
+/-- Counts with one missing entry. -/
+def optionalCounts : List (Option Nat) := [none, some 2]
 
 /-- Spelling with quotes, Markdown punctuation and control characters. -/
 def exactText : String := "\"\\\n|_*\u202e\u0085"
@@ -112,6 +116,6 @@ structure TextShape where
 
 /-- A case with punctuation in its label. -/
 inductive Label where
-  | «a*b»
+  | «a*b» (active : Bool)
 
 end TeslaValve.Test.Accepted.Probe

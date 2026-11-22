@@ -5,11 +5,13 @@ theorem trusted : (1 : Nat) = 1 := by native_decide
 inductive Bulb where
   /-- Lit. -/
   | on
+  | off
   deriving DecidableEq
 
 /-- Whether a bulb is lit. -/
 def lit : Bulb → Bool
   | .on => true
+  | .off => false
 
 /-- A lit bulb. -/
 structure Lit where

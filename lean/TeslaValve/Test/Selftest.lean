@@ -11,15 +11,36 @@ def includes (text fragment : String) : Bool :=
 
 /-- The outputs and scope scan of a ledger that passes the forms. -/
 def accepted (place : String) : IO UInt32 := do
-  let loaded ← Config.load { ledger := `TeslaValve.Test.Accepted, proofs := [`TeslaValve.Test.Proofs] }
+  let libraries := [`TeslaValve.Test.Proofs, `TeslaValve.Test.EmptyProofs, `TeslaValve.Test.MissingProofs]
+  let loaded ← Config.load { ledger := `TeslaValve.Test.Accepted, proofs := libraries }
   let refused ← refusals loaded
   let mut failed ← expect refused.isEmpty
     s!"Accepted: unexpected refusals {(refused.map fun r => s!"{r.name} {r.why.says}").toList}"
+  let inventory ← proofAxioms loaded loaded.proofs
+  failed := failed + (← expect (emptyProofLibraries libraries inventory ==
+    [`TeslaValve.Test.EmptyProofs, `TeslaValve.Test.MissingProofs])
+    "Accepted: check did not distinguish empty proof libraries from a populated one")
+  failed := failed + (← expect (proofSummary inventory ==
+    "4 proof theorems (axiom-free: 1, propext: 1, Quot.sound: 1, Classical.choice: 1)")
+    s!"Accepted: unexpected axiom counts {proofSummary inventory}")
+  let proofView ← viewProofs loaded `TeslaValve.Test.Proofs
+  for fragment in [
+      "- Premise **documented**: The incoming flag is set.",
+      "- Premise **bounded**: ∀ (n : Nat), n ≤ count → n ≤ count",
+      "✓ **set by premise** (axioms: none)",
+      "✓ **same prop** (axioms: `propext`)",
+      "✓ **same quot** (axioms: `Quot.sound`)",
+      "✓ **chosen proof** (axioms: `Classical.choice`)"] do
+    failed := failed + (← expect (includes proofView fragment) s!"Accepted: proof view omitted {fragment}")
+  for field in ["documented", "bounded", "condition", "count"] do
+    failed := failed + (← expect (!includes proofView s!"✓ **{field}**") s!"Accepted: view marked {field} proved")
+  for field in ["condition", "count"] do
+    failed := failed + (← expect (!includes proofView s!"Premise **{field}**") s!"Accepted: view treated {field} as a premise")
   let vectors ← emitVectors loaded
   let expected := Json.parse r#"{
     "TeslaValve.Test.Accepted.Probe.allowed": [
-      {"in":[true],"out":true},
-      {"in":[false],"out":false}
+      {"in":["red"],"out":true},
+      {"in":["blue"],"out":false}
     ],
     "TeslaValve.Test.Accepted.Probe.label": [
       {"in":["a b"],"out":"x|y"},
@@ -50,10 +71,10 @@ def accepted (place : String) : IO UInt32 := do
     "TeslaValve.Test.Accepted.Probe.applyEvent": [
       {"in":["a b","toggle"],"out":{"ok":"aB"}},
       {"in":["a b",{"paint":["red"]}],"out":{"ok":"a b"}},
-      {"in":["a b",{"paint":["blue"]}],"out":{"error":"blue"}},
+      {"in":["a b",{"paint":["blue"]}],"out":{"error":"blueUnsupported"}},
       {"in":["aB","toggle"],"out":{"ok":"a b"}},
       {"in":["aB",{"paint":["red"]}],"out":{"ok":"a b"}},
-      {"in":["aB",{"paint":["blue"]}],"out":{"error":"blue"}}
+      {"in":["aB",{"paint":["blue"]}],"out":{"error":"blueUnsupported"}}
     ],
     "TeslaValve.Test.Accepted.Probe.wideNumber": [
       {"in":[true],"out":9007199254740993},
@@ -66,7 +87,7 @@ def accepted (place : String) : IO UInt32 := do
   for fragment in ["| «a b» | \"x\\|y\" | count: 2, active: yes |", "| aB | \"other\" | count: 0, active: no |",
       "| paint (blue) | \"blue\" |", "| toggle | — |", "state \"«a b»\" as s0", "state \"aB\" as s1",
       "s0 --> s1 : toggle", "s1 --> s0 : paint (red)",
-      "| «a b» | paint (blue) | refused: blue |", "| aB | paint (blue) | refused: blue |",
+      "| «a b» | paint (blue) | refused: blueUnsupported |", "| aB | paint (blue) | refused: blueUnsupported |",
       "**exact text** = ", "\\|\\_\\*", "- «a\\*b»", "- \\*flag\\*"] do
     failed := failed + (← expect (includes view fragment) s!"Accepted: view omitted {fragment}")
   let missing ← unheld loaded { rules := `TeslaValve.Test.Accepted.Probe, code := [place ++ "TeslaValve/Test/Accepted/Scope.txt"] }
@@ -96,9 +117,9 @@ def accepted (place : String) : IO UInt32 := do
     failed := failed + (← expect (includes text "(TeslaValve.Test.Accepted.Probe._key) =>" &&
       includes text "340282366920938463463374607431768211455")
       "Accepted: emit rust did not export the underscore name and maximum Nat")
-    for fragment in ["[2, 3]", "Some(2)", "None", "\"\\\"\\\\\\n|_*\\u{202e}\\u{85}\""] do
+    for fragment in ["[2, 3]", "Some(2)", "[None, Some(2)]", "\"\\\"\\\\\\n|_*\\u{202e}\\u{85}\""] do
       failed := failed + (← expect (includes text fragment) s!"Accepted: Rust omitted {fragment}")
-    failed := failed + (← expect (!["defaultColour", "itemβ", "emptyStates", "absentState", "saved"].any (includes text))
+    failed := failed + (← expect (!["defaultColour", "itemβ", "availableStates", "suggestedState", "saved"].any (includes text))
       "Accepted: emit rust exported a type owned by the Rust consumer")
   let emptyRust ← emitRust { loaded with modules := #[`TeslaValve.Test.Accepted] }
   failed := failed + (← expect (emptyRust.toOption.any fun text =>
@@ -171,6 +192,13 @@ def selftest (place : String) : IO UInt32 := do
       | .ok _ => false) s!"Refused: {command} accepted a stuck list tail")
   for (module, name, why) in [
       (`TeslaValve.Test.Refused, `TeslaValve.Test.Refused.rootAxiom, .isAxiom),
+      (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Lone, .singletonChoice),
+      (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.UnusedError, .singletonChoice),
+      (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.forwardFlag, .booleanDecision),
+      (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.invertFlag, .booleanDecision),
+      (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.emptyFlags, .emptyConstant),
+      (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.absentFlag, .emptyConstant),
+      (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.moreEmptyFlags, .emptyConstant),
       (`TeslaValve.Test.Refused.doesIO, `concealed, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `Job, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `world, .doesIO),

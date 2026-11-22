@@ -2,4 +2,5 @@
 inductive Toggle where
   /-- On. -/
   | on
+  | off
   deriving DecidableEq

@@ -42,18 +42,6 @@ def docOf (env : Environment) (name : Name) : IO String := do
 def captioned (label doc : String) : String :=
   if doc.isEmpty then label else s!"{label}: {doc}"
 
-/-- Every value of a closed choice, case by case in the order they are declared. -/
-partial def valuesOf (env : Environment) : Expr → List Expr
-  | .const ``Bool [] => [mkConst ``Bool.true, mkConst ``Bool.false]
-  | .const name [] => match env.find? name with
-    | some (.inductInfo type) => type.ctors.flatMap fun ctor =>
-      let args := match env.find? ctor with
-        | some info => (arrows info.type).1.toList
-        | none => []
-      args.foldl (fun made arg => made.flatMap fun e => (valuesOf env arg).map (mkApp e ·)) [mkConst ctor]
-    | _ => []
-  | _ => []
-
 /-- The types of a constructor's fields, after its parameters. -/
 def fieldTypes (type : Expr) (params : Nat) : List Expr :=
   match type, params with
@@ -109,10 +97,6 @@ def computed (name : Name) (answer : Except String α) : IO α :=
 def evaluate (loaded : Loaded) (decision : Name) (inputs : List Expr) : IO String := do
   let answer ← loaded.reduce decision inputs.toArray
   computed decision (render loaded.env answer)
-
-/-- Every combination of one value per type. -/
-def combinations (env : Environment) (types : List Expr) : List (List Expr) :=
-  types.foldr (fun type rest => (valuesOf env type).flatMap fun v => rest.map (v :: ·)) [[]]
 
 /-- Escape a value or label for Markdown prose or a table cell. -/
 def escape (text : String) : String :=
@@ -230,7 +214,24 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     | _ => pure ()
   return "\n\n".intercalate out.toList
 
-/-- The view of one proof module: its title, and each rule it proves. -/
+/-- A structure's propositional fields, in the context of its parameters and earlier fields. -/
+private def premises (loaded : Loaded) (name : Name) : IO (Array (Name × String)) := do
+  let env := loaded.env
+  let fields := getStructureFields env name
+  let ctor := getStructureCtor env name
+  loaded.meta <| Meta.forallTelescope ctor.type fun args _ => do
+    let mut out := #[]
+    for field in fields, arg in args.toList.drop ctor.numParams do
+      let type ← Meta.inferType arg
+      if ← Meta.isProp type then
+        let doc ← docOf env ((getProjFnForField? env name field).getD (name ++ field))
+        let text ← if doc.isEmpty then
+          pure (escape (oneLine (← Meta.ppExpr type).pretty))
+        else pure doc
+        out := out.push (field, text)
+    return out
+
+/-- The view of one proof module: its premises, theorems and axiom dependencies. -/
 def viewProofs (loaded : Loaded) (module : Name) : IO String := do
   let env := loaded.env
   let mut out := #[]
@@ -239,9 +240,18 @@ def viewProofs (loaded : Loaded) (module : Name) : IO String := do
     out := out.push ("\n".intercalate ((d.trimAscii.toString.splitOn "\n").map fun l => if l.startsWith "#" then "#" ++ l else l))
   if doc.isEmpty then out := out.push s!"## {escape module.toString}"
   for w in loaded.written do
-    if w.module != module then continue
-    let .thmInfo _ := w.info | continue
-    out := out.push (captioned s!"✓ **{escape (words w.name)}**" (← docOf env w.name))
+    if w.module != module || !isStructure env w.name then continue
+    let fields ← premises loaded w.name
+    if fields.isEmpty then continue
+    let label := captioned s!"**{escape (title w.name)}**" (← docOf env w.name)
+    let rows := fields.map fun (name, text) => captioned s!"- Premise **{escape (words name)}**" text
+    out := out.push (label ++ "\n\n" ++ "\n".intercalate rows.toList)
+  for proof in ← proofAxioms loaded #[module] do
+    let mark := if usesOutsideAxioms proof.axioms then "⚠" else "✓"
+    let axioms := if proof.axioms.isEmpty then "none" else
+      ", ".intercalate (proof.axioms.toList.map fun name => s!"`{name}`")
+    let label := s!"{mark} **{escape (words proof.theoremName)}** (axioms: {axioms})"
+    out := out.push (captioned label (← docOf env proof.theoremName))
   return "\n\n".intercalate out.toList
 
 /-- Draws the ledger and its proof libraries as Markdown. -/

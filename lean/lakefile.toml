@@ -12,7 +12,7 @@ name = "TeslaValve"
 # The driver reads these compiled fixtures by module name.
 [[lean_lib]]
 name = "LedgerTests"
-globs = ["TeslaValve.Test.Accepted.*", "TeslaValve.Test.Proofs", "TeslaValve.Test.Refused.*"]
+globs = ["TeslaValve.Test.Accepted.*", "TeslaValve.Test.Proofs", "TeslaValve.Test.EmptyProofs", "TeslaValve.Test.Refused.*"]
 
 [[lean_exe]]
 name = "selftest"

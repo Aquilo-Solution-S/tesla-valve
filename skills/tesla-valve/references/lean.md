@@ -19,6 +19,10 @@ and test vectors.
 
 In every alternative of a decision match, including nested matches and
 or-patterns, name a constructor at each pattern position down to its fields.
+A choice needs distinct cases or a case carrying data. A single fieldless
+case may name a refusal when an `Except` decision can both succeed and refuse.
+A decision with the same answer for every input belongs in a constant. Use a single Bool input
+or its negation directly. Write empty lists and absent options at the use site.
 
 A ledger value is a closed choice, a shape, a `Nat`, a `Bool`, a `String`,
 a `List` or `Option` of a value, or an `Except` with a closed refusal
@@ -63,8 +67,9 @@ end Shop.Shipping
 ## Proof libraries
 
 Keep a rule that needs arithmetic, recursion or induction in a proof library.
-Its types and definitions can use ordinary Lean. The gate checks its proofs
-and the docstrings it has. It refuses `unsafe`, `axiom`, `partial`,
+Its types and definitions can use ordinary Lean. Each configured proof
+library must contribute a theorem. The gate checks its proofs and the
+docstrings it has. It refuses `unsafe`, `axiom`, `partial`,
 `noncomputable`, IO, and proofs that depend on `sorry`, `native_decide` or
 an axiom beyond Lean's own. A proof library may use an opaque type to leave
 its representation unspecified. An outside fact goes in the hypotheses of
@@ -213,7 +218,10 @@ def test_the_code_decides_the_days_the_spec_decides(postcode: Postcode) -> None:
 ```
 
 `lake exe shop view` prints Markdown from the Lean. It shows the ledger's
-shapes, values and decision tables, with theorems beside them. Read the view
-when you need the answer to a rule or want to see the whole decision table.
+shapes, values and decision tables, with theorems beside them. In proof
+libraries it labels propositional structure fields as premises, using the
+field's docstring or the proposition itself. It names each proof theorem's
+axioms, and `check` counts theorems using `propext`, `Quot.sound` or
+`Classical.choice` and those using none.
 
 [Set up the gate and run the tool's selftest.](../../prepare/references/lean.md)

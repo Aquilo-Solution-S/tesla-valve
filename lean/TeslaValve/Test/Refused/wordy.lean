@@ -3,4 +3,5 @@ already says. -/
 inductive Lever where
   /-- Down. -/
   | down
+  | up
   deriving DecidableEq

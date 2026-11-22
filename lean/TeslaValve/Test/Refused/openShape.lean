@@ -3,14 +3,19 @@ structure Offset where
   /-- Its distance, which may be below zero. -/
   distance : Int
 
+/-- The readiness of a value. -/
+inductive Readiness where
+  | ready
+  | waiting
+
 /-- Whether the value is ready. -/
-def yes : Bool → Bool
-  | true => true
-  | false => false
+def yes : Readiness → Bool
+  | .ready => true
+  | .waiting => false
 
 /-- A shape with an invariant under the wrong field name. -/
 structure RenamedProof where
-  value : Bool
+  value : Readiness
   proofWithAnotherName : yes value = true
 
 /-- A boolean constant. -/
