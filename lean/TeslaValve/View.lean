@@ -32,10 +32,13 @@ def oneLine (doc : String) : String :=
 def docOf (env : Environment) (name : Name) : IO String := do
   return oneLine ((← findDocString? env name).getD "")
 
+/-- A label, and after it the docstring where there is one. -/
+def captioned (label doc : String) : String :=
+  if doc.isEmpty then label else s!"{label}: {doc}"
+
 /-- A case or a field as a list item: its words, and its docstring where it has one. -/
 def item (env : Environment) (label : String) (name : Name) : IO String := do
-  let doc ← docOf env name
-  return if doc.isEmpty then s!"- {label}" else s!"- {label}: {doc}"
+  return "- " ++ captioned label (← docOf env name)
 
 /-- Every value of a closed choice, case by case in the order they are declared. -/
 partial def valuesOf (env : Environment) : Expr → List Expr
@@ -83,7 +86,7 @@ partial def render (env : Environment) (e : Expr) : String :=
       let fields := args.extract info.numParams args.size
       if fields.isEmpty then words ctor
       else
-        let names := getStructureFields env info.induct
+        let names := if isStructure env info.induct then getStructureFields env info.induct else #[]
         if names.isEmpty then s!"{words ctor} ({", ".intercalate (fields.toList.map (render env))})"
         else
           let shown := ((names.toList.zip fields.toList).zip (fieldTypes info.type info.numParams)).filter
@@ -135,7 +138,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
   -- The choices and shapes, with their cases and fields.
   for w in here do
     let .inductInfo type := w.info | continue
-    let mut block := #[s!"**{title w.name}**: {← docOf env w.name}", ""]
+    let mut block := #[captioned s!"**{title w.name}**" (← docOf env w.name), ""]
     if isStructure env w.name then
       for field in getStructureFields env w.name do
         block := block.push (← item env (words field) (w.name ++ field))
@@ -147,7 +150,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
   for w in here do
     let .defnInfo d := w.info | continue
     if !(arrows d.type).1.isEmpty then continue
-    out := out.push s!"**{words w.name}** = {← evaluate loaded w.name []}: {← docOf env w.name}"
+    out := out.push (captioned s!"**{words w.name}** = {← evaluate loaded w.name []}" (← docOf env w.name))
   -- The decisions over the same inputs, in one table; a state machine as its diagram.
   let decisions := here.filter fun w => match w.info with
     | .defnInfo d => !(arrows d.type).1.isEmpty
@@ -167,7 +170,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
           match answer.getAppFn with
           | .const ``Except.error _ => refused := refused.push [render env s, render env e, render env answer]
           | _ => edges := edges.push s!"  {render env s |>.replace " " "_"} --> {render env answer |>.replace " " "_"} : {render env e}"
-      out := out.push s!"**{words w.name}**: {← docOf env w.name}"
+      out := out.push (captioned s!"**{words w.name}**" (← docOf env w.name))
       out := out.push ("```mermaid\nstateDiagram-v2\n" ++ "\n".intercalate edges.toList ++ "\n```")
       if !refused.isEmpty then
         out := out.push (table [typeWords state, typeWords event, "answer"] refused.toList)
@@ -185,7 +188,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     out := out.push (table (inputs.map typeWords ++ group.toList.map (words ·.name)) rows.toList)
     let mut legend := #[]
     for g in group do
-      legend := legend.push s!"- {words g.name}: {← docOf env g.name}"
+      legend := legend.push ("- " ++ captioned (words g.name) (← docOf env g.name))
     out := out.push ("\n".intercalate legend.toList)
   -- The rules and the rejected designs.
   for w in here do
@@ -193,8 +196,8 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     let doc ← docOf env w.name
     match w.name with
     | .str _ last =>
-      if last.startsWith "not_" then out := out.push s!"✗ **{words (Name.mkSimple (last.drop 4).toString)}**, rejected: {doc}"
-      else out := out.push s!"✓ **{words w.name}**: {doc}"
+      if last.startsWith "not_" then out := out.push (captioned s!"✗ **{words (Name.mkSimple (last.drop 4).toString)}**, rejected" doc)
+      else out := out.push (captioned s!"✓ **{words w.name}**" doc)
     | _ => pure ()
   return "\n\n".intercalate out.toList
 
@@ -209,7 +212,7 @@ def viewProofs (loaded : Loaded) (module : Name) : IO String := do
   for w in loaded.written do
     if w.module != module then continue
     let .thmInfo _ := w.info | continue
-    out := out.push s!"✓ **{words w.name}**: {← docOf env w.name}"
+    out := out.push (captioned s!"✓ **{words w.name}**" (← docOf env w.name))
   return "\n\n".intercalate out.toList
 
 /-- Draws the ledger and its proof libraries as Markdown. -/

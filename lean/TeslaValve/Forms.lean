@@ -470,7 +470,7 @@ def check (config : Config) : IO UInt32 := do
       IO.eprintln s!"error: {w.module}: {privateToUserName w.name} is named by no file under {scope.code}"
       owed := owed + 1
   if !config.scopes.isEmpty then
-    for module in all do
+    for module in loaded.modules do
       if !config.scopes.any (·.rules.isPrefixOf module) then
         IO.println s!"{module}: no scope lists it, so no code owes its declarations"
   if refused.isEmpty && unresolved.isEmpty && owed == 0 then

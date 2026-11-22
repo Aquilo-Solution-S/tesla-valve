@@ -81,7 +81,7 @@ partial def toJson (env : Environment) (e : Expr) : Json :=
       let case := match ctor with | .str _ s => s | _ => ctor.toString
       if fields.isEmpty then .str case
       else
-        let names := getStructureFields env info.induct
+        let names := if isStructure env info.induct then getStructureFields env info.induct else #[]
         if names.isEmpty then .mkObj [(case, .arr (fields.map (toJson env)))]
         else .mkObj (((names.toList.zip fields.toList).zip (fieldTypes info.type info.numParams)).filterMap
           fun ((field, v), type) => if type.isAppOf ``Eq then none else some (field.toString, toJson env v))
