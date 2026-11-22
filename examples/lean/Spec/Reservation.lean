@@ -1,4 +1,6 @@
 -- region: reservation
+namespace Spec
+
 /-- An order and the stock it holds. -/
 inductive Order where
   | placed (reserved : Nat)
@@ -44,4 +46,6 @@ theorem terminal_holds_nothing (order : Order)
   | placed n => have ⟨_, h⟩ := h .ship; simp [step] at h
   | shipped => rfl
   | cancelled => rfl
+
+end Spec
 -- endregion

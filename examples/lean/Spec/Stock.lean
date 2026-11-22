@@ -1,4 +1,6 @@
 -- region: stock
+namespace Spec
+
 /-- What the warehouse says about an item. -/
 inductive Stock where
   | inStock
@@ -14,11 +16,12 @@ theorem backorder_not_sooner (shipping restockDays : Nat) :
     deliveryDays shipping .inStock ≤ deliveryDays shipping (.backorder restockDays) := by
   simp [deliveryDays]
 
-/-- Rejected: one promise for every stock status. A backorder would be promised
-the date of an item in stock. -/
+/-- One delivery promise would give a backorder the date of an item in stock. -/
 theorem not_one_promise : ∃ shipping restockDays,
     deliveryDays shipping (.backorder restockDays) ≠ deliveryDays shipping .inStock :=
   ⟨0, 1, by decide⟩
 
 #guard deliveryDays 2 (.backorder 3) == 5
+
+end Spec
 -- endregion

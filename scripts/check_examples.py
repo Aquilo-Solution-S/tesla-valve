@@ -36,9 +36,7 @@ class Language:
 CLIPPY = ["cargo", "clippy", "--all-targets", "--locked", "--", "-D", "warnings"]
 PYTHON_LINTS = [["pyright"], ["mypy", "."], ["ruff", "check"]]
 TYPESCRIPT_LINTS = [["npx", "tsc", "--noEmit"], ["npx", "eslint", "."]]
-LEAN_GATE = [["lake", "build", "--wfail"], ["lake", "exe", "audit"]]
-# Writes the vectors the other examples replay. CI fails when they differ from the commit.
-LEAN_VECTORS = ["lake", "exe", "vectors"]
+LEAN_GATE = [["lake", "build", "--wfail"], ["lake", "exe", "shop", "check"]]
 
 LANGUAGES = {
     "rust": Language(
@@ -64,9 +62,9 @@ LANGUAGES = {
         linked=("node_modules",),
     ),
     "lean": Language(
-        checks=[*LEAN_GATE, LEAN_VECTORS],
+        checks=LEAN_GATE,
         lints=LEAN_GATE,
-        slot="Spec/Bad.lean",
+        slot="Spec/Stock/Unheld.lean",
         beside=("go", "python", "rust", "typescript"),
     ),
 }
@@ -95,12 +93,14 @@ def refuses(name: str, language: Language, bad: Path) -> tuple[bool, str]:
     if not expected:
         return False, f"{bad} names no `expect:` line"
     with tempfile.TemporaryDirectory() as tmp:
-        copy = Path(tmp) / name
+        sandbox = Path(tmp)
+        example_root = sandbox / "examples" if name == "lean" else sandbox
+        copy = example_root / name
         shutil.copytree(examples / name, copy, ignore=NOT_COPIED)
         for directory in language.linked:
             (copy / directory).symlink_to(examples / name / directory)
         for other in language.beside:
-            shutil.copytree(examples / other, Path(tmp) / other, ignore=NOT_COPIED)
+            shutil.copytree(examples / other, example_root / other, ignore=NOT_COPIED)
         named = SLOT.search(source)
         slot = copy / (named[1] if named else language.slot)
         slot.parent.mkdir(parents=True, exist_ok=True)
@@ -110,6 +110,12 @@ def refuses(name: str, language: Language, bad: Path) -> tuple[bool, str]:
             path, line = language.register
             with (copy / path).open("a") as file:
                 file.write(line)
+        if name == "lean":
+            # Lake resolves the dependency from examples/lean, and the check scans tracked files.
+            (sandbox / "lean").symlink_to(root / "lean", target_is_directory=True)
+            ready, output = run([["git", "init", "--quiet"], ["git", "add", "--", "examples"]], sandbox)
+            if not ready:
+                return False, output
         passed, output = run(language.lints, copy)
     missing = [line for line in expected if line not in output]
     if passed:
@@ -117,6 +123,30 @@ def refuses(name: str, language: Language, bad: Path) -> tuple[bool, str]:
     if missing:
         return False, f"the checks failed, but without {missing}\n{output}"
     return True, output
+
+
+def check_lean_artifacts() -> tuple[bool, str]:
+    lean = examples / "lean"
+    passed, output = run([["lake", "exe", "vectors"]], lean)
+    if not passed:
+        return False, output
+
+    command = ["lake", "exe", "shop", "emit", "rust"]
+    emitted = subprocess.run(command, cwd=lean, capture_output=True, check=False)
+    output += f"$ {' '.join(command)}\n{emitted.stderr.decode()}"
+    if emitted.returncode != 0:
+        return False, output
+    ledger = "examples/rust/src/ledger.rs"
+    (root / ledger).write_bytes(emitted.stdout)
+
+    paths = [ledger, ":(glob)examples/**/delivery_days.json"]
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--", *paths], cwd=root, capture_output=True, text=True, check=True
+    ).stdout
+    if untracked:
+        return False, output + f"Generated files missing from Git:\n{untracked}"
+    passed, diff = run([["git", "diff", "--exit-code", "HEAD", "--", *paths]], root)
+    return passed, output + diff
 
 
 def report(title: str, passed: bool, output: str) -> bool:
@@ -130,7 +160,10 @@ def main() -> None:
     results = []
     for name in sys.argv[1:] or LANGUAGES:
         language = LANGUAGES[name]
-        results.append(report(f"{name}: the example passes", *run(language.checks, examples / name)))
+        passed = report(f"{name}: the example passes", *run(language.checks, examples / name))
+        results.append(passed)
+        if name == "lean" and passed:
+            results.append(report("lean: regenerated Rust and vectors match the commit", *check_lean_artifacts()))
         for bad in sorted((examples / "bad" / name).iterdir()):
             results.append(report(f"{name}: {bad.name} is refused", *refuses(name, language, bad)))
     sys.exit(0 if all(results) else 1)

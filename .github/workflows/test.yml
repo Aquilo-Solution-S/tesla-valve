@@ -125,8 +125,11 @@ jobs:
           tar --zstd --extract --file "$RUNNER_TEMP/lean.tar.zst" --directory "$RUNNER_TEMP/lean" --strip-components=1
           echo "$RUNNER_TEMP/lean/bin" >> "$GITHUB_PATH"
 
-      - name: The example passes, and every enforcer refuses its bad file
-        run: python3 scripts/check_examples.py lean
+      - name: Build the ledger tool and run its selftest
+        working-directory: lean
+        run: |
+          lake build
+          lake test
 
-      - name: The vectors the code replays are the ones the spec writes
-        run: git diff --exit-code
+      - name: The example passes, and its emitted files match the commit
+        run: python3 scripts/check_examples.py lean

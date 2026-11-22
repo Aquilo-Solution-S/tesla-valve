@@ -155,7 +155,10 @@ stops firing there:
 <!-- code: examples/rust/src/lib.rs#clock -->
 ```rust
 /// The clock is a spring: read it here, once, and pass the date in.
-#[expect(clippy::disallowed_methods, reason = "the one place that reads the clock")]
+#[expect(
+    clippy::disallowed_methods,
+    reason = "the one place that reads the clock"
+)]
 pub fn today() -> NaiveDate {
     chrono::Local::now().date_naive()
 }

@@ -1,28 +1,28 @@
 name = "shop"
-defaultTargets = ["Spec", "audit", "vectors"]
+defaultTargets = ["Shop", "Spec", "shop", "vectors"]
 
-# region: whole-spec
-# Every module under Spec/ is built, whether or not anything imports it.
+# region: libraries
+[[require]]
+name = "teslavalve"
+path = "../../lean"
+
+[[lean_lib]]
+name = "Shop"
+globs = ["Shop.+"]
+
 [[lean_lib]]
 name = "Spec"
 globs = ["Spec.+"]
 # endregion
 
-# region: audit
-# The gate's own program. It is not part of the model, so it may do IO.
-[[lean_lib]]
-name = "Audit"
-
-# Its root is the project's own file, which names the library and the scopes.
-# It reads what the build produced, so the spec is built before it runs.
+# region: shop
 [[lean_exe]]
-name = "audit"
-root = "Scopes"
-needs = ["Spec"]
+name = "shop"
+root = "Main"
+needs = ["Shop", "Spec"]
 supportInterpreter = true
 # endregion
 
-# It writes the vectors the code replays, so it is outside the model too.
 [[lean_exe]]
 name = "vectors"
 root = "Vectors"

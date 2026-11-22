@@ -20,7 +20,7 @@ def test_a_backorder_ships_once_restocked() -> None:
 
 # region: named
 def test_a_backorder_never_arrives_sooner() -> None:
-    """@holds backorder_not_sooner"""
+    """`Spec.backorder_not_sooner`"""
     in_stock = delivery_date(Postcode("10115"), InStock(), date(2026, 10, 6))
     for restock_days in (0, 1, 30):
         backorder = Backorder(restock_days=restock_days)
@@ -31,7 +31,7 @@ def test_a_backorder_never_arrives_sooner() -> None:
 
 
 def test_a_backorder_is_not_promised_the_date_of_an_item_in_stock() -> None:
-    """@holds not_one_promise"""
+    """`Spec.not_one_promise`"""
     in_stock = delivery_date(Postcode("10115"), InStock(), date(2026, 10, 6))
     assert delivery_date(Postcode("10115"), Backorder(restock_days=1), date(2026, 10, 6)) != in_stock
 
@@ -44,7 +44,7 @@ class Vector(BaseModel):
     days: int
 
 
-# @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
+# Replay `Spec.deliveryDays` with the inputs encoded by `Spec.stockJson`.
 vectors_of = TypeAdapter(list[Vector]).validate_json
 VECTORS = vectors_of((Path(__file__).parent / "delivery_days.json").read_bytes())
 

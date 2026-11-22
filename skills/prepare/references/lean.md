@@ -1,236 +1,129 @@
 # Lean
 
-A spec in Lean is a project of its own beside the code, built by the same
-gate. What it may contain is in the tesla-valve skill's
-[Lean reference](../../tesla-valve/references/lean.md).
-
-| tool | holds | comes with |
-| --- | --- | --- |
-| the compiler | every proof, every `#guard` and `example`, every match | the toolchain |
-| `lake build --wfail` | no `sorry`: its warning fails the build | the toolchain |
-| the `Spec.+` glob | every module of the spec is built, imported or not | Lake |
-| an audit of the built spec | no `axiom`, `partial`, `unsafe`, `noncomputable` or `IO` in the model | a small program beside the spec |
-| the same audit, on the code | the code of a scope holds every declaration in the modules the scope lists, and every name the code cites is a declaration of the spec or a program beside it | the same program |
+Put the ledger and its proof libraries in a Lake package beside the code.
+[The Lean reference](../../tesla-valve/references/lean.md) explains the forms
+and how the code holds the rules.
 
 ## The tools
 
-Pin the toolchain in `lean-toolchain`. `elan` reads the file, and every `lake`
-call below it uses that toolchain:
+Pin the toolchain in `lean-toolchain`. Elan uses that pin for commands run
+under the package.
 
 <!-- code: examples/lean/lean-toolchain -->
 ```text
 leanprover/lean4:v4.35.0
 ```
 
-Commit `lake-manifest.json`.
+Require the [teslavalve Lake package](../../../lean) and commit
+`lake-manifest.json`. The example uses a path in the same repository. Use a
+glob for each library so the build includes modules nothing imports.
 
-## The config
-
-In `lakefile.toml`, the library is a glob, not a root module that imports the
-rest. A root module is a list each new file must be added to, and a file left
-out of it is never checked:
-
-<!-- code: examples/lean/lakefile.toml#whole-spec -->
+<!-- code: examples/lean/lakefile.toml#libraries -->
 ```toml
-# Every module under Spec/ is built, whether or not anything imports it.
+[[require]]
+name = "teslavalve"
+path = "../../lean"
+
+[[lean_lib]]
+name = "Shop"
+globs = ["Shop.+"]
+
 [[lean_lib]]
 name = "Spec"
 globs = ["Spec.+"]
 ```
 
-The audit is a program in the same package and outside the model. Its
-executable has a file of the project's own as its root, and needs the spec,
-so `lake exe audit` never reads a build that is older than the source:
+Give the project an executable that needs both libraries. It reads the
+compiled modules when it runs.
 
-<!-- code: examples/lean/lakefile.toml#audit -->
+<!-- code: examples/lean/lakefile.toml#shop -->
 ```toml
-# The gate's own program. It is not part of the model, so it may do IO.
-[[lean_lib]]
-name = "Audit"
-
-# Its root is the project's own file, which names the library and the scopes.
-# It reads what the build produced, so the spec is built before it runs.
 [[lean_exe]]
-name = "audit"
-root = "Scopes"
-needs = ["Spec"]
+name = "shop"
+root = "Main"
+needs = ["Shop", "Spec"]
 supportInterpreter = true
 ```
 
-It reads the modules from the tree, loads what the build produced, and
-refuses a declaration of the spec for one of five reasons:
+The program calls `TeslaValve.run` with the ledger, any proof libraries, and
+the scopes. A scope's paths are relative to the Git root. Add the generated
+Rust file as an exclusion. Use `unscanned` for the tool's own example links
+and for the intentionally broken links in the fixtures and the guide that
+quotes them.
 
-<!-- code: examples/lean/Audit.lean#refusal -->
+<!-- code: examples/lean/Main.lean#config -->
 ```lean
-/-- The constants a declaration names, in its type and in its value. -/
-def named (info : ConstantInfo) : Array Name :=
-  info.type.getUsedConstants ++ (info.value?.map (·.getUsedConstants)).getD #[]
-
-/-- Why a declaration of the model is refused, if it is. -/
-def refusal (env : Environment) (name : Name) (info : ConstantInfo) : Option String :=
-  if info matches .axiomInfo _ then some "is an axiom"
-  else if info.isUnsafe then some "is unsafe"
-  else if info matches .opaqueInfo _ then some "is partial or opaque"
-  else if isNoncomputable env name then some "is noncomputable"
-  else if (named info).any (· ∈ [``IO, ``EIO, ``BaseIO]) then some "does IO"
-  else none
+unsafe def main (args : List String) : IO UInt32 :=
+  TeslaValve.run {
+    ledger := `Shop
+    proofs := [`Spec]
+    scopes := [
+      { rules := `Spec.Stock, code := ["examples/go"] },
+      { rules := `Spec.Stock, code := ["examples/python/shop", "examples/python/tests"] },
+      { rules := `Spec.Stock, code := ["examples/rust/src", ":!examples/rust/src/ledger.rs"] },
+      { rules := `Spec.Stock, code := ["examples/typescript/src"] },
+      { rules := `Shop.Shipping, code := ["examples/rust/src", ":!examples/rust/src/ledger.rs"] },
+    ]
+    -- The tool has its own examples. The preparation guide quotes the broken links.
+    unscanned := ["lean", "examples/bad/lean", "skills/prepare/references/lean.md"]
+  } args
 ```
 
-The same program ties the spec to the code. The code names what it holds
-with `@holds <name>`: a declaration, or a program beside the spec whose
-output it takes in. The project's own `Scopes.lean` names the library and
-says which code holds which modules, as the tesla-valve skill's
-[Lean reference](../../tesla-valve/references/lean.md#one-part-of-the-spec-at-a-time)
-shows. Add a scope for each module the code already holds. With no scope
-this row of the table is off: report it so, and prove it with the first
-scope. The paths are read from the directory `lake` runs in. List the
-directories of the source, not a build output: a compiled file can carry a
-name its source no longer has.
+## The gate
 
-A program the code names is a module beside the spec that declares `main`
-and that the Lake file builds, as the root of `vectors`. The audit builds
-it before it reads what its `main` uses, so the `needs` of the audit lists
-the spec and no program.
-
-The program is
-[`Audit.lean`](https://github.com/Aquilo-Solution-S/tesla-valve/blob/main/examples/lean/Audit.lean)
-in the example. Copy it as it is, and write `Scopes.lean` beside it. A later
-version of the audit then replaces that one file, and the scopes stay.
-
-## CI
+Run the build and check from the project's Lean package. The compiler proves
+the theorems and `--wfail` makes warnings fail the build. The check enforces
+the forms, proof-library restrictions, docstrings, links and scopes.
 
 ```sh
 lake build --wfail
-lake exe audit
+lake exe shop check
 ```
 
-Where a program beside the model writes a file the code reads, as the vectors
-a test replays, run it after these and fail on a difference:
+Use `lake exe shop view` to read the ledger as Markdown, and
+`lake exe shop emit vectors` to print the ledger decisions as JSON. Where the
+code consumes generated Rust or vectors, regenerate them in the gate and
+compare them with the commit. The shop writes its Nat-input vectors with its
+own `vectors` program.
 
 ```sh
 lake exe vectors
-git diff --exit-code
+lake exe shop emit rust > ../rust/src/ledger.rs
+git diff --exit-code HEAD
 ```
 
-The audit counts such a program as holding what it carries. That holds only
-where this step runs: without it the file in the commit can be older than
-the spec. Prove the step too: change the written file in the copy, and it
-fails.
+## The refusals
 
-## The proofs
+Run `lake build` and `lake test` in the tool's
+[`lean/`](../../../lean) package. The selftest checks every
+[`Refused/`](../../../lean/Refused) module for its own refusal. It checks
+which restrictions also hold in a proof library.
 
-Put the bad file in the spec as a module nothing imports, such as
-`Spec/Bad.lean`, and run both commands in the copy.
-
-The build refuses an assumed proof, and a false one in a module nothing
-imports:
-
-<!-- code: examples/bad/lean/sorry.lean -->
-```lean
--- expect: declaration uses `sorry`
-theorem restock_is_short (restockDays : Nat) : restockDays ≤ 14 := by sorry
-```
-
-<!-- code: examples/bad/lean/not_imported.lean -->
-```lean
--- expect: Tactic `decide` proved that the proposition
--- Nothing imports this module, and the gate still builds it.
-example : 2 + 2 = 5 := by decide
-```
-
-The audit refuses an outside fact declared as an axiom, private or not. It
-belongs in the hypotheses of the theorem that needs it:
-
-<!-- code: examples/bad/lean/axiom.lean -->
-```lean
--- expect: warehouse_is_honest is an axiom
-private axiom warehouse_is_honest (restockDays : Nat) : restockDays ≤ 14
-```
-
-It refuses a decision that need not terminate, one that steps outside the
-kernel, and one that cannot be evaluated:
-
-<!-- code: examples/bad/lean/partial.lean -->
-```lean
--- expect: retry is partial or opaque
-partial def retry (attempt : Nat) : Nat := retry (attempt + 1)
-```
-
-<!-- code: examples/bad/lean/unsafe.lean -->
-```lean
--- expect: forgedDays is unsafe
-unsafe def forgedDays (raw : Nat) : Nat := raw
-```
-
-<!-- code: examples/bad/lean/noncomputable.lean -->
-```lean
--- expect: someDays is noncomputable
-noncomputable def someDays : Nat := Classical.choice ⟨0⟩
-```
-
-In a module a scope lists, it refuses a declaration no code names. The bad
-file goes under the scope, which its `slot:` line says:
-
-<!-- code: examples/bad/lean/unnamed.lean -->
-```lean
--- slot: Spec/Stock/Rush.lean
--- expect: no code under [../python/shop, ../python/tests] names in_stock_takes_shipping_only
-import Spec.Stock
-
-/-- An item in stock takes the shipping time and no more. -/
-theorem in_stock_takes_shipping_only (shipping : Nat) : deliveryDays shipping .inStock = shipping :=
-  rfl
-```
-
-And it refuses a name in the code that is no declaration of the spec and no
-program beside it. This bad file goes into the code:
+Exercise the project's wiring in a separate Git checkout. Add the file to
+the index where the gate can see it. A bad code file links a missing rule.
 
 <!-- code: examples/bad/lean/stale.py -->
 ```python
 # slot: ../python/tests/test_rush.py
-# expect: names rush_ships_today, which is no declaration of the spec and no program beside it
+# expect: links `Spec.rush_ships_today`, which neither the ledger nor a proof library declares
 def test_a_rush_order_ships_today() -> None:
-    """@holds rush_ships_today"""
+    """`Spec.rush_ships_today`"""
 ```
 
-It refuses a program the code names that does not build, because what it
-holds cannot be read. This bad file takes the place of the program:
+A bad Lean module belongs under a scoped module prefix. The shop puts this
+one in `Spec/Stock/Unheld.lean`. It builds, and the check refuses it because
+no code in a scope names its theorem.
 
-<!-- code: examples/bad/lean/broken_program.lean -->
+<!-- code: examples/bad/lean/unnamed.lean -->
 ```lean
--- slot: Vectors.lean
--- expect: names Vectors, which does not build
-def main : IO Unit := "the vectors"
-```
-
-It refuses a root module, `Spec.lean` beside `Spec/`: the glob does not
-build it, and the audit would not read it.
-
-<!-- code: examples/bad/lean/root_module.lean -->
-```lean
--- slot: Spec.lean
--- expect: the spec is the modules under Spec/
+-- expect: Spec.in_stock_takes_shipping_only is named by no file under
 import Spec.Stock
-```
 
-It refuses modules that do not load as one model, as two that declare one
-name. Two programs under the library do that with `main`, so a program
-stands beside the library:
+namespace Spec
 
-<!-- code: examples/bad/lean/same_name.lean -->
-```lean
--- slot: Spec/Rush.lean
--- expect: its modules do not load as one model
-/-- A second decision of the same name, in a module that does not import the first. -/
-def deliveryDays (shipping : Nat) : Nat := shipping
-```
+/-- An item in stock takes the shipping time and no more. -/
+theorem in_stock_takes_shipping_only (shipping : Nat) : deliveryDays shipping .inStock = shipping :=
+  rfl
 
-It refuses a model that acts instead of deciding, behind an alias too:
-
-<!-- code: examples/bad/lean/io_in_the_model.lean -->
-```lean
--- expect: Effect does IO
-abbrev Effect := IO
-
-def announce : Effect Unit := IO.println "shipped"
+end Spec
 ```

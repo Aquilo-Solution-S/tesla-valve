@@ -1,9 +1,12 @@
+import Shop.Shipping
 import Spec.Stock.Wire
+
+open Shop.Shipping Spec
 
 -- region: vectors
 /-- What the code replays: both shipping times it knows, in stock and on backorder. -/
 def inputs : List (Nat × Stock) :=
-  [2, 3].flatMap fun shipping =>
+  [shippingDays .local, shippingDays .standard].flatMap fun shipping =>
     [.inStock, .backorder 0, .backorder 1, .backorder 5, .backorder 65535].map (shipping, ·)
 
 /-- Where each codebase keeps the vectors its test replays. -/

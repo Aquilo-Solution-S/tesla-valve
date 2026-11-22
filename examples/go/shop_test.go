@@ -34,7 +34,7 @@ func TestABackorderShipsOnceRestocked(t *testing.T) {
 	}
 }
 
-// @holds backorder_not_sooner
+// `Spec.backorder_not_sooner`
 func TestABackorderNeverArrivesSooner(t *testing.T) {
 	today := date(2026, time.October, 6)
 	inStock := DeliveryDate(berlin(t), InStock{}, today)
@@ -46,7 +46,7 @@ func TestABackorderNeverArrivesSooner(t *testing.T) {
 	}
 }
 
-// @holds not_one_promise
+// `Spec.not_one_promise`
 func TestABackorderIsNotPromisedTheDateOfAnItemInStock(t *testing.T) {
 	today := date(2026, time.October, 6)
 	inStock := DeliveryDate(berlin(t), InStock{}, today)
@@ -56,7 +56,7 @@ func TestABackorderIsNotPromisedTheDateOfAnItemInStock(t *testing.T) {
 }
 
 func TestTheCodeDecidesTheDaysTheSpecDecides(t *testing.T) {
-	// @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
+	// Replay `Spec.deliveryDays` with the inputs encoded by `Spec.stockJson`.
 	raw, err := os.ReadFile("testdata/delivery_days.json")
 	if err != nil {
 		t.Fatal(err)

@@ -25,7 +25,7 @@ test("a backorder ships once restocked", () => {
   assert.deepEqual(arrives, new Date("2026-10-13"));
 });
 
-// @holds backorder_not_sooner
+// `Spec.backorder_not_sooner`
 test("a backorder never arrives sooner", () => {
   const today = new Date("2026-10-06");
   const inStock = deliveryDate(berlin(), Stock.parse({ status: "in_stock" }), today);
@@ -35,7 +35,7 @@ test("a backorder never arrives sooner", () => {
   }
 });
 
-// @holds not_one_promise
+// `Spec.not_one_promise`
 test("a backorder is not promised the date of an item in stock", () => {
   const today = new Date("2026-10-06");
   const inStock = deliveryDate(berlin(), Stock.parse({ status: "in_stock" }), today);
@@ -43,7 +43,7 @@ test("a backorder is not promised the date of an item in stock", () => {
   assert.notDeepEqual(deliveryDate(berlin(), backorder, today), inStock);
 });
 
-// @holds Vectors: `lake exe vectors`, in examples/lean, writes this file.
+// Replay `Spec.deliveryDays` with the inputs encoded by `Spec.stockJson`.
 const written: unknown = JSON.parse(
   readFileSync(new URL("../src/delivery_days.json", import.meta.url), "utf8"),
 );

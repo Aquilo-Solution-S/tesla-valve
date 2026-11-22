@@ -264,9 +264,9 @@ the code are read as "is" and may not. Neither says when.
   it holds, as the test `cancel_releases` names the rule it tests, so a
   search for the name shows what holds it, and no list of what is done has
   to be kept. A rule nothing names is unbuilt, and an open gap issue says so.
-  Where the rules are declarations in a spec, a gate does that search for
-  the modules the project has put under it, and refuses a rule there that
-  the code does not name: [Lean](references/lean.md).
+  For rules in Lean, put the full name in backticks beside the code that
+  holds it. The ledger check resolves those links and checks that the code
+  of each scope holds its declarations. [Lean](references/lean.md)
 
 ## At a gap
 
