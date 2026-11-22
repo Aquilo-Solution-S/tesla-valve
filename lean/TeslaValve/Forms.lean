@@ -449,7 +449,8 @@ every link to either resolves, in every tracked file of the repository, and ever
 declarations are held by its code. -/
 def check (config : Config) : IO UInt32 := do
   let loaded ← config.load
-  if loaded.modules.isEmpty then
+  -- A project may start from its proofs, before its ledger has a module.
+  if loaded.modules.isEmpty && loaded.proofs.isEmpty then
     IO.eprintln s!"{config.ledger}: no module under {config.ledger}/, so nothing is checked"
     return 1
   let refused ← refusals loaded
