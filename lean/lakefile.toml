@@ -1,0 +1,21 @@
+name = "teslavalve"
+defaultTargets = ["TeslaValve", "Refused", "selftest"]
+# `lake test` shows that the check refuses each module under Refused/ for its own reason.
+testDriver = "selftest"
+
+# The check and the view. A project requires this package and calls `TeslaValve.run` from a
+# program of its own, which names its ledger and its proof libraries.
+[[lean_lib]]
+name = "TeslaValve"
+
+# One module per refusal of the check. Each builds, and the selftest expects its refusal.
+[[lean_lib]]
+name = "Refused"
+globs = ["Refused.+"]
+
+# It reads what the build produced, so the refused modules are built before it runs.
+[[lean_exe]]
+name = "selftest"
+root = "Selftest"
+needs = ["Refused"]
+supportInterpreter = true
