@@ -1,2 +1,2 @@
-/-- A text. -/
-def greeting : String := "hello"
+/-- A signed number. -/
+def offset : Int := -1

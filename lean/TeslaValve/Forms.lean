@@ -17,8 +17,9 @@ The ledger allows seven forms, so that a view can draw all of it by evaluation:
   axiom beyond Lean's three;
 - a rejected design: a rule named `not_…`, which shows the alternative breaks the ledger.
 
-A ledger value is a closed choice, a shape, `Nat`, `Bool`, an `Option` of a value, or an
-`Except` of a closed choice and a value.
+A ledger value is a closed choice, a shape, `Nat`, `Bool`, a `String`, a `List` or an `Option`
+of a value, or an `Except` of a closed choice and a value. A string spells what another
+system reads exactly, such as a key; a rule is a declaration, never a string.
 
 The Lean is the documentation. Every declaration has a docstring of one line that says
 what it is, without a date, and a module's docstring is its title. A case or a field has
@@ -30,6 +31,10 @@ such as who ruled a rule and when: git and the issue keep that.
 A rule is linked by its full name in backticks, as `Shop.Stock.reserve`, in a docstring of
 the ledger and in every file of the repository alike. The check refuses a link that
 names neither a declaration nor a namespace of the ledger or of a proof library beside it.
+
+A scope ties modules to the code that holds them: every declaration of its modules is named,
+by its full name, in a file under the scope's paths, or is stated in one that is, as a
+choice is in the decision over it. A rule, a theorem, is held by its name alone.
 
 A proof library holds the rules that need more than the forms, such as an induction over a
 graph: its structures, classes and instances are its own business, and the check holds it
@@ -133,7 +138,8 @@ def Refusal.inProofs : Refusal → Bool
 /-- Operations a decision or a constant may use beside the ledger's own declarations. -/
 def operations : List Name := [
   ``Bool, ``Bool.true, ``Bool.false, ``and, ``or, ``not,
-  ``Nat, ``OfNat.ofNat, ``instOfNatNat,
+  ``Nat, ``OfNat.ofNat, ``instOfNatNat, ``String,
+  ``List, ``List.cons, ``List.nil,
   ``Option, ``Option.some, ``Option.none,
   ``Except, ``Except.ok, ``Except.error,
   ``Unit, ``PUnit, ``Unit.unit, ``PUnit.unit]
@@ -161,12 +167,14 @@ partial def closed (loaded : Loaded) : Expr → Bool
   | _ => false
 
 mutual
-/-- A ledger value: a closed choice (`Bool` among them), a shape, `Nat`, an `Option` of
-a value, or an `Except` of a closed choice and a value. -/
+/-- A ledger value: a closed choice (`Bool` among them), a shape, `Nat`, a `String`, a `List`
+or an `Option` of a value, or an `Except` of a closed choice and a value. -/
 partial def value (loaded : Loaded) : Expr → Bool
   | .const ``Nat [] => true
+  | .const ``String [] => true
   | type@(.const name []) => closed loaded type || shape loaded name
   | .app (.const ``Option [_]) inner => value loaded inner
+  | .app (.const ``List [_]) inner => value loaded inner
   | .app (.app (.const ``Except [_, _]) refusal) inner => closed loaded refusal && value loaded inner
   | _ => false
 
@@ -349,32 +357,80 @@ def placeInRepository : IO String := do
     throw <| IO.userError s!"git rev-parse: {place.stderr.trimAscii}"
   return place.stdout.trimAscii.toString
 
-/-- Each backticked name that starts with one of the roots in the repository's tracked files
-under `paths`, with the file and line it stands on. -/
-def mentions (roots : List Name) (paths : Array String) : IO (Array (String × Name)) := do
+/-- Each name that starts with one of the roots in the repository's tracked files under
+`paths`, with the file and line it stands on: in backticks, or, where `backticked` is false,
+wherever it stands, as in `ledger!(Shop.Stock.maxPerOrder)`. -/
+def mentions (roots : List Name) (paths : Array String) (backticked : Bool := true) :
+    IO (Array (String × Name)) := do
   if roots.isEmpty then return #[]
   let top ← IO.Process.output { cmd := "git", args := #["rev-parse", "--show-toplevel"] }
   if top.exitCode != 0 then
     throw <| IO.userError s!"git rev-parse: {top.stderr.trimAscii}"
+  let tick := if backticked then "`" else ""
   let grep ← IO.Process.output {
     cmd := "git", cwd := top.stdout.trimAscii.toString,
-    args := #["grep", "-n", "-I", "-o", "-E", s!"`({"|".intercalate (roots.map toString)})\\.[A-Za-z0-9_.']+`", "--"] ++ paths }
+    args := #["grep", "-n", "-I", "-o", "-E", s!"{tick}({"|".intercalate (roots.map toString)})\\.[A-Za-z0-9_.']+{tick}", "--"] ++ paths }
   -- `git grep` exits 1 when nothing matches, and above 1 when it could not search.
   if grep.exitCode > 1 then
     throw <| IO.userError s!"git grep: {grep.stderr.trimAscii}"
   return grep.stdout.splitOn "\n" |>.filter (· != "") |>.toArray.map fun line =>
     let parts := line.splitOn ":"
-    (":".intercalate parts.dropLast, (parts.getLast!.drop 1 |>.dropEnd 1).toString.toName)
+    let found := if backticked then (parts.getLast!.drop 1 |>.dropEnd 1).toString else parts.getLast!
+    -- A name that ends a sentence keeps its full stop out.
+    (":".intercalate parts.dropLast, (found.dropEndWhile (· == '.')).toString.toName)
 
 /-- The mentions under `paths` whose name the environment neither declares nor opens. -/
 def dangling (env : Environment) (roots : List Name) (paths : Array String) : IO (Array (String × Name)) :=
   return (← mentions roots paths).filter fun (_, name) => !env.contains name && !env.isNamespace name
 
-/-- What a project checks: its ledger, the proof libraries beside it, and the paths of the
-repository whose links are not the project's, relative to the repository's top. -/
+/-- A part of the ledger or of a proof library, by the prefix of its modules, and the paths
+of the repository whose files hold it, relative to the repository's top: a generated file
+among them is excluded, as `:!src/ledger.rs`, since it names what it holds nowhere. -/
+structure Scope where
+  rules : Name
+  code : List String
+
+/-- What a declaration is stated in: its type and body, or the fields of its cases; a case
+stands for its type. -/
+def statedIn (env : Environment) (info : ConstantInfo) : Array Name :=
+  let used : Array Name := match info with
+    | .thmInfo rule => rule.type.getUsedConstants
+    | .inductInfo type => type.ctors.toArray.flatMap fun ctor =>
+        ((env.find? ctor).map fun (c : ConstantInfo) => c.type.getUsedConstants).getD #[]
+    | other => other.type.getUsedConstants ++ (other.value?.map Expr.getUsedConstants).getD #[]
+  used.map fun name => match env.find? name with
+    | some (.ctorInfo ctor) => ctor.induct
+    | _ => name
+
+/-- The declarations of a scope that no file under its paths holds. A file holds what it
+names and what that is stated in; a rule only by its name. A case, a field, an instance and
+what the compiler made belong to their declaration. -/
+def unheld (loaded : Loaded) (scope : Scope) : IO (Array Written) := do
+  let env := loaded.env
+  let mut held : Std.HashSet Name := {}
+  let mut todo := ((← mentions loaded.roots scope.code.toArray (backticked := false)).map (·.2)).toList
+  repeat
+    let name :: rest := todo | break
+    todo := rest
+    if held.contains name then continue
+    held := held.insert name
+    let some info := env.find? name | continue
+    let further := (statedIn env info).filter fun used =>
+      (moduleOf env used).any (loaded.modules ++ loaded.proofs).contains &&
+      !(env.find? used matches some (.thmInfo _))
+    todo := further.toList ++ todo
+  return loaded.written.filter fun w =>
+    scope.rules.isPrefixOf w.module && !held.contains w.name &&
+    !isPrivateName w.name && !(w.info matches .ctorInfo _) && !env.isProjectionFn w.name &&
+    !Meta.isInstanceCore env w.name
+
+/-- What a project checks: its ledger, the proof libraries beside it, the scopes that tie them
+to the code, and the paths of the repository whose links are not the project's, relative to
+the repository's top. -/
 structure Config where
   ledger : Name
   proofs : List Name := []
+  scopes : List Scope := []
   unscanned : List String := []
 
 /-- Loads a project's libraries. -/
@@ -383,7 +439,8 @@ def Config.load (config : Config) : IO Loaded := do
   TeslaValve.load (← modulesOf config.ledger) proofs (config.ledger :: config.proofs)
 
 /-- Checks the ledger: every declaration in its forms, every proof on Lean's axioms alone,
-and every link to either resolves, in every tracked file of the repository. -/
+every link to either resolves, in every tracked file of the repository, and every scope's
+declarations are held by its code. -/
 def check (config : Config) : IO UInt32 := do
   let loaded ← config.load
   if loaded.modules.isEmpty then
@@ -396,9 +453,23 @@ def check (config : Config) : IO UInt32 := do
   let unresolved ← dangling loaded.env loaded.roots (#["."] ++ unscanned)
   for (place, name) in unresolved do
     IO.eprintln s!"error: {place}: links `{name}`, which neither the ledger nor a proof library declares"
-  if refused.isEmpty && unresolved.isEmpty then
+  let all := loaded.modules ++ loaded.proofs
+  let mut owed := 0
+  for scope in config.scopes do
+    if !all.any scope.rules.isPrefixOf then
+      IO.eprintln s!"error: the scope {scope.rules} has no module of the ledger or a proof library under it"
+      owed := owed + 1
+    for w in ← unheld loaded scope do
+      IO.eprintln s!"error: {w.module}: {privateToUserName w.name} is named by no file under {scope.code}"
+      owed := owed + 1
+  if !config.scopes.isEmpty then
+    for module in all do
+      if !config.scopes.any (·.rules.isPrefixOf module) then
+        IO.println s!"{module}: no scope lists it, so no code owes its declarations"
+  if refused.isEmpty && unresolved.isEmpty && owed == 0 then
     let proofs := if loaded.proofs.isEmpty then "" else s!", beside {loaded.proofs.size} proof modules"
-    IO.println s!"{config.ledger}: {loaded.written.size} declarations in {loaded.modules.size} modules{proofs}, each in its form"
+    let holders := if config.scopes.isEmpty then "" else s!", held by the code of {config.scopes.length} scopes"
+    IO.println s!"{config.ledger}: {loaded.written.size} declarations in {loaded.modules.size} modules{proofs}, each in its form{holders}"
     return 0
   return 1
 

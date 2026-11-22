@@ -56,6 +56,12 @@ def fieldTypes (type : Expr) (params : Nat) : List Expr :=
   | .forallE _ field body _, 0 => field :: fieldTypes body 0
   | _, _ => []
 
+/-- The items of a list the ledger computed, in order. -/
+partial def listItems (e : Expr) : List Expr :=
+  match e.getAppFn, e.getAppArgs with
+  | .const ``List.cons _, #[_, head, tail] => head :: listItems tail
+  | _, _ => []
+
 /-- A value the ledger computed, in words. A shape shows its fields and not its invariant,
 which is a proof. -/
 partial def render (env : Environment) (e : Expr) : String :=
@@ -69,6 +75,9 @@ partial def render (env : Environment) (e : Expr) : String :=
   | .const ``Bool.false _ => "no"
   | .const ``OfNat.ofNat _ => render env (args[1]?.getD e)
   | .lit (.natVal n) => toString n
+  | .lit (.strVal s) => s.quote
+  | .const ``List.nil _ => "[]"
+  | .const ``List.cons _ => s!"[{", ".intercalate ((listItems e).map (render env))}]"
   | .const ctor _ => match env.find? ctor with
     | some (.ctorInfo info) =>
       let fields := args.extract info.numParams args.size

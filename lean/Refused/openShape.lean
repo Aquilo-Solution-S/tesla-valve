@@ -1,4 +1,4 @@
-/-- A shape with a free text. -/
-structure Labelled where
-  /-- Its label. -/
-  label : String
+/-- A shape with a signed number. -/
+structure Offset where
+  /-- Its distance, which may be below zero. -/
+  distance : Int
