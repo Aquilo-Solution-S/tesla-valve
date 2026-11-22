@@ -1,3 +1,6 @@
-/-! An empty proof library can contain definitions. -/
+/-! An empty proof library can contain definitions and instances. -/
 
-def proofLibraryFlag : Bool := true
+structure Box where
+  count : Nat
+
+instance boxExists : Nonempty Box := ⟨⟨0⟩⟩

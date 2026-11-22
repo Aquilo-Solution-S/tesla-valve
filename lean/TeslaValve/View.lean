@@ -222,7 +222,7 @@ private def premises (loaded : Loaded) (name : Name) : IO (Array (Name × String
   loaded.meta <| Meta.forallTelescope ctor.type fun args _ => do
     let mut out := #[]
     for field in fields, arg in args.toList.drop ctor.numParams do
-      let type ← Meta.inferType arg
+      let type := (← Meta.inferType arg).consumeTypeAnnotations
       if ← Meta.isProp type then
         let doc ← docOf env ((getProjFnForField? env name field).getD (name ++ field))
         let text ← if doc.isEmpty then
@@ -240,18 +240,19 @@ def viewProofs (loaded : Loaded) (module : Name) : IO String := do
     out := out.push ("\n".intercalate ((d.trimAscii.toString.splitOn "\n").map fun l => if l.startsWith "#" then "#" ++ l else l))
   if doc.isEmpty then out := out.push s!"## {escape module.toString}"
   for w in loaded.written do
-    if w.module != module || !isStructure env w.name then continue
-    let fields ← premises loaded w.name
-    if fields.isEmpty then continue
-    let label := captioned s!"**{escape (title w.name)}**" (← docOf env w.name)
-    let rows := fields.map fun (name, text) => captioned s!"- Premise **{escape (words name)}**" text
-    out := out.push (label ++ "\n\n" ++ "\n".intercalate rows.toList)
-  for proof in ← proofAxioms loaded #[module] do
-    let mark := if usesOutsideAxioms proof.axioms then "⚠" else "✓"
-    let axioms := if proof.axioms.isEmpty then "none" else
-      ", ".intercalate (proof.axioms.toList.map fun name => s!"`{name}`")
-    let label := s!"{mark} **{escape (words proof.theoremName)}** (axioms: {axioms})"
-    out := out.push (captioned label (← docOf env proof.theoremName))
+    if w.module != module then continue
+    if isStructure env w.name then
+      let fields ← premises loaded w.name
+      if fields.isEmpty then continue
+      let label := captioned s!"**{escape (title w.name)}**" (← docOf env w.name)
+      let rows := fields.map fun (name, text) => captioned s!"- Premise **{escape (words name)}**" text
+      out := out.push (label ++ "\n\n" ++ "\n".intercalate rows.toList)
+    else if let some proof ← loaded.meta (w.proofAxioms env) then
+      let mark := if usesOutsideAxioms proof.axioms then "⚠" else "✓"
+      let axioms := if proof.axioms.isEmpty then "none" else
+        ", ".intercalate (proof.axioms.toList.map fun name => s!"`{name}`")
+      let label := s!"{mark} **{escape (words w.name)}** (axioms: {axioms})"
+      out := out.push (captioned label (← docOf env w.name))
   return "\n\n".intercalate out.toList
 
 /-- Draws the ledger and its proof libraries as Markdown. -/

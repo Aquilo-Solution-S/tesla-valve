@@ -19,10 +19,11 @@ and test vectors.
 
 In every alternative of a decision match, including nested matches and
 or-patterns, name a constructor at each pattern position down to its fields.
-A choice needs distinct cases or a case carrying data. A single fieldless
-case may name a refusal when an `Except` decision can both succeed and refuse.
-A decision with the same answer for every input belongs in a constant. Use a single Bool input
-or its negation directly. Write empty lists and absent options at the use site.
+A choice needs at least two values, and a shape needs at least one field.
+A one-value choice may name a refusal in a decision that returns `Except <Error> _`
+and can both succeed and refuse. A decision with the same answer for every input
+belongs in a constant. Use a single Bool input or its negation directly. In a shape,
+drop a field that can only be `true`. Write empty lists and absent options at the use site.
 
 A ledger value is a closed choice, a shape, a `Nat`, a `Bool`, a `String`,
 a `List` or `Option` of a value, or an `Except` with a closed refusal
@@ -220,8 +221,8 @@ def test_the_code_decides_the_days_the_spec_decides(postcode: Postcode) -> None:
 `lake exe shop view` prints Markdown from the Lean. It shows the ledger's
 shapes, values and decision tables, with theorems beside them. In proof
 libraries it labels propositional structure fields as premises, using the
-field's docstring or the proposition itself. It names each proof theorem's
-axioms, and `check` counts theorems using `propext`, `Quot.sound` or
-`Classical.choice` and those using none.
+field's docstring or the proposition itself. Both commands name each proof
+theorem's axioms. The check also counts theorems using `propext`, `Quot.sound`
+or `Classical.choice` and those using none.
 
 [Set up the gate and run the tool's selftest.](../../prepare/references/lean.md)

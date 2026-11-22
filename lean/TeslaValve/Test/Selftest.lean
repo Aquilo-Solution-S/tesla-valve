@@ -20,14 +20,25 @@ def accepted (place : String) : IO UInt32 := do
   failed := failed + (← expect (emptyProofLibraries libraries inventory ==
     [`TeslaValve.Test.EmptyProofs, `TeslaValve.Test.MissingProofs])
     "Accepted: check did not distinguish empty proof libraries from a populated one")
-  failed := failed + (← expect (proofSummary inventory ==
-    "4 proof theorems (axiom-free: 1, propext: 1, Quot.sound: 1, Classical.choice: 1)")
-    s!"Accepted: unexpected axiom counts {proofSummary inventory}")
+  let report := proofReport inventory
+  failed := failed + (← expect (report.splitOn "\n" == [
+    "4 proof theorems (axiom-free: 1, propext: 1, Quot.sound: 1, Classical.choice: 1)",
+    "TeslaValve.Test.Proofs.setByPremise: none",
+    "TeslaValve.Test.Proofs.sameProp: propext",
+    "TeslaValve.Test.Proofs.sameQuot: Quot.sound",
+    "TeslaValve.Test.Proofs.chosenProof: Classical.choice"])
+    s!"Accepted: unexpected axiom report {report}")
   let proofView ← viewProofs loaded `TeslaValve.Test.Proofs
+  let emptyView ← viewProofs loaded `TeslaValve.Test.EmptyProofs
+  failed := failed + (← expect (!includes emptyView "(axioms:")
+    "Accepted: proof view counted an instance as a theorem")
+  failed := failed + (← expect (match proofView.splitOn "✓ **set by premise** (axioms: none)" with
+    | [before, after] => includes before "Premise **bounded**" && includes after "Premise **ordered**"
+    | _ => false) "Accepted: proof view lost source order")
   for fragment in [
       "- Premise **documented**: The incoming flag is set.",
       "- Premise **bounded**: ∀ (n : Nat), n ≤ count → n ≤ count",
-      "✓ **set by premise** (axioms: none)",
+      "- Premise **ordered**: lo ≤ hi + lo",
       "✓ **same prop** (axioms: `propext`)",
       "✓ **same quot** (axioms: `Quot.sound`)",
       "✓ **chosen proof** (axioms: `Classical.choice`)"] do
@@ -194,6 +205,10 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused, `TeslaValve.Test.Refused.rootAxiom, .isAxiom),
       (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Lone, .singletonChoice),
       (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.UnusedError, .singletonChoice),
+      (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Marker, .singletonChoice),
+      (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Wrapper, .singletonChoice),
+      (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Never, .singletonChoice),
+      (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.overWrapper, .constantDecision),
       (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.forwardFlag, .booleanDecision),
       (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.invertFlag, .booleanDecision),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.emptyFlags, .emptyConstant),
@@ -215,6 +230,8 @@ def selftest (place : String) : IO UInt32 := do
     failed := failed + (← expect (refused.any inModule) s!"{module}: {name} was not refused as {why.name}")
     if why.inProofs then
       failed := failed + (← expect (asProofs.any inModule) s!"{module}: {name} passed in a proof library")
+  failed := failed + (← expect (!refused.any (·.name == `TeslaValve.Test.Refused.singletonChoice.Admitted))
+    "Refused: a one-value choice used as a decision error was refused")
   if failed == 0 then
     IO.println s!"Refused: each of the {Refusal.all.length} refusals is shown by its module, in the ledger and in a proof library"
     return 0

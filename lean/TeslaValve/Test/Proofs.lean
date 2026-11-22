@@ -16,6 +16,12 @@ structure ValidFlag (ready : Bool) where
 /-- The flag is set by its documented premise. -/
 theorem setByPremise (valid : ValidFlag ready) : ready = true := valid.documented
 
+/-- A bound whose default proof is computed by a tactic. -/
+structure Ordered where
+  lo : Nat
+  hi : Nat
+  ordered : lo ≤ hi + lo := by omega
+
 theorem sameProp (p q : Prop) (h : p ↔ q) : p = q := propext h
 
 theorem sameQuot (r : Nat → Nat → Prop) (n m : Nat) (h : r n m) :

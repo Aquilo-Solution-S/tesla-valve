@@ -18,9 +18,10 @@ The ledger allows seven forms, so that a view can draw all of it by evaluation:
   axiom beyond Lean's three;
 - a rejected design: a rule named `not_…`, which shows the alternative breaks the ledger.
 
-The check refuses a choice with one fieldless case unless a decision returns it as a
-named refusal alongside successes. It also refuses a decision with the same result for
-every input, a unary Bool identity or negation, and a constant equal to `[]` or `none`.
+The check refuses a choice with at most one value and a structure with no fields.
+A decision that returns `Except <Error> _` and both succeeds and refuses may name its
+refusal with a one-value choice. The check also refuses a decision with the same result
+for every input, a unary Bool identity or negation, and a constant equal to `[]` or `none`.
 
 A ledger value is a closed choice, a shape, `Nat`, `Bool`, a `String`, a `List` or an `Option`
 of a value, or an `Except` of a closed choice and a value. An `Option` cannot directly
@@ -49,8 +50,8 @@ A proof library holds rules that need more than the forms, such as induction ove
 It uses ordinary Lean types and definitions. The checker audits its proofs and docstrings,
 and refuses unsafe, partial, noncomputable or IO declarations. Each configured proof
 library must contribute a theorem. The view shows structure premises with their
-docstrings or propositions, and lists each theorem's axioms. The check counts proof
-theorems by axiom.
+docstrings or propositions. The check and view list each theorem's axioms, and the
+check also counts proof theorems by axiom.
 
 The check guards against mistakes in trusted source. It relies on Lean's declaration
 ranges and authored name prefixes to distinguish generated declarations, and on kernel
@@ -117,13 +118,13 @@ def Refusal.says : Refusal → String
   | .isMeta => "is meta code (syntax, a macro, a notation or an elaborator)"
   | .isExample => "is an example: a rule is a theorem, which others name and the view draws"
   | .openChoice => "is a choice with parameters, indices or recursion, or a case that carries what is not a closed choice"
-  | .singletonChoice => "has one fieldless case. Use it as a named error in an Except decision with successes and failures, give the choice distinct or data-carrying cases, or state the rule in a theorem"
+  | .singletonChoice => "has at most one value. Give the type fields or cases that distinguish values, use a one-value choice in a decision that returns `Except <Error> _` and both succeeds and refuses, or state the rule in a theorem"
   | .openShape => "is a shape with a field that is neither a ledger value nor an invariant `ok : decision fields = true`"
   | .openInput => "is a decision with an input that is not a closed choice"
   | .openValue => "has a type that is not a ledger value"
   | .operation => "uses an operation outside the forms: a decision matches its inputs into ledger values with constructors at every pattern position"
   | .constantDecision => "returns the same value for every input. Write a constant or match inputs that change the result"
-  | .booleanDecision => "returns its Bool input or its negation. Use the input directly or write `!input` at the use site"
+  | .booleanDecision => "returns its Bool input or its negation. Use the input directly or write `!input` at the use site. In a shape, drop a field that can only be `true`"
   | .emptyConstant => "is an empty list or absent option. Write `[]` or `none` at the use site"
   | .statement => "is a rule that names what is not in the ledger or in Lean's logic"
   | .assumed => "rests on `sorry`, `native_decide` or an axiom beyond propext, Quot.sound and Classical.choice"
@@ -397,26 +398,37 @@ structure ProofAxioms where
   module : Name
   axioms : Array Name
 
+/-- The inventory of a written theorem that contributes to its proof library. -/
+def Written.proofAxioms (w : Written) (env : Environment) : MetaM (Option ProofAxioms) := do
+  let .thmInfo _ := w.info | return none
+  if !w.standsAlone env || Meta.isInstanceCore env w.name then return none
+  return some ⟨w.name, w.module, ← collectAxioms w.name⟩
+
 /-- The axiom inventory of the authored theorems in the configured proof modules. -/
 def proofAxioms (loaded : Loaded) (modules : Array Name) : IO (Array ProofAxioms) :=
   loaded.meta do
     let mut proofs := #[]
     for w in loaded.written do
-      if !modules.contains w.module || !w.standsAlone loaded.env then continue
-      let .thmInfo _ := w.info | continue
-      proofs := proofs.push ⟨w.name, w.module, ← collectAxioms w.name⟩
+      if !modules.contains w.module then continue
+      if let some proof ← w.proofAxioms loaded.env then
+        proofs := proofs.push proof
     return proofs
 
 /-- Configured proof libraries with no authored theorem in their modules. -/
 def emptyProofLibraries (libraries : List Name) (proofs : Array ProofAxioms) : List Name :=
   libraries.filter fun root => !proofs.any (root.isPrefixOf ·.module)
 
-/-- The number of proof theorems using each axiom, and the number with an empty inventory. -/
-def proofSummary (proofs : Array ProofAxioms) : String :=
+/-- The axiom counts followed by each theorem's inventory. -/
+def proofReport (proofs : Array ProofAxioms) : String :=
   let free := proofs.countP (·.axioms.isEmpty)
   let counts := leansAxioms.map fun axiomName =>
     s!"{axiomName}: {proofs.countP (·.axioms.contains axiomName)}"
-  s!"{proofs.size} proof theorems ({", ".intercalate (s!"axiom-free: {free}" :: counts)})"
+  let summary := s!"{proofs.size} proof theorems ({", ".intercalate (s!"axiom-free: {free}" :: counts)})"
+  let lines := proofs.toList.map fun proof =>
+    let axioms := if proof.axioms.isEmpty then "none" else
+      ", ".intercalate (proof.axioms.toList.map Name.toString)
+    s!"{proof.theoremName}: {axioms}"
+  "\n".intercalate (summary :: lines)
 
 /-- Whether an axiom inventory contains anything outside Lean's admitted axioms. -/
 def usesOutsideAxioms (axioms : Array Name) : Bool :=
@@ -482,10 +494,11 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : M
   if form.isSome then return form
   if ← rests name then return some .assumed
   match info with
-  | .inductInfo { ctors := [ctor], .. } =>
-    if !isStructure env name then
-      if let some (.ctorInfo c) := env.find? ctor then
-        if c.numFields == 0 && !(← isDecisionError loaded name) then return some .singletonChoice
+  | .inductInfo _ =>
+    if isStructure env name then
+      if (getStructureFields env name).isEmpty then return some .singletonChoice
+    else if (valuesOf env (mkConst name)).length ≤ 1 && !(← isDecisionError loaded name) then
+      return some .singletonChoice
   | .defnInfo d =>
     if let some why ← definitionContentRefusal env d then return some why
   | _ => pure ()
@@ -768,7 +781,7 @@ def check (config : Config) : IO UInt32 := do
     let proofs := if loaded.proofs.isEmpty then "" else s!", beside {loaded.proofs.size} proof modules"
     let holders := if config.scopes.isEmpty then "" else s!", held by the code of {config.scopes.length} scopes"
     IO.println s!"{config.ledger}: {loaded.written.size} declarations in {loaded.modules.size} modules{proofs}, each in its form{holders}"
-    if !inventory.isEmpty then IO.println (proofSummary inventory)
+    if !inventory.isEmpty then IO.println (proofReport inventory)
     return 0
   return 1
 
