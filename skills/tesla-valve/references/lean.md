@@ -60,10 +60,11 @@ end Shop.Shipping
 
 Keep a rule that needs arithmetic, recursion or induction in a proof library.
 Its types and definitions can use ordinary Lean. The gate checks its proofs
-and the docstrings it has. It refuses `unsafe`, `axiom`, `partial` or opaque
-declarations, `noncomputable`, IO, and proofs that depend on `sorry`,
-`native_decide` or an axiom beyond Lean's own. An outside fact goes in the
-hypotheses of the theorem that uses it.
+and the docstrings it has. It refuses `unsafe`, `axiom`, `partial`,
+`noncomputable`, IO, and proofs that depend on `sorry`, `native_decide` or
+an axiom beyond Lean's own. A proof library may use an opaque type to leave
+its representation unspecified. An outside fact goes in the hypotheses of
+the theorem that uses it.
 
 A backorder carries a natural number and adds it to the shipping time. The
 shop keeps that decision and its proofs in `Spec.Stock`.
@@ -100,8 +101,9 @@ end Spec
 ## Links and scopes
 
 Link a rule by its full Lean name in backticks beside the code or test that
-holds it. The check resolves names starting with a library root in every
-tracked file it scans. The same syntax works in a docstring.
+holds it. A link that starts with a library root must resolve to a
+declaration, namespace or module in every tracked file the check scans.
+The same syntax works in a docstring.
 
 <!-- code: examples/python/tests/test_shop.py#named -->
 ```python

@@ -17,6 +17,8 @@ leanprover/lean4:v4.35.0
 Require the [teslavalve Lake package](../../../lean) and commit
 `lake-manifest.json`. The example uses a path in the same repository. Use a
 glob for each library so the build includes modules nothing imports.
+A project can start with a proof library and add ledger modules as rules
+fit the forms.
 
 <!-- code: examples/lean/lakefile.toml#libraries -->
 ```toml
