@@ -17,9 +17,8 @@ and test vectors.
 | Theorem | A proved rule about the ledger. |
 | Rejected design | A theorem named `not_…` that shows which rule an alternative breaks. |
 
-At each match on a closed choice, name the constructor in every alternative.
-An or-pattern can share a body across explicitly named constructors. A
-constructor pattern can bind fields for use in the body or in a nested match.
+In every alternative of a decision match, including nested matches and
+or-patterns, name a constructor at each pattern position down to its fields.
 
 A ledger value is a closed choice, a shape, a `Nat`, a `Bool`, a `String`,
 a `List` or `Option` of a value, or an `Except` with a closed refusal
@@ -117,8 +116,9 @@ Link a rule by its full Lean name in backticks beside the code or test that
 holds it. A link that starts with a library root must resolve to a
 declaration, module or namespace in a configured library in every tracked
 file the check scans. A namespace counts when it contains a declaration of
-that library. The checker refuses links to compiler-generated names. A root
-module is checked alongside its submodules.
+that library. A written inductive or structure contributes all its constructors,
+including an implicit `mk`. The checker refuses other compiler-generated names.
+A root module is checked alongside its submodules.
 The same syntax works in a docstring.
 
 <!-- code: examples/python/tests/test_shop.py#named -->
@@ -136,8 +136,8 @@ holds them. Every declaration in the scope must be named there by its full
 name, or be stated in a declaration that is. Constructors and fields
 belong to their type. A theorem counts only when
 the code names the theorem itself. A decision that names a type in its
-statement or body holds the type too. A full name in code counts for a
-scope without backticks, as it does inside `ledger!`. A longer name
+statement or body holds the type too. A scope reads full names in code,
+including inside `ledger!` and between single or double quotes. A longer name
 that contains the full name does not satisfy the scope.
 
 Each scope is checked on its own. The shop has four scopes for `Spec.Stock`,

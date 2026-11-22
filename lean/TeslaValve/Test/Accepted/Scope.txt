@@ -1,6 +1,6 @@
 MyTeslaValve.Test.Accepted.Probe.notHeld
-"TeslaValve.Test.Accepted.Probe._key"
-TeslaValve.Test.Accepted.Probe.itemβ
+NAMES = ['TeslaValve.Test.Accepted.Probe._key', "TeslaValve.Test.Accepted.Probe.itemβ"]
+'TeslaValve.Test.Accepted.Probe.description'
 TeslaValve.Test.Accepted.Probe.notHeldβ
 TeslaValve.Test.Accepted.Probe.notHeld'
 foo'TeslaValve.Test.Accepted.Probe.notHeld

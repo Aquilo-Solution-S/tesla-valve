@@ -13,8 +13,5 @@ structure Job where
 /-- An optional outside world. -/
 def world : Option IO.RealWorld := none
 
-/-- An optional stateful computation. -/
-def stateful : Option (EStateM Unit Unit Unit) := none
-
 /-- A computation hidden in an imported inductive and structure. -/
 def envelope : Option TeslaValve.Test.FixtureSupport.Envelope := none

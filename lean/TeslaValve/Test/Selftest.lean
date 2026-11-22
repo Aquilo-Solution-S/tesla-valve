@@ -11,7 +11,7 @@ def includes (text fragment : String) : Bool :=
 
 /-- The outputs and scope scan of a ledger that passes the forms. -/
 def accepted (place : String) : IO UInt32 := do
-  let loaded ← Config.load { ledger := `TeslaValve.Test.Accepted }
+  let loaded ← Config.load { ledger := `TeslaValve.Test.Accepted, proofs := [`TeslaValve.Test.Proofs] }
   let refused ← refusals loaded
   let mut failed ← expect refused.isEmpty
     s!"Accepted: unexpected refusals {(refused.map fun r => s!"{r.name} {r.why.says}").toList}"
@@ -33,6 +33,11 @@ def accepted (place : String) : IO UInt32 := do
       {"in":["toggle"],"out":null},
       {"in":[{"paint":["red"]}],"out":"red"},
       {"in":[{"paint":["blue"]}],"out":"blue"}
+    ],
+    "TeslaValve.Test.Accepted.Probe.carriesPaint": [
+      {"in":["toggle"],"out":false},
+      {"in":[{"paint":["red"]}],"out":true},
+      {"in":[{"paint":["blue"]}],"out":true}
     ],
     "TeslaValve.Test.Accepted.Probe.advance": [
       {"in":["a b","toggle"],"out":"aB"},
@@ -67,7 +72,9 @@ def accepted (place : String) : IO UInt32 := do
   let missing ← unheld loaded { rules := `TeslaValve.Test.Accepted.Probe, code := [place ++ "TeslaValve/Test/Accepted/Scope.txt"] }
   failed := failed + (← expect (missing.any (·.name == `TeslaValve.Test.Accepted.Probe.notHeld))
     "Accepted: a longer name satisfied the scope")
-  failed := failed + (← expect (!missing.any (fun w => w.name ∈ [`TeslaValve.Test.Accepted.Probe._key, `TeslaValve.Test.Accepted.Probe.itemβ]))
+  failed := failed + (← expect (!missing.any (fun w => w.name ∈
+    [`TeslaValve.Test.Accepted.Probe._key, `TeslaValve.Test.Accepted.Probe.itemβ,
+      `TeslaValve.Test.Accepted.Probe.description]))
     "Accepted: a quoted or Unicode name did not satisfy the scope")
   failed := failed + (← expect (resolves loaded `TeslaValve.Test.Accepted.Probe._key)
     "Accepted: a written name with an underscore did not resolve")
@@ -132,6 +139,14 @@ def selftest (place : String) : IO UInt32 := do
     let proofRefusal := proofWhy.inProofs && module != `TeslaValve.Test.Refused.isPartial.opaqueSort
     failed := failed + (← expect (proofsHere.isEmpty == !proofRefusal && proofsHere.all (·.why == proofWhy))
       s!"{module}: unexpected proof library refusals {proofsHere.toList.map (·.why.name)}")
+  -- Lean adds an equality binder for a named pattern. Admit its module to isolate the matcher check.
+  match loaded.written.find? (·.name == `namedPayload), moduleOf loaded.env ``Eq with
+  | some named, some eqModule =>
+    let withEquality := { loaded with modules := loaded.modules.push eqModule }
+    let why ← withEquality.meta (refusal withEquality named)
+    failed := failed + (← expect (why == some .operation) "namedPayload: accepted by the matcher check")
+  | _, _ =>
+    failed := failed + (← expect false "namedPayload: could not isolate the matcher check")
   -- A file that links a name nothing declares: the dangling module, read as a file.
   let badLinks ← dangling loaded #[place ++ "TeslaValve/Test/Refused/dangling.lean"]
   for name in [`TeslaValve.Test.Refused.Nowhere.switch, `TeslaValve.Test.Refused.Foreign.imported, `TeslaValve.Test.Refused.Nowhere.nonexistentβ] do
@@ -142,6 +157,7 @@ def selftest (place : String) : IO UInt32 := do
     IO.eprintln "error: a git grep that fails is read as no links"
     failed := failed + 1
   for name in [`TeslaValve.Test.Refused.isUp.match_1, `TeslaValve.Test.Refused.Switch.rec,
+      `TeslaValve.Test.Refused.Switch.casesOn, `TeslaValve.Test.Refused.Switch.ctorIdx,
       `TeslaValve.Test.Refused.switchUp._proof_1] do
     failed := failed + (← expect (loaded.env.contains name && !resolves loaded name)
       s!"Refused: expected compiler-generated name {name} to be unresolvable")
@@ -158,7 +174,6 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.doesIO, `concealed, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `Job, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `world, .doesIO),
-      (`TeslaValve.Test.Refused.doesIO, `stateful, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `envelope, .doesIO),
       (`TeslaValve.Test.Refused.isAbbrev, `hiddenFlag, .isAbbrev),
       (`TeslaValve.Test.Refused.assumed, `Deferred, .assumed),

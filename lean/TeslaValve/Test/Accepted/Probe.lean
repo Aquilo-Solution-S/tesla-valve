@@ -36,7 +36,7 @@ def label : State → String
   | .«a b» => "x|y"
   | .aB => "other"
 
-/-- The window for each status. -/
+/-- The window for each status, built with `TeslaValve.Test.Accepted.Probe.Window.mk`. -/
 def window : State → Window
   | .«a b» => ⟨2, true⟩
   | .aB => ⟨0, false⟩
@@ -44,10 +44,17 @@ def window : State → Window
 /-- A description when the event carries a colour. -/
 def description : Event → Option String
   | .toggle => none
-  | .paint colour =>
-    match colour with
-    | .red => some "red"
-    | .blue => some "blue"
+  | .paint .red => some "red"
+  | .paint .blue => some "blue"
+
+/-- Whether the event carries paint. -/
+def carriesPaint (event : Event) : Bool :=
+  match event with
+  | .toggle => false
+  | .paint .red | .paint .blue =>
+    match some event with
+    | some (.paint .red) | some (.paint .blue) => true
+    | some .toggle | none => false
 
 /-- Paint or toggle the status. -/
 def advance (state : State) (event : Event) : State :=

@@ -88,6 +88,8 @@ unsafe def main (args : List String) : IO UInt32 :=
 Run the build and check from the project's Lean package. The compiler proves
 the theorems and `--wfail` makes warnings fail the build. The check enforces
 the forms, proof-library restrictions, docstrings, links and scopes.
+Every alternative of a decision match, including nested matches and
+or-patterns, names a constructor at each pattern position down to its fields.
 
 ```sh
 lake build --wfail

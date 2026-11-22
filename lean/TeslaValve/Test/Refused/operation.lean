@@ -22,3 +22,8 @@ inductive TrafficLight where
   | red
   | amber
   | green
+
+/-- An event that may carry a light setting. -/
+inductive PaintEvent where
+  | toggle
+  | paint (light : Light)

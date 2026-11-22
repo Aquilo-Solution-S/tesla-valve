@@ -8,9 +8,9 @@ The ledger allows seven forms, so that a view can draw all of it by evaluation:
 - a shape: a `structure` of ledger values, whose only invariant is a field
   `ok : decision fields = true`;
 - a constant: a `def` of a ledger value, such as a number;
-- a decision: a `def` whose inputs are closed choices and whose body matches them,
-  case by case, into ledger values, naming the constructor of each closed-choice
-  discriminant in every alternative, including nested matches;
+- a decision: a `def` that matches closed inputs into ledger values and names
+  a constructor at every pattern position in every alternative, down to
+  constructor fields and inside nested matches;
 - a state machine: a decision `State → Event → State`, or `State → Event → Except Refusal State`
   where an event can be refused, whose events are a choice of their own; its name says what it
   decides;
@@ -33,8 +33,9 @@ such as who ruled a rule and when: git and the issue keep that.
 A rule is linked by its full name in backticks, as `Shop.Stock.reserve`, in a docstring of
 the ledger and in every file of the repository alike. The check refuses a link that
 does not resolve to a declaration, module or namespace owned by a configured library.
-A namespace counts when it contains a declaration of that library. Links to
-compiler-generated declarations are refused.
+A namespace counts when it contains a declaration of that library. A written
+inductive or structure contributes all its constructors, including an implicit
+`mk`. Other compiler-generated declarations are refused.
 
 A scope ties modules to the code that holds them: every declaration of its modules is named,
 by its full name, in a file under the scope's paths, or is stated in one that is, as a
@@ -108,7 +109,7 @@ def Refusal.says : Refusal → String
   | .openShape => "is a shape with a field that is neither a ledger value nor an invariant `ok : decision fields = true`"
   | .openInput => "is a decision with an input that is not a closed choice"
   | .openValue => "has a type that is not a ledger value"
-  | .operation => "uses an operation outside the forms: a decision matches its inputs case by case into ledger values"
+  | .operation => "uses an operation outside the forms: a decision matches its inputs into ledger values with constructors at every pattern position"
   | .statement => "is a rule that names what is not in the ledger or in Lean's logic"
   | .assumed => "rests on `sorry`, `native_decide` or an axiom beyond propext, Quot.sound and Classical.choice"
   | .undocumented => "has no docstring"
@@ -189,21 +190,22 @@ private partial def binderResult : Expr → Expr
   | .forallE _ _ rest _ => binderResult rest
   | result => result
 
-private def hasCatchAll (loaded : Loaded) (name : Name) : Bool := Id.run do
-  let some matcher := Meta.getMatcherInfoCore? loaded.env name | return false
-  let some info := loaded.env.find? name | return true
-  let types := binders info.type
-  let discrs := types.extract matcher.getFirstDiscrPos matcher.getFirstAltPos
-  for alt in types.extract matcher.getFirstAltPos matcher.arity do
-    let patterns := (binderResult alt).getAppArgs
-    for i in [:discrs.size] do
-      if closed loaded discrs[i]! && !(patterns[i]?.any fun pattern =>
-          (loaded.env.find? pattern.getAppFn.constName).any (· matches .ctorInfo _)) then
-        return true
-  return false
+private partial def constructorPattern (env : Environment) (pattern : Expr) : Bool :=
+  match env.find? pattern.getAppFn.constName with
+  | some (.ctorInfo ctor) =>
+    let args := pattern.getAppArgs
+    (args.extract ctor.numParams args.size).all (constructorPattern env)
+  | _ => false
 
-/-- A decision starts by matching an input. Each match in the body must name the
-constructor of each closed-choice discriminant explicitly. -/
+private def hasNonConstructorPattern (env : Environment) (name : Name) : Bool := Id.run do
+  let some matcher := Meta.getMatcherInfoCore? env name | return false
+  let some info := env.find? name | return true
+  let types := binders info.type
+  return (types.extract matcher.getFirstAltPos matcher.arity).any fun alt =>
+    let patterns := (binderResult alt).getAppArgs
+    patterns.size != matcher.numDiscrs || !patterns.all (constructorPattern env)
+
+/-- A decision starts by matching an input. -/
 partial def matchesInputs (env : Environment) (term : Expr) (inputs : Nat) : Bool :=
   match term.consumeMData with
   | .lam _ _ body _ => matchesInputs env body inputs
@@ -218,7 +220,7 @@ partial def matchesInputs (env : Environment) (term : Expr) (inputs : Nat) : Boo
 def bodyInForm (loaded : Loaded) (d : DefinitionVal) (inputs : Array Expr) : Bool :=
   within loaded operations d.value && (inputs.isEmpty ||
     (matchesInputs loaded.env d.value inputs.size &&
-      !d.value.getUsedConstants.any (hasCatchAll loaded)))
+      !d.value.getUsedConstants.any (hasNonConstructorPattern loaded.env)))
 
 mutual
 /-- A ledger value: a closed choice (`Bool` among them), a shape, `Nat`, a `String`, a `List`
@@ -331,7 +333,7 @@ where
   usesIO (seen : Std.HashSet Name) : List Name → Bool
     | [] => false
     | name :: more =>
-      if name ∈ [``IO, ``EIO, ``BaseIO, ``IO.RealWorld, ``EStateM] then true
+      if name ∈ [``IO, ``EIO, ``BaseIO, ``IO.RealWorld] then true
       else if seen.contains name then usesIO seen more
       else
         let used := match env.find? name with
@@ -404,8 +406,10 @@ where
 def resolves (loaded : Loaded) (name : Name) : Bool :=
   let all := loaded.modules ++ loaded.proofs
   all.contains name ||
-    if loaded.env.contains name then loaded.written.any (·.name == name)
-    else loaded.env.isNamespace name && loaded.written.any (name.isPrefixOf ·.name)
+    match loaded.env.find? name with
+    | some (.ctorInfo ctor) => loaded.written.any (·.name == ctor.induct)
+    | some _ => loaded.written.any (·.name == name)
+    | none => loaded.env.isNamespace name && loaded.written.any (name.isPrefixOf ·.name)
 
 /-- Whether a docstring links a name that does not resolve. -/
 def dangles (loaded : Loaded) (doc : String) : Bool :=
@@ -485,7 +489,7 @@ def placeInRepository : IO String := do
     throw <| IO.userError s!"git rev-parse: {place.stderr.trimAscii}"
   return place.stdout.trimAscii.toString
 
-/-- Complete Lean names in text, starting at an identifier boundary. -/
+/-- Complete Lean names in text, including names surrounded by quotes at an identifier boundary. -/
 def namesIn (env : Environment) (roots : List Name) (text : String) : Array Name := Id.run do
   let input := Parser.mkInputContext text "scope"
   let mut pos := 0
@@ -493,12 +497,17 @@ def namesIn (env : Environment) (roots : List Name) (text : String) : Array Name
   let mut found := #[]
   while !input.atEnd pos do
     let c := input.get pos
-    if (isIdFirst c || isIdBeginEscape c) &&
-        !isIdRest previous && previous != '.' then
-      if let some (name, stop) := readName env input pos then
+    let quoted := c == '\'' && !isIdRest previous
+    if quoted || ((isIdFirst c || isIdBeginEscape c) && !isIdRest previous && previous != '.') then
+      let start := if quoted then input.next pos else pos
+      if let some (name, stop) := readName env input start then
+        let last := (stop.prev text).get text
+        let name := match name with
+          | .str pre part => if quoted && last == '\'' then pre.str (part.dropEnd 1).toString else name
+          | _ => name
         if roots.any (fun root => root != name && root.isPrefixOf name) then
           found := found.push name
-        previous := (stop.prev text).get text
+        previous := last
         pos := stop
         continue
     previous := c
