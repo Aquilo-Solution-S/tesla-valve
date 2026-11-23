@@ -22,6 +22,7 @@ The check refuses a choice with at most one value and a structure with no fields
 A decision that returns `Except <Error> _` and both succeeds and refuses may name its
 refusal with a one-value choice. The check also refuses a decision with the same result
 for every input, a unary Bool identity or negation, and a constant equal to `[]` or `none`.
+The check also refuses a unary decision that maps two values one-to-one onto a two-value choice.
 
 A ledger value is a closed choice, a shape, `Nat`, `Bool`, a `String`, a `List` or an `Option`
 of a value, or an `Except` of a closed choice and a value. An `Option` cannot directly
@@ -82,6 +83,7 @@ inductive Refusal where
   | operation
   | constantDecision
   | booleanDecision
+  | relabelDecision
   | emptyConstant
   | statement
   | assumed
@@ -125,6 +127,7 @@ def Refusal.says : Refusal → String
   | .operation => "uses an operation outside the forms: a decision matches its inputs into ledger values with constructors at every pattern position"
   | .constantDecision => "returns the same value for every input. Write a constant or match inputs that change the result"
   | .booleanDecision => "returns its Bool input or its negation. Use the input directly or write `!input` at the use site. In a shape, drop a field that can only be `true`"
+  | .relabelDecision => "only relabels the two values of its input. Use the input type directly, or state the rule as one comment at its holder"
   | .emptyConstant => "is an empty list or absent option. Write `[]` or `none` at the use site"
   | .statement => "is a rule that names what is not in the ledger or in Lean's logic"
   | .assumed => "rests on `sorry`, `native_decide` or an axiom beyond propext, Quot.sound and Classical.choice"
@@ -157,6 +160,7 @@ def Refusal.inProofs : Refusal → Bool
   | .operation => false
   | .constantDecision => false
   | .booleanDecision => false
+  | .relabelDecision => false
   | .emptyConstant => false
   | .statement => false
   | .assumed => true
@@ -318,22 +322,24 @@ def definitionForm (loaded : Loaded) (d : DefinitionVal) : Option Refusal :=
   else none
 
 /-- The output must carry a value or depend on the decision's inputs. -/
-private def definitionContentRefusal (env : Environment) (d : DefinitionVal) : MetaM (Option Refusal) := do
+private def definitionContentRefusal (loaded : Loaded) (d : DefinitionVal) : MetaM (Option Refusal) := do
   let (inputs, result) := arrows d.type
   let term := mkConst d.name
   if inputs.isEmpty then
     let output ← Meta.whnf term
     return if output.isAppOf ``List.nil || output.isAppOf ``Option.none then some .emptyConstant else none
-  let first :: rest := combinations env inputs.toList | return none
+  let first :: rest := combinations loaded.env inputs.toList | return none
   let output := mkAppN term first.toArray
   if ← rest.allM (fun args => Meta.isDefEq output (mkAppN term args.toArray)) then
     return some .constantDecision
-  if inputs == #[mkConst ``Bool] && result == mkConst ``Bool then
-    let yes ← Meta.whnf (mkApp term (mkConst ``Bool.true))
-    let no ← Meta.whnf (mkApp term (mkConst ``Bool.false))
-    if (yes.isConstOf ``Bool.true && no.isConstOf ``Bool.false) ||
-        (yes.isConstOf ``Bool.false && no.isConstOf ``Bool.true) then
-      return some .booleanDecision
+  let #[input] := inputs | return none
+  let [second] := rest | return none
+  if !closed loaded result then return none
+  let [left, right] := valuesOf loaded.env result | return none
+  let other := mkAppN term second.toArray
+  if ← (Meta.isDefEq output left <&&> Meta.isDefEq other right) <||>
+      (Meta.isDefEq output right <&&> Meta.isDefEq other left) then
+    return some (if input.isConstOf ``Bool && result.isConstOf ``Bool then .booleanDecision else .relabelDecision)
   return none
 
 /-- A named error carries meaning alongside the successes of an `Except` decision. -/
@@ -500,7 +506,7 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : M
     else if (valuesOf env (mkConst name)).length ≤ 1 && !(← isDecisionError loaded name) then
       return some .singletonChoice
   | .defnInfo d =>
-    if let some why ← definitionContentRefusal env d then return some why
+    if let some why ← definitionContentRefusal loaded d then return some why
   | _ => pure ()
   if (← findDocString? env name).isNone then return some .undocumented
   return none

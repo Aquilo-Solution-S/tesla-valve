@@ -6,12 +6,13 @@ inductive Bulb where
   /-- Lit. -/
   | on
   | off
+  | dim
   deriving DecidableEq
 
 /-- Whether a bulb is lit. -/
 def lit : Bulb → Bool
   | .on => true
-  | .off => false
+  | .off | .dim => false
 
 /-- A lit bulb. -/
 structure Lit where

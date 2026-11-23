@@ -21,11 +21,12 @@ namespace TeslaValve.Test.Refused
 inductive Switch where
   | up
   | down
+  | middle
 
 /-- Whether the switch is up. -/
 def isUp : Switch → Bool
   | .up => true
-  | .down => false
+  | .down | .middle => false
 
 /-- A switch held in the up position. -/
 structure UpSwitch where

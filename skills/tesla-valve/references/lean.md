@@ -24,6 +24,7 @@ A one-value choice may name a refusal in a decision that returns `Except <Error>
 and can both succeed and refuse. A decision with the same answer for every input
 belongs in a constant. Use a single Bool input or its negation directly. In a shape,
 drop a field that can only be `true`. Write empty lists and absent options at the use site.
+When one input maps its two values one-to-one onto a two-value choice, use the input type directly, or state the rule as one comment at its holder.
 
 A ledger value is a closed choice, a shape, a `Nat`, a `Bool`, a `String`,
 a `List` or `Option` of a value, or an `Except` with a closed refusal

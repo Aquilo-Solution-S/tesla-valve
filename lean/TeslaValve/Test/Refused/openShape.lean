@@ -7,11 +7,12 @@ structure Offset where
 inductive Readiness where
   | ready
   | waiting
+  | unavailable
 
 /-- Whether the value is ready. -/
 def yes : Readiness → Bool
   | .ready => true
-  | .waiting => false
+  | .waiting | .unavailable => false
 
 /-- A shape with an invariant under the wrong field name. -/
 structure RenamedProof where

@@ -21,15 +21,15 @@ structure Window where
   count : Nat
   active : Bool
 
-/-- Whether a colour allows a window. -/
-def allowed : Colour → Bool
-  | .red => true
-  | .blue => false
+/-- Whether an event allows a window. -/
+def allowed : Event → Bool
+  | .paint .red => true
+  | .paint .blue | .toggle => false
 
-/-- A window whose flag passes the decision. -/
+/-- A window opened by an allowed event. -/
 structure AllowedWindow where
-  colour : Colour
-  ok : allowed colour = true
+  event : Event
+  ok : allowed event = true
 
 /-- The text for each status. -/
 def label : State → String

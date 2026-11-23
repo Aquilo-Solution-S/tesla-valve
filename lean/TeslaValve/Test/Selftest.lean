@@ -49,9 +49,18 @@ def accepted (place : String) : IO UInt32 := do
     failed := failed + (← expect (!includes proofView s!"Premise **{field}**") s!"Accepted: view treated {field} as a premise")
   let vectors ← emitVectors loaded
   let expected := Json.parse r#"{
+    "TeslaValve.Test.Accepted.Relabel.alertColour": [
+      {"in":[true],"out":"red"},
+      {"in":[false],"out":"blue"}
+    ],
+    "TeslaValve.Test.Accepted.Relabel.clearAlert": [
+      {"in":[true],"out":{"error":"alertActive"}},
+      {"in":[false],"out":{"ok":false}}
+    ],
     "TeslaValve.Test.Accepted.Probe.allowed": [
-      {"in":["red"],"out":true},
-      {"in":["blue"],"out":false}
+      {"in":["toggle"],"out":false},
+      {"in":[{"paint":["red"]}],"out":true},
+      {"in":[{"paint":["blue"]}],"out":false}
     ],
     "TeslaValve.Test.Accepted.Probe.label": [
       {"in":["a b"],"out":"x|y"},
@@ -118,7 +127,7 @@ def accepted (place : String) : IO UInt32 := do
       "| retired | forgotten | restore admission |"] do
     failed := failed + (← expect (includes view s!"\n{header}\n") s!"Accepted: view omitted table {header}")
   for fragment in ["| «a b» | \"x\\|y\" | count: 2, active: yes |", "| aB | \"other\" | count: 0, active: no |",
-      "| paint (blue) | \"blue\" |", "| toggle | — |", "state \"«a b»\" as s0", "state \"aB\" as s1",
+      "| paint (blue) | no | \"blue\" |", "| toggle | no | — |", "state \"«a b»\" as s0", "state \"aB\" as s1",
       "s0 --> s1 : toggle", "s1 --> s0 : paint (red)",
       "| «a b» | paint (blue) | refused: blueUnsupported |", "| aB | paint (blue) | refused: blueUnsupported |",
       "**exact text** = ", "\\|\\_\\*", "- «a\\*b»", "- \\*flag\\*"] do
@@ -231,8 +240,13 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Wrapper, .singletonChoice),
       (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Never, .singletonChoice),
       (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.overWrapper, .constantDecision),
+      (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.alwaysSet, .constantDecision),
       (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.forwardFlag, .booleanDecision),
       (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.invertFlag, .booleanDecision),
+      (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.markAfter, .relabelDecision),
+      (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.endpointChoice, .relabelDecision),
+      (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.serviceVisibility, .relabelDecision),
+      (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.invertWrappedFlag, .relabelDecision),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.emptyFlags, .emptyConstant),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.absentFlag, .emptyConstant),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.moreEmptyFlags, .emptyConstant),

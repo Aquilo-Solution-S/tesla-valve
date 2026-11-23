@@ -2,6 +2,7 @@
 inductive Light where
   /-- Stop. -/
   | red
+  | amber
   /-- Go. -/
   | green
   deriving DecidableEq
@@ -12,7 +13,7 @@ def go (light : Light) : Bool := if light = .green then true else false
 /-- Whether a light is red. -/
 def isRed : Light → Bool
   | .red => true
-  | .green => false
+  | .amber | .green => false
 
 /-- An alias of a decision. -/
 def alias := isRed
