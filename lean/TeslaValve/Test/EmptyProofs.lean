@@ -10,3 +10,13 @@ namespace Demo
 scoped instance boxDefault : Inhabited Box := ⟨⟨0⟩⟩
 
 end Demo
+
+@[instance_reducible] def outsideBox : Inhabited Box := ⟨⟨1⟩⟩
+
+theorem outsideNonempty : Nonempty Box := ⟨⟨1⟩⟩
+
+namespace Elsewhere
+
+attribute [scoped instance] outsideBox outsideNonempty
+
+end Elsewhere

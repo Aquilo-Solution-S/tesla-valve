@@ -50,7 +50,8 @@ def authoredAt (env : Environment) (source : Array String) (name : Name) : Optio
   if !token.isAnonymous && token.isSuffixOf (privateToUserName name) then some stands else none
 
 /-- The evidence attached to source commands by the parser. Lean drops examples after
-checking them. It places derived instances at the class names inside deriving clauses. -/
+checking them. It places derived instances at the class names inside deriving clauses and
+`deriving instance` commands. -/
 structure SourceForms where
   examples : Array Position := #[]
   derivingClauses : Array (Position × Position) := #[]
@@ -62,7 +63,7 @@ partial def SourceForms.record (input : Parser.InputContext) (forms : SourceForm
       let pos := input.fileMap.toPosition start
       if kind == ``Parser.Command.example then
         forms := { forms with examples := forms.examples.push pos }
-      else if kind == ``Parser.Command.optDeriving && start < stop then
+      else if (kind == ``Parser.Command.optDeriving || kind == ``Parser.Command.«deriving») && start < stop then
         forms := { forms with derivingClauses := forms.derivingClauses.push (pos, input.fileMap.toPosition stop) }
     return args.foldl (SourceForms.record input) forms
   | _ => forms

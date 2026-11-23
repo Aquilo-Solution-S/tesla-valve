@@ -14,3 +14,12 @@ namespace Shown
 scoped instance litLamp : Inhabited Lamp := ⟨.on⟩
 
 end Shown
+
+/-- The lamp a fixture starts with. -/
+@[instance_reducible] def outsideLamp : Inhabited Lamp := ⟨.off⟩
+
+namespace Outside
+
+attribute [scoped instance] outsideLamp
+
+end Outside

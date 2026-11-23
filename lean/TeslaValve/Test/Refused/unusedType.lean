@@ -16,4 +16,17 @@ inductive Finish where
   | matte | gloss
   deriving DecidableEq
 
+/-- A lamp's tint, compared only by the instance derived for it. -/
+inductive Tint where
+  | warm | cool
+
+/-- A flag whose namespace holds that instance. -/
+def Holder : Bool := true
+
+namespace Holder
+
+deriving instance DecidableEq for Tint
+
+end Holder
+
 end TeslaValve.Test.Refused.unusedType

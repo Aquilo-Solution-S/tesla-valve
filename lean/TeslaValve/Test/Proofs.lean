@@ -1,4 +1,8 @@
-/-! Pure state in a proof library. -/
+import TeslaValve.Test.Accepted
+import TeslaValve.Test.Accepted.Probe
+
+/-! Pure state in a proof library. Its definitions, a shape's default and a proof are the
+only uses of three ledger types. -/
 
 namespace TeslaValve.Test.Proofs
 
@@ -30,5 +34,19 @@ theorem sameQuot (r : Nat → Nat → Prop) (n m : Nat) (h : r n m) :
 theorem chosenProof (p : Prop) (h : Nonempty p) : p := Classical.choice h
 
 def underOne (n : Nat) (_h : n < 1) : Nat := n
+
+def «back`tick» : Nat := 1
+
+def ticked (n : Fin («back`tick» + 1)) : Nat := n.val
+
+/-- A new lamp's flag is off. -/
+def startsOff : Bool := match TeslaValve.Test.Accepted.Flag.flag false with
+  | .flag enabled => !enabled
+
+/-- A shade whose punctuated flag starts set. -/
+structure Shaded where
+  set : Bool := (⟨true⟩ : TeslaValve.Test.Accepted.Probe.TextShape).«*flag*»
+
+theorem labelled : True := (fun (_ : TeslaValve.Test.Accepted.Probe.Label) => trivial) (.«a*b» true)
 
 end TeslaValve.Test.Proofs

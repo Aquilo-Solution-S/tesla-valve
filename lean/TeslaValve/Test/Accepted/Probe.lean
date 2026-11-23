@@ -136,10 +136,4 @@ structure TextShape where
 inductive Label where
   | «a*b» (active : Bool)
 
-/-- The punctuated shape, set. -/
-def punctuatedShape : TextShape := ⟨true⟩
-
-/-- The punctuated case, active. -/
-def punctuatedLabel : Label := .«a*b» true
-
 end TeslaValve.Test.Accepted.Probe

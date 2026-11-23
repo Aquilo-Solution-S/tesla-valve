@@ -34,6 +34,17 @@ def title (name : Name) : String :=
 def oneLine (doc : String) : String :=
   " ".intercalate ((doc.splitOn "\n").map (·.trimAscii.toString) |>.filter (!·.isEmpty))
 
+/-- Text as a Markdown code span, delimited by more backticks than its longest run. -/
+def codeSpan (text : String) : String := Id.run do
+  let mut longest := 0
+  let mut run := 0
+  for c in text.toList do
+    run := if c == '`' then run + 1 else 0
+    longest := max longest run
+  let fence := String.ofList (List.replicate (longest + 1) '`')
+  let pad := if text.startsWith "`" || text.endsWith "`" then " " else ""
+  return fence ++ pad ++ text ++ pad ++ fence
+
 /-- The docstring of a declaration, on one line. -/
 def docOf (env : Environment) (name : Name) : IO String := do
   return oneLine ((← findDocString? env name).getD "")
@@ -269,7 +280,7 @@ def viewProofs (loaded : Loaded) (module : Name) : IO String := do
       if !w.standsAlone env || isInstanceAnywhere env w.name then continue
       let doc ← docOf env w.name
       let text ← if doc.isEmpty then
-        pure s!"`{oneLine (← loaded.meta (Meta.ppExpr d.type)).pretty}`"
+        pure (codeSpan (oneLine (← loaded.meta (Meta.ppExpr d.type)).pretty))
       else pure doc
       out := out.push (captioned s!"- Definition **{escape (words w.name)}**" text)
   return "\n\n".intercalate out.toList

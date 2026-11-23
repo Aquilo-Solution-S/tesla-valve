@@ -22,11 +22,12 @@ def accepted (place : String) : IO UInt32 := do
     "Accepted: check did not distinguish empty proof libraries from a populated one")
   let report := proofReport inventory
   failed := failed + (← expect (report.splitOn "\n" == [
-    "4 proof theorems (axiom-free: 1, propext: 1, Quot.sound: 1, Classical.choice: 1)",
+    "5 proof theorems (axiom-free: 2, propext: 1, Quot.sound: 1, Classical.choice: 1)",
     "TeslaValve.Test.Proofs.setByPremise: none",
     "TeslaValve.Test.Proofs.sameProp: propext",
     "TeslaValve.Test.Proofs.sameQuot: Quot.sound",
-    "TeslaValve.Test.Proofs.chosenProof: Classical.choice"])
+    "TeslaValve.Test.Proofs.chosenProof: Classical.choice",
+    "TeslaValve.Test.Proofs.labelled: none"])
     s!"Accepted: unexpected axiom report {report}")
   let proofView ← viewProofs loaded `TeslaValve.Test.Proofs
   let emptyView ← viewProofs loaded `TeslaValve.Test.EmptyProofs
@@ -45,7 +46,8 @@ def accepted (place : String) : IO UInt32 := do
       "✓ **same quot** (axioms: `Quot.sound`)",
       "✓ **chosen proof** (axioms: `Classical.choice`)",
       "- Definition **stateful**: Advance the state one step.",
-      "- Definition **under one**: `(n : Nat) → n < 1 → Nat`"] do
+      "- Definition **under one**: `(n : Nat) → n < 1 → Nat`",
+      "- Definition **ticked**: ``Fin (TeslaValve.Test.Proofs.«back`tick» + 1) → Nat``"] do
     failed := failed + (← expect (includes proofView fragment) s!"Accepted: proof view omitted {fragment}")
   for field in ["documented", "bounded", "condition", "count"] do
     failed := failed + (← expect (!includes proofView s!"✓ **{field}**") s!"Accepted: view marked {field} proved")
@@ -259,6 +261,8 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.moreEmptyFlags, .emptyConstant),
       (`TeslaValve.Test.Refused.unusedType, `TeslaValve.Test.Refused.unusedType.Placement, .unusedType),
       (`TeslaValve.Test.Refused.unusedType, `TeslaValve.Test.Refused.unusedType.Finish, .unusedType),
+      (`TeslaValve.Test.Refused.unusedType, `TeslaValve.Test.Refused.unusedType.Tint, .unusedType),
+      (`TeslaValve.Test.Refused.isInstance, `outsideLamp, .isInstance),
       (`TeslaValve.Test.Refused.isInstance, `Shown.litLamp, .isInstance),
       (`TeslaValve.Test.Refused.doesIO, `concealed, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `Job, .doesIO),

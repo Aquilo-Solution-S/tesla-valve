@@ -420,13 +420,11 @@ structure ProofAxioms where
   axioms : Array Name
 
 /-- Whether a name is an instance, a scoped one included: Lean finds a scoped instance only
-while its namespace is open, so this opens each namespace the name is in. -/
+while its scope is open, so this reads the scoped registrations of every scope. -/
 def isInstanceAnywhere (env : Environment) (name : Name) : Bool :=
-  let opened := name.getPrefix.components.foldl (init := (env, Name.anonymous))
-    fun (env, scope) part =>
-      let scope := scope ++ part
-      (Meta.instanceExtension.activateScoped env scope, scope)
-  Meta.isInstanceCore opened.1 name
+  Meta.isInstanceCore env name ||
+    (Meta.instanceExtension.ext.getState env).scopedEntries.map.toList.any fun (_, entries) =>
+      entries.toList.any (·.globalName? == some name)
 
 /-- The inventory of a written theorem that contributes to its proof library. -/
 def Written.proofAxioms (w : Written) (env : Environment) : MetaM (Option ProofAxioms) := do
@@ -597,32 +595,40 @@ def namedType (env : Environment) (name : Name) : Name :=
     if env.isProjectionFn name || isAuxRecursor env name || isNoConfusion env name then name.getPrefix
     else name
 
-/-- The constants a declaration names in its type, its value and its cases' fields, and
-through each constant the compiler made under its name, as a matcher. -/
-partial def namedBy (env : Environment) (owner : Name) (info : ConstantInfo) : Std.HashSet Name :=
-  walk {} ((declarationTypes env info).flatMap Expr.getUsedConstants ++
-    (info.value?.map Expr.getUsedConstants).getD #[]).toList
+/-- The constants a declaration names in its type, its value, a proof included, its cases'
+fields and the further constants given, as a structure's field defaults, and through each
+of these that the compiler made under its name, as a matcher. -/
+partial def namedBy (env : Environment) (owner : Name) (info : ConstantInfo) (further : Array Name) :
+    Std.HashSet Name :=
+  walk {} (((declarationTypes env info).flatMap Expr.getUsedConstants ++
+    ((info.value? (allowOpaque := true)).map Expr.getUsedConstants).getD #[]) ++ further).toList
 where
   walk (seen : Std.HashSet Name) : List Name → Std.HashSet Name
     | [] => seen
     | name :: more =>
       if seen.contains name then walk seen more
       else
-        let made := match env.find? name with
+        let inner := match env.find? name with
           | some info => if owner.isPrefixOf name && name != owner then
-              info.type.getUsedConstants ++ (info.value?.map Expr.getUsedConstants).getD #[]
+              info.type.getUsedConstants ++
+                ((info.value? (allowOpaque := true)).map Expr.getUsedConstants).getD #[]
             else #[]
           | none => #[]
-        walk (seen.insert name) (made.toList ++ more)
+        walk (seen.insert name) (inner.toList ++ more)
 
 /-- The types that a declaration written in the ledger or a proof library uses, beside the
-type itself. -/
+type itself. What a deriving clause or command made is not a use. -/
 def usedTypes (loaded : Loaded) : Std.HashSet Name := Id.run do
+  let env := loaded.env
   let mut used := {}
   for written in loaded.written do
-    if !written.standsAlone loaded.env then continue
-    for name in namedBy loaded.env written.name written.info do
-      let type := namedType loaded.env name
+    if !written.standsAlone env then continue
+    -- A structure's field defaults are constants of their own, which its type does not name.
+    let defaults := if isStructure env written.name then
+        (getStructureFields env written.name).filterMap (getDefaultFnForField? env written.name)
+      else #[]
+    for name in namedBy env written.name written.info defaults do
+      let type := namedType env name
       if type != written.name then used := used.insert type
   return used
 
