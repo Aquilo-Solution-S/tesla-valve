@@ -222,7 +222,30 @@ def selftest (place : String) : IO UInt32 := do
   for name in [`TeslaValve.Test.Refused.Nowhere.switch, `TeslaValve.Test.Refused.Foreign.imported, `TeslaValve.Test.Refused.Nowhere.nonexistentβ] do
     failed := failed + (← expect (badLinks.any (·.2 == name))
       s!"TeslaValve/Test/Refused/dangling.lean: {name}, read as a file, is not refused")
-  -- A scan git cannot run fails, instead of finding no link.
+  -- A doc comment that only links, in each comment form, read as files.
+  let linked := `TeslaValve.Test.Refused.unusedType.Mount
+  let badDocPath := place ++ "TeslaValve/Test/Refused/LinkOnly.rs"
+  let badDocs ← linkOnlyDocs loaded #[badDocPath]
+  failed := failed + (← expect (badDocs == (#[1, 4, 6, 8, 12, 14, 17].map fun line =>
+    (s!"{badDocPath}:{line}", linked)))
+    s!"LinkOnly.rs: expected seven doc comments to be refused at their first lines, got {badDocs}")
+  -- A file that is not UTF-8, on a matched line or another, holds no Rust: the scans skip it
+  -- instead of failing.
+  let goodDocs ← linkOnlyDocs loaded #[place ++ "TeslaValve/Test/Accepted/LinkOnly.rs",
+    place ++ "TeslaValve/Test/Accepted/Latin1.rs"]
+  failed := failed + (← expect goodDocs.isEmpty
+    s!"LinkOnly.rs: refused a doc with prose or a plain comment: {goodDocs}")
+  -- A scan git cannot run or finish fails, instead of finding no link, and keeps git's words.
+  for (code, stderr, words) in [(128, "fatal: bad\n".toUTF8, "fatal: bad"),
+      (0, "error: open(\"a.rs\"): Permission denied\n".toUTF8, "Permission denied"),
+      (1, ByteArray.mk #[102, 97, 116, 97, 108, 58, 32, 0xE9], "fatal: \u00E9")] do
+    failed := failed + (← expect ((grepError code stderr).any (·.endsWith words))
+      s!"grepError: git's exit {code} with {stderr.size} bytes of stderr is not an error naming {words}")
+  for (code, stderr) in [(1, ""), (0, ""),
+      (0, "warning: ignoring overly long attributes line 1\n"),
+      (0, "12:00:00.000000 git.c:463 trace: built-in: git grep\n")] do
+    failed := failed + (← expect (grepError code stderr.toUTF8).isNone
+      s!"grepError: git's exit {code} with stderr {stderr.quote} is read as failed")
   if (← (mentions loaded #[":(nonsense)x"]).toBaseIO) matches .ok _ then
     IO.eprintln "error: a git grep that fails is read as no links"
     failed := failed + 1

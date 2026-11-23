@@ -266,7 +266,9 @@ the code are read as "is" and may not. Neither says when.
   to be kept. A rule nothing names is unbuilt, and an open gap issue says so.
   For rules in Lean, put the full name in backticks beside the code that
   holds it. The ledger check resolves those links and checks that the code
-  of each scope holds its declarations. [Lean](references/lean.md)
+  of each scope holds its declarations. It also refuses doc comments that
+  only link rules.
+  [Lean](references/lean.md)
 
 ## At a gap
 

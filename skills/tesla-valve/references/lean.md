@@ -128,7 +128,19 @@ file the check scans. A namespace counts when it contains a declaration of
 that library. A written inductive or structure contributes all its constructors,
 including an implicit `mk`. The checker refuses other compiler-generated names.
 A root module is checked alongside its submodules.
-The same syntax works in a docstring.
+The same link syntax works in a docstring. In scanned files, `check` refuses
+a doc comment that holds a rule link and, besides its links, no letter or
+digit: only ASCII other than letters and digits, Unicode's General
+Punctuation block (U+2000 to U+206F, such as a dash or a curly quote), and
+U+0085, U+00A0, U+1680, U+3000 and U+FEFF. The scan reads lines: a run of
+`///` or `//!` lines, or a `/**` or `/*!` line through the first line, that
+one included, that holds `*/`. A block that never closes is skipped, and
+backticks pair within a line. So it also reads such lines inside a
+multi-line string or a plain `/* … */` comment, and it misses a doc comment
+that follows code on its line. `////`, `/***` and `/**/` are plain comments,
+and a plain `//` comment can hold the link alone. The doc-comment scan skips
+generated Rust by its banner. Both scans skip what is not UTF-8, which holds
+no Rust: the doc-comment scan a file, the link scan a line.
 
 <!-- code: examples/python/tests/test_shop.py#named -->
 ```python

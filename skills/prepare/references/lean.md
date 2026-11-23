@@ -59,7 +59,7 @@ supportInterpreter = true
 ```
 
 The program calls `TeslaValve.run` with the ledger, any proof libraries, and
-the scopes. A scope's paths are relative to the Git root. The scope scan skips generated Rust by its banner. Use `unscanned` for the tool's own example links
+the scopes. A scope's paths are relative to the Git root. The scope and doc-comment scans skip generated Rust by its banner. Use `unscanned` for the tool's own example links
 and for the intentionally broken links in the fixtures and the guide that
 quotes them.
 
@@ -114,7 +114,9 @@ Run `lake build` and `lake test` in the tool's
 [`lean/`](../../../lean) package. The selftest checks every
 [`Refused/`](../../../lean/TeslaValve/Test/Refused) module for its own refusal. It checks
 which restrictions also hold in a proof library, and exercises the output
-commands on an accepted ledger.
+commands on an accepted ledger. It also reads link-only doc comments as
+files: `check` refuses a code doc comment that holds rule links and no word
+([the reference](../../tesla-valve/references/lean.md) names the characters).
 
 Exercise the project's wiring in a separate Git checkout. Add the file to
 the index where the gate can see it. A bad code file links a missing rule.
