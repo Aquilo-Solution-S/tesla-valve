@@ -257,6 +257,8 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.emptyFlags, .emptyConstant),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.absentFlag, .emptyConstant),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.moreEmptyFlags, .emptyConstant),
+      (`TeslaValve.Test.Refused.unusedType, `TeslaValve.Test.Refused.unusedType.Placement, .unusedType),
+      (`TeslaValve.Test.Refused.unusedType, `TeslaValve.Test.Refused.unusedType.Finish, .unusedType),
       (`TeslaValve.Test.Refused.isInstance, `Shown.litLamp, .isInstance),
       (`TeslaValve.Test.Refused.doesIO, `concealed, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `Job, .doesIO),
@@ -276,6 +278,8 @@ def selftest (place : String) : IO UInt32 := do
       failed := failed + (← expect (asProofs.any inModule) s!"{module}: {name} passed in a proof library")
   failed := failed + (← expect (!refused.any (·.name == `TeslaValve.Test.Refused.singletonChoice.Admitted))
     "Refused: a one-value choice used as a decision error was refused")
+  failed := failed + (← expect (!refused.any (·.name == `TeslaValve.Test.Refused.unusedType.Mount))
+    "Refused: a choice another shape's field uses was refused as unused")
   if failed == 0 then
     IO.println s!"Refused: each of the {Refusal.all.length} refusals is shown by its module, in the ledger and in a proof library"
     return 0

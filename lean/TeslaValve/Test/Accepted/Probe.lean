@@ -31,6 +31,9 @@ structure AllowedWindow where
   event : Event
   ok : allowed event = true
 
+/-- The window red paint opens. -/
+def redWindow : AllowedWindow := ⟨.paint .red, rfl⟩
+
 /-- The text for each status. -/
 def label : (state : State) → String
   | .«a b» => "x|y"
@@ -132,5 +135,11 @@ structure TextShape where
 /-- A case with punctuation in its label. -/
 inductive Label where
   | «a*b» (active : Bool)
+
+/-- The punctuated shape, set. -/
+def punctuatedShape : TextShape := ⟨true⟩
+
+/-- The punctuated case, active. -/
+def punctuatedLabel : Label := .«a*b» true
 
 end TeslaValve.Test.Accepted.Probe

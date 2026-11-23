@@ -14,4 +14,7 @@ inductive Flag where
 /-- The default colour. -/
 def defaultColour : Colour := .blue
 
+/-- The flag a new lamp starts with. -/
+def defaultFlag : Flag := .flag false
+
 end TeslaValve.Test.Accepted

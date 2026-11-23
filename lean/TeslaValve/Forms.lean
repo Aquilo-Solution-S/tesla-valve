@@ -86,6 +86,7 @@ inductive Refusal where
   | idleInput
   | relabelDecision
   | emptyConstant
+  | unusedType
   | statement
   | assumed
   | undocumented
@@ -130,6 +131,7 @@ def Refusal.says : Refusal → String
   | .idleInput => "has an input that changes no result. Drop the input, or match it where it changes the result"
   | .relabelDecision => "only relabels the two values of its input. Use the input directly (write `!input` for the negation), or keep the rule as one comment at its holder. In a shape, drop a field that can only hold one value"
   | .emptyConstant => "is an empty list or absent option. Write `[]` or `none` at the use site"
+  | .unusedType => "is a choice or a shape that no other declaration uses, so it only gives a link a target. Use it in the decision or theorem that holds its rule, or keep the rule as one comment at its holder"
   | .statement => "is a rule that names what is not in the ledger or in Lean's logic"
   | .assumed => "rests on `sorry`, `native_decide` or an axiom beyond propext, Quot.sound and Classical.choice"
   | .undocumented => "has no docstring"
@@ -163,6 +165,7 @@ def Refusal.inProofs : Refusal → Bool
   | .idleInput => false
   | .relabelDecision => false
   | .emptyConstant => false
+  | .unusedType => false
   | .statement => false
   | .assumed => true
   | .undocumented => false
@@ -585,6 +588,44 @@ def docRefusal (loaded : Loaded) (doc : String) : Option Refusal :=
   else if dated doc then some .dated
   else none
 
+/-- The type a constant names: a case, a field or a recursor names its type. -/
+def namedType (env : Environment) (name : Name) : Name :=
+  match env.find? name with
+  | some (.ctorInfo ctor) => ctor.induct
+  | some (.recInfo _) => name.getPrefix
+  | _ =>
+    if env.isProjectionFn name || isAuxRecursor env name || isNoConfusion env name then name.getPrefix
+    else name
+
+/-- The constants a declaration names in its type, its value and its cases' fields, and
+through each constant the compiler made under its name, as a matcher. -/
+partial def namedBy (env : Environment) (owner : Name) (info : ConstantInfo) : Std.HashSet Name :=
+  walk {} ((declarationTypes env info).flatMap Expr.getUsedConstants ++
+    (info.value?.map Expr.getUsedConstants).getD #[]).toList
+where
+  walk (seen : Std.HashSet Name) : List Name → Std.HashSet Name
+    | [] => seen
+    | name :: more =>
+      if seen.contains name then walk seen more
+      else
+        let made := match env.find? name with
+          | some info => if owner.isPrefixOf name && name != owner then
+              info.type.getUsedConstants ++ (info.value?.map Expr.getUsedConstants).getD #[]
+            else #[]
+          | none => #[]
+        walk (seen.insert name) (made.toList ++ more)
+
+/-- The types that a declaration written in the ledger or a proof library uses, beside the
+type itself. -/
+def usedTypes (loaded : Loaded) : Std.HashSet Name := Id.run do
+  let mut used := {}
+  for written in loaded.written do
+    if !written.standsAlone loaded.env then continue
+    for name in namedBy loaded.env written.name written.info do
+      let type := namedType loaded.env name
+      if type != written.name then used := used.insert type
+  return used
+
 /-- Every refusal in the loaded libraries: each declaration of the ledger written in its
 source that is outside the forms, each constant the compiler made that the forms do not
 allow, each proof that rests on more than Lean's axioms, each `example`, and each
@@ -592,6 +633,7 @@ docstring outside its form, a module's too. -/
 def refusals (loaded : Loaded) : IO (Array Refused) := do
   let mut found := #[]
   let mut defaults : Std.HashSet Name := {}
+  let used := usedTypes loaded
   for written in loaded.written do
     let doc ← findDocString? loaded.env written.name
     let ofLedger := loaded.modules.contains written.module
@@ -603,6 +645,9 @@ def refusals (loaded : Loaded) : IO (Array Refused) := do
         else loaded.meta (refusal loaded written (inProofs := !ofLedger))
       else pure none
     let why := why.orElse fun _ => doc.bind (docRefusal loaded)
+    let why := why.orElse fun _ =>
+      if ofLedger && written.standsAlone loaded.env && written.info matches .inductInfo _ &&
+        !used.contains written.name then some .unusedType else none
     if let some why := why then
       found := found.push { module := written.module, name := privateToUserName written.name, why }
   for (module, name, info) in loaded.made do
