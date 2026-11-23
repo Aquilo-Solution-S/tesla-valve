@@ -9,7 +9,7 @@ and test vectors.
 
 | Form | Lean |
 | --- | --- |
-| Closed choice | An `inductive` whose cases carry nothing or other closed choices. |
+| Closed choice | An `inductive` outside `Prop` whose cases carry nothing or other closed choices. |
 | Shape | A `structure` of ledger values, with any invariant as an `ok : decision fields = true` field. |
 | Constant | A `def` of a ledger value. |
 | Decision | A `def` that matches its closed inputs case by case into ledger values. |

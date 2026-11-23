@@ -121,7 +121,7 @@ def Refusal.says : Refusal → String
   | .isAbbrev => "is an abbrev or has a reducibility override: use an ordinary def"
   | .isMeta => "is meta code (syntax, a macro, a notation or an elaborator)"
   | .isExample => "is an example: a rule is a theorem, which others name and the view draws"
-  | .openChoice => "is a choice with parameters, indices or recursion, or a case that carries what is not a closed choice"
+  | .openChoice => "is a choice in `Prop` or with parameters, indices or recursion, or a case that carries what is not a closed choice"
   | .singletonChoice => "has at most one value. Give the type fields or cases that distinguish values, use a one-value choice in a decision that returns `Except <Error> _` and both succeeds and refuses, or state the rule in a theorem"
   | .openShape => "is a shape with a field that is neither a ledger value nor an invariant `ok : decision fields = true`"
   | .openInput => "is a decision with an input that is not a closed choice"
@@ -190,15 +190,15 @@ def logic : List Name := [
 /-- The axioms Lean itself rests on. -/
 def leansAxioms : List Name := [``propext, ``Quot.sound, ``Classical.choice]
 
-/-- A closed choice of the loaded library: an inductive without parameters, indices or
-recursion, whose cases carry only closed choices, or `Bool`. -/
+/-- A closed choice of the loaded library: an inductive outside `Prop` without parameters,
+indices or recursion, whose cases carry only closed choices, or `Bool`. -/
 partial def closed (loaded : Loaded) : Expr → Bool
   | .const ``Bool [] => true
   | .const name [] => loaded.owns name && !isStructure loaded.env name &&
     match loaded.env.find? name with
     | some (.inductInfo type) =>
-      type.numParams == 0 && type.numIndices == 0 && !type.isRec && type.all.length == 1 &&
-      type.ctors.all fun ctor => match loaded.env.find? ctor with
+      !type.type.isProp && type.numParams == 0 && type.numIndices == 0 && !type.isRec &&
+      type.all.length == 1 && type.ctors.all fun ctor => match loaded.env.find? ctor with
         | some info => let (args, result) := arrows info.type; result == .const name [] && args.all (closed loaded)
         | none => false
     | _ => false
@@ -430,7 +430,7 @@ def isInstanceAnywhere (env : Environment) (name : Name) : Bool :=
 def Written.proofAxioms (w : Written) (env : Environment) : MetaM (Option ProofAxioms) := do
   let .thmInfo _ := w.info | return none
   if !w.standsAlone env || isInstanceAnywhere env w.name then return none
-  return some ⟨w.name, w.module, ← collectAxioms w.name⟩
+  return some ⟨privateToUserName w.name, w.module, ← collectAxioms w.name⟩
 
 /-- The axiom inventory of the authored theorems in the configured proof modules. -/
 def proofAxioms (loaded : Loaded) (modules : Array Name) : IO (Array ProofAxioms) :=
@@ -629,9 +629,11 @@ def usedTypes (loaded : Loaded) : Std.HashSet Name := Id.run do
   let mut used := {}
   for written in loaded.written do
     if !written.standsAlone env then continue
-    -- A structure's field defaults are constants of their own, which its type does not name.
+    -- A structure's field defaults, an inherited field's included, are constants of their
+    -- own, which its type does not name.
     let defaults := if isStructure env written.name then
-        (getStructureFields env written.name).filterMap (getDefaultFnForField? env written.name)
+        (getStructureFieldsFlattened env written.name (includeSubobjectFields := false)).filterMap
+          (getDefaultFnForField? env written.name)
       else #[]
     for name in namedBy env written.name written.info defaults do
       let type := namedType env name

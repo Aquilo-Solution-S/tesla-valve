@@ -29,4 +29,16 @@ deriving instance DecidableEq for Tint
 
 end Holder
 
+/-- How dark a shade is. -/
+inductive Shade where
+  | dark | pale
+
+/-- A count that starts at zero. -/
+structure Counted where
+  count : Nat := 0
+
+/-- A count whose start an inherited field's default takes from a shade. -/
+structure Shaded extends Counted where
+  count := (fun (_ : Shade) => 1) .dark
+
 end TeslaValve.Test.Refused.unusedType

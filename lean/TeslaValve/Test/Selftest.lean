@@ -22,12 +22,13 @@ def accepted (place : String) : IO UInt32 := do
     "Accepted: check did not distinguish empty proof libraries from a populated one")
   let report := proofReport inventory
   failed := failed + (← expect (report.splitOn "\n" == [
-    "5 proof theorems (axiom-free: 2, propext: 1, Quot.sound: 1, Classical.choice: 1)",
+    "6 proof theorems (axiom-free: 3, propext: 1, Quot.sound: 1, Classical.choice: 1)",
     "TeslaValve.Test.Proofs.setByPremise: none",
     "TeslaValve.Test.Proofs.sameProp: propext",
     "TeslaValve.Test.Proofs.sameQuot: Quot.sound",
     "TeslaValve.Test.Proofs.chosenProof: Classical.choice",
-    "TeslaValve.Test.Proofs.labelled: none"])
+    "TeslaValve.Test.Proofs.labelled: none",
+    "TeslaValve.Test.Proofs.quiet: none"])
     s!"Accepted: unexpected axiom report {report}")
   let proofView ← viewProofs loaded `TeslaValve.Test.Proofs
   let emptyView ← viewProofs loaded `TeslaValve.Test.EmptyProofs
@@ -287,6 +288,7 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.unusedType, `TeslaValve.Test.Refused.unusedType.Tint, .unusedType),
       (`TeslaValve.Test.Refused.isInstance, `outsideLamp, .isInstance),
       (`TeslaValve.Test.Refused.isInstance, `Shown.litLamp, .isInstance),
+      (`TeslaValve.Test.Refused.openChoice, `Stance, .openChoice),
       (`TeslaValve.Test.Refused.doesIO, `concealed, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `Job, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `world, .doesIO),
@@ -307,6 +309,8 @@ def selftest (place : String) : IO UInt32 := do
     "Refused: a one-value choice used as a decision error was refused")
   failed := failed + (← expect (!refused.any (·.name == `TeslaValve.Test.Refused.unusedType.Mount))
     "Refused: a choice another shape's field uses was refused as unused")
+  failed := failed + (← expect (!refused.any (·.name == `TeslaValve.Test.Refused.unusedType.Shade))
+    "Refused: a choice an inherited field's default uses was refused as unused")
   if failed == 0 then
     IO.println s!"Refused: each of the {Refusal.all.length} refusals is shown by its module, in the ledger and in a proof library"
     return 0

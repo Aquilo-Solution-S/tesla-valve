@@ -33,7 +33,7 @@ def endpointChoice : (custom : Bool) → Endpoint
 /-- Where a service originates. -/
 inductive Source where
   | core
-  | spiice
+  | addon
 
 /-- Whether a service is visible to everyone. -/
 inductive Visibility where
@@ -43,7 +43,7 @@ inductive Visibility where
 /-- The visibility of each service source. -/
 def serviceVisibility : Source → Visibility
   | .core => .«public»
-  | .spiice => .«private»
+  | .addon => .«private»
 
 /-- A choice whose two values come from its payload. -/
 inductive WrappedFlag where

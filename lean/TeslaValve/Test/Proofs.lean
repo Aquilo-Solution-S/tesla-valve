@@ -49,4 +49,6 @@ structure Shaded where
 
 theorem labelled : True := (fun (_ : TeslaValve.Test.Accepted.Probe.Label) => trivial) (.«a*b» true)
 
+private theorem quiet : True := trivial
+
 end TeslaValve.Test.Proofs
