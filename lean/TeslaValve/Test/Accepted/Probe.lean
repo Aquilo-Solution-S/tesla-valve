@@ -37,7 +37,7 @@ def label : State → String
   | .aB => "other"
 
 /-- The window for each status, built with `TeslaValve.Test.Accepted.Probe.Window.mk`. -/
-def window : State → Window
+def window : (_ : State) → Window
   | .«a b» => ⟨2, true⟩
   | .aB => ⟨0, false⟩
 
@@ -97,6 +97,21 @@ def applyEvent (state : State) (event : Event) : Except PaintRefusal State :=
 def wideNumber : Bool → Nat
   | true => 9007199254740993
   | false => 0
+
+/-- Live, unforgotten content is visible. -/
+def visibleInScope : (lifecycle : Bool) → (forgotten : Bool) → Bool
+  | true, false => true
+  | true, true | false, true | false, false => false
+
+/-- Forgotten or inactive content is hidden. -/
+def hiddenInScope : (lifecycle : Bool) → (forgotten : Bool) → Bool
+  | true, false => false
+  | true, true | false, true | false, false => true
+
+/-- Retired, unforgotten content can be restored. -/
+def restoreAdmission : (retired : Bool) → (forgotten : Bool) → Bool
+  | true, false => true
+  | true, true | false, true | false, false => false
 
 /-- Counts available to the Rust consumer. -/
 def counts : List Nat := [2, 3]

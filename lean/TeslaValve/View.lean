@@ -120,6 +120,10 @@ def typeWords (type : Expr) : String :=
   | .const name _ => words name
   | _ => toString type
 
+/-- Plain arrows and wildcard binders carry generated names in Lean. -/
+private def writtenBinder (name : Name) : Option Name :=
+  if name.isAnonymous || name.hasMacroScopes || name.isInaccessibleUserName then none else some name
+
 /-- Whether a decision is a state machine: `State → Event → State`, or inside `Except`. An
 event is its own choice, so `A → A → A` joins two values and is drawn as a table. -/
 def machine? (type : Expr) : Option (Expr × Expr) :=
@@ -162,7 +166,10 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
     if !(arrows d.type).1.isEmpty then continue
     out := out.push (captioned s!"**{escape (words w.name)}** = {escape (← evaluate loaded w.name [])}" (← docOf env w.name))
   -- The decisions over the same inputs, in one table; a state machine as its diagram.
-  let decisions := here.filterMap fun w => (w.decisionInputs loaded).map (w, ·)
+  let decisions := here.filterMap fun w => do
+    let inputs ← w.decisionInputs loaded
+    let binders := w.info.type.getForallBinderNames.map writtenBinder
+    return (w, inputs.zip binders)
   let mut drawn : Array Name := #[]
   for (w, inputs) in decisions do
     if drawn.contains w.name then continue
@@ -193,12 +200,13 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
       args == inputs && (machine? other.info.type).isNone).map (·.1)
     drawn := drawn ++ group.map (·.name)
     let mut rows := #[]
-    for combination in combinations env inputs do
+    for combination in combinations env (inputs.map Prod.fst) do
       let mut row ← computed w.name (combination.mapM (render env))
       for g in group do
         row := row ++ [← evaluate loaded g.name combination]
       rows := rows.push row
-    out := out.push (table (inputs.map typeWords ++ group.toList.map (words ·.name)) rows.toList)
+    let headers := inputs.map fun (type, binder) => (binder.map words).getD (typeWords type)
+    out := out.push (table (headers ++ group.toList.map (words ·.name)) rows.toList)
     let mut legend := #[]
     for g in group do
       legend := legend.push ("- " ++ captioned (escape (words g.name)) (← docOf env g.name))

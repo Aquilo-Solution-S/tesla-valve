@@ -90,11 +90,33 @@ def accepted (place : String) : IO UInt32 := do
     "TeslaValve.Test.Accepted.Probe.wideNumber": [
       {"in":[true],"out":9007199254740993},
       {"in":[false],"out":0}
+    ],
+    "TeslaValve.Test.Accepted.Probe.visibleInScope": [
+      {"in":[true,true],"out":false},
+      {"in":[true,false],"out":true},
+      {"in":[false,true],"out":false},
+      {"in":[false,false],"out":false}
+    ],
+    "TeslaValve.Test.Accepted.Probe.hiddenInScope": [
+      {"in":[true,true],"out":true},
+      {"in":[true,false],"out":false},
+      {"in":[false,true],"out":true},
+      {"in":[false,false],"out":true}
+    ],
+    "TeslaValve.Test.Accepted.Probe.restoreAdmission": [
+      {"in":[true,true],"out":false},
+      {"in":[true,false],"out":true},
+      {"in":[false,true],"out":false},
+      {"in":[false,false],"out":false}
     ]
   }"#
   failed := failed + (← expect (expected.toOption == some vectors)
     s!"Accepted: unexpected vectors {vectors.compress}")
   let view ← viewModule loaded `TeslaValve.Test.Accepted.Probe
+  for header in ["| state | label | window |",
+      "| lifecycle | forgotten | visible in scope | hidden in scope |",
+      "| retired | forgotten | restore admission |"] do
+    failed := failed + (← expect (includes view s!"\n{header}\n") s!"Accepted: view omitted table {header}")
   for fragment in ["| «a b» | \"x\\|y\" | count: 2, active: yes |", "| aB | \"other\" | count: 0, active: no |",
       "| paint (blue) | \"blue\" |", "| toggle | — |", "state \"«a b»\" as s0", "state \"aB\" as s1",
       "s0 --> s1 : toggle", "s1 --> s0 : paint (red)",
