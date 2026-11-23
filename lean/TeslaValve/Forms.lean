@@ -21,7 +21,7 @@ The ledger allows seven forms, so that a view can draw all of it by evaluation:
 The check refuses a choice with at most one value and a structure with no fields.
 A decision that returns `Except <Error> _` and both succeeds and refuses may name its
 refusal with a one-value choice. The check also refuses a decision with the same result
-for every input, a unary decision that maps its two input values one-to-one onto a
+for every input, a decision with an input that changes no result, a unary decision that maps its two input values one-to-one onto a
 two-value choice or `Bool` (including a Bool identity or negation), and a constant equal
 to `[]` or `none`.
 
@@ -83,6 +83,7 @@ inductive Refusal where
   | openValue
   | operation
   | constantDecision
+  | idleInput
   | relabelDecision
   | emptyConstant
   | statement
@@ -126,6 +127,7 @@ def Refusal.says : Refusal → String
   | .openValue => "has a type that is not a ledger value"
   | .operation => "uses an operation outside the forms: a decision matches its inputs into ledger values with constructors at every pattern position"
   | .constantDecision => "returns the same value for every input. Write a constant or match inputs that change the result"
+  | .idleInput => "has an input that changes no result. Drop the input, or match it where it changes the result"
   | .relabelDecision => "only relabels the two values of its input. Use the input directly (write `!input` for the negation), or keep the rule as one comment at its holder. In a shape, drop a field that can only hold one value"
   | .emptyConstant => "is an empty list or absent option. Write `[]` or `none` at the use site"
   | .statement => "is a rule that names what is not in the ledger or in Lean's logic"
@@ -158,6 +160,7 @@ def Refusal.inProofs : Refusal → Bool
   | .openValue => false
   | .operation => false
   | .constantDecision => false
+  | .idleInput => false
   | .relabelDecision => false
   | .emptyConstant => false
   | .statement => false
@@ -319,7 +322,16 @@ def definitionForm (loaded : Loaded) (d : DefinitionVal) : Option Refusal :=
   else if !bodyInForm loaded d args then some .operation
   else none
 
-/-- The output must carry a value or depend on the decision's inputs. -/
+/-- Whether the input at `position` changes no result: for every value of the other inputs,
+each of its values gives the same output. -/
+private def idle (loaded : Loaded) (term : Expr) (inputs : Array Expr) (position : Nat) : MetaM Bool := do
+  let first :: rest := valuesOf loaded.env inputs[position]! | return false
+  let at_ (others : List Expr) (v : Expr) := mkAppN term (others.take position ++ v :: others.drop position).toArray
+  (combinations loaded.env (inputs.toList.eraseIdx position)).allM fun others => do
+    let output := at_ others first
+    rest.allM fun v => Meta.isDefEq output (at_ others v)
+
+/-- The output must carry a value or depend on each of the decision's inputs. -/
 private def definitionContentRefusal (loaded : Loaded) (d : DefinitionVal) : MetaM (Option Refusal) := do
   let (inputs, result) := arrows d.type
   let term := mkConst d.name
@@ -330,6 +342,8 @@ private def definitionContentRefusal (loaded : Loaded) (d : DefinitionVal) : Met
   let output := mkAppN term first.toArray
   if ← rest.allM (fun args => Meta.isDefEq output (mkAppN term args.toArray)) then
     return some .constantDecision
+  if ← (List.range inputs.size).anyM (idle loaded term inputs) then
+    return some .idleInput
   let #[_] := inputs | return none
   let [second] := rest | return none
   if !closed loaded result then return none
@@ -402,10 +416,19 @@ structure ProofAxioms where
   module : Name
   axioms : Array Name
 
+/-- Whether a name is an instance, a scoped one included: Lean finds a scoped instance only
+while its namespace is open, so this opens each namespace the name is in. -/
+def isInstanceAnywhere (env : Environment) (name : Name) : Bool :=
+  let opened := name.getPrefix.components.foldl (init := (env, Name.anonymous))
+    fun (env, scope) part =>
+      let scope := scope ++ part
+      (Meta.instanceExtension.activateScoped env scope, scope)
+  Meta.isInstanceCore opened.1 name
+
 /-- The inventory of a written theorem that contributes to its proof library. -/
 def Written.proofAxioms (w : Written) (env : Environment) : MetaM (Option ProofAxioms) := do
   let .thmInfo _ := w.info | return none
-  if !w.standsAlone env || Meta.isInstanceCore env w.name then return none
+  if !w.standsAlone env || isInstanceAnywhere env w.name then return none
   return some ⟨w.name, w.module, ← collectAxioms w.name⟩
 
 /-- The axiom inventory of the authored theorems in the configured proof modules. -/
@@ -475,7 +498,7 @@ def refusal (loaded : Loaded) (written : Written) (inProofs : Bool := false) : M
     -- An opaque type is how a proof library says it does not care what a thing is.
     (.isPartial, info matches .opaqueInfo _ && !(inProofs && info.type.isSort)),
     (.isMeta, isMetaCode info),
-    (.isInstance, Meta.isInstanceCore env name),
+    (.isInstance, isInstanceAnywhere env name),
     (.isNoncomputable, isNoncomputable env name),
     (.doesIO, doesIO env info),
     (.isPolymorphic, !info.levelParams.isEmpty)]
@@ -593,7 +616,7 @@ def refusals (loaded : Loaded) : IO (Array Refused) := do
     let why : Option Refusal ←
       if isMetaCode info && !defaults.contains name then pure (some .isMeta)
       -- What `deriving` makes for a type of the ledger: only `DecidableEq`.
-      else if !name.isInternal && Meta.isInstanceCore loaded.env name && !ofLedger then pure (some .isInstance)
+      else if !name.isInternal && isInstanceAnywhere loaded.env name && !ofLedger then pure (some .isInstance)
       else if ← loaded.meta (rests name) then pure (some .assumed)
       else pure none
     if let some why := why then
@@ -732,7 +755,7 @@ def unheld (loaded : Loaded) (scope : Scope) : IO (Array Written) := do
   return loaded.written.filter fun w =>
     scope.rules.isPrefixOf w.module && !held.contains w.name &&
     !isPrivateName w.name && w.standsAlone env &&
-    !Meta.isInstanceCore env w.name
+    !isInstanceAnywhere env w.name
 
 /-- What a project checks: its ledger, the proof libraries beside it, the scopes that tie them
 to the code, and the paths of the repository whose links are not the project's, relative to

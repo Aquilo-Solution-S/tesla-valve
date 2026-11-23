@@ -32,6 +32,8 @@ def accepted (place : String) : IO UInt32 := do
   let emptyView ← viewProofs loaded `TeslaValve.Test.EmptyProofs
   failed := failed + (← expect (!includes emptyView "(axioms:")
     "Accepted: proof view counted an instance as a theorem")
+  failed := failed + (← expect (!includes emptyView "Definition")
+    "Accepted: proof view drew an instance, a scoped one included, as a definition")
   failed := failed + (← expect (match proofView.splitOn "✓ **set by premise** (axioms: none)" with
     | [before, after] => includes before "Premise **bounded**" && includes after "Premise **ordered**"
     | _ => false) "Accepted: proof view lost source order")
@@ -41,7 +43,9 @@ def accepted (place : String) : IO UInt32 := do
       "- Premise **ordered**: lo ≤ hi + lo",
       "✓ **same prop** (axioms: `propext`)",
       "✓ **same quot** (axioms: `Quot.sound`)",
-      "✓ **chosen proof** (axioms: `Classical.choice`)"] do
+      "✓ **chosen proof** (axioms: `Classical.choice`)",
+      "- Definition **stateful**: Advance the state one step.",
+      "- Definition **under one**: `(n : Nat) → n < 1 → Nat`"] do
     failed := failed + (← expect (includes proofView fragment) s!"Accepted: proof view omitted {fragment}")
   for field in ["documented", "bounded", "condition", "count"] do
     failed := failed + (← expect (!includes proofView s!"✓ **{field}**") s!"Accepted: view marked {field} proved")
@@ -242,6 +246,8 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Never, .singletonChoice),
       (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.overWrapper, .constantDecision),
       (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.alwaysSet, .constantDecision),
+      (`TeslaValve.Test.Refused.idleInput, `TeslaValve.Test.Refused.idleInput.ignoresSecond, .idleInput),
+      (`TeslaValve.Test.Refused.idleInput, `TeslaValve.Test.Refused.idleInput.ignoresFirst, .idleInput),
       (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.forwardFlag, .relabelDecision),
       (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.invertFlag, .relabelDecision),
       (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.markAfter, .relabelDecision),
@@ -251,6 +257,7 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.emptyFlags, .emptyConstant),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.absentFlag, .emptyConstant),
       (`TeslaValve.Test.Refused.emptyConstant, `TeslaValve.Test.Refused.emptyConstant.moreEmptyFlags, .emptyConstant),
+      (`TeslaValve.Test.Refused.isInstance, `Shown.litLamp, .isInstance),
       (`TeslaValve.Test.Refused.doesIO, `concealed, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `Job, .doesIO),
       (`TeslaValve.Test.Refused.doesIO, `world, .doesIO),

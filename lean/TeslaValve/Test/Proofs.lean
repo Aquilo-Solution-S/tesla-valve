@@ -29,4 +29,6 @@ theorem sameQuot (r : Nat → Nat → Prop) (n m : Nat) (h : r n m) :
 
 theorem chosenProof (p : Prop) (h : Nonempty p) : p := Classical.choice h
 
+def underOne (n : Nat) (_h : n < 1) : Nat := n
+
 end TeslaValve.Test.Proofs

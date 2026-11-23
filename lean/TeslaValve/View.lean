@@ -265,6 +265,13 @@ def viewProofs (loaded : Loaded) (module : Name) : IO String := do
         ", ".intercalate (proof.axioms.toList.map fun name => s!"`{name}`")
       let label := s!"{mark} **{escape (words w.name)}** (axioms: {axioms})"
       out := out.push (captioned label (← docOf env w.name))
+    else if let .defnInfo d := w.info then
+      if !w.standsAlone env || isInstanceAnywhere env w.name then continue
+      let doc ← docOf env w.name
+      let text ← if doc.isEmpty then
+        pure s!"`{oneLine (← loaded.meta (Meta.ppExpr d.type)).pretty}`"
+      else pure doc
+      out := out.push (captioned s!"- Definition **{escape (words w.name)}**" text)
   return "\n\n".intercalate out.toList
 
 /-- Draws the ledger and its proof libraries as Markdown. -/
