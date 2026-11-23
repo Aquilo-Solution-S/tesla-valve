@@ -123,6 +123,7 @@ def accepted (place : String) : IO UInt32 := do
     s!"Accepted: unexpected vectors {vectors.compress}")
   let view ← viewModule loaded `TeslaValve.Test.Accepted.Probe
   for header in ["| state | label | window |",
+      "| current status | incoming event | answer |",
       "| lifecycle | forgotten | visible in scope | hidden in scope |",
       "| retired | forgotten | restore admission |"] do
     failed := failed + (← expect (includes view s!"\n{header}\n") s!"Accepted: view omitted table {header}")
@@ -241,8 +242,8 @@ def selftest (place : String) : IO UInt32 := do
       (`TeslaValve.Test.Refused.singletonChoice, `TeslaValve.Test.Refused.singletonChoice.Never, .singletonChoice),
       (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.overWrapper, .constantDecision),
       (`TeslaValve.Test.Refused.constantDecision, `TeslaValve.Test.Refused.constantDecision.alwaysSet, .constantDecision),
-      (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.forwardFlag, .booleanDecision),
-      (`TeslaValve.Test.Refused.booleanDecision, `TeslaValve.Test.Refused.booleanDecision.invertFlag, .booleanDecision),
+      (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.forwardFlag, .relabelDecision),
+      (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.invertFlag, .relabelDecision),
       (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.markAfter, .relabelDecision),
       (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.endpointChoice, .relabelDecision),
       (`TeslaValve.Test.Refused.relabelDecision, `TeslaValve.Test.Refused.relabelDecision.serviceVisibility, .relabelDecision),

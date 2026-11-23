@@ -1,5 +1,15 @@
 namespace TeslaValve.Test.Refused.relabelDecision
 
+/-- Return the input. -/
+def forwardFlag : Bool → Bool
+  | true => true
+  | false => false
+
+/-- Invert the input. -/
+def invertFlag : Bool → Bool
+  | true => false
+  | false => true
+
 /-- A change to a forgotten mark. -/
 inductive MarkChange where
   | forget

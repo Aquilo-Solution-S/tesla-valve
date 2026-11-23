@@ -124,6 +124,10 @@ def typeWords (type : Expr) : String :=
 private def writtenBinder (name : Name) : Option Name :=
   if name.isAnonymous || name.hasMacroScopes || name.isInaccessibleUserName then none else some name
 
+/-- The input column uses its written name, or its type name for a plain arrow or wildcard. -/
+private def inputHeader (type : Expr) (binder : Name) : String :=
+  ((writtenBinder binder).map words).getD (typeWords type)
+
 /-- Whether a decision is a state machine: `State → Event → State`, or inside `Except`. An
 event is its own choice, so `A → A → A` joins two values and is drawn as a table. -/
 def machine? (type : Expr) : Option (Expr × Expr) :=
@@ -168,11 +172,12 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
   -- The decisions over the same inputs, in one table; a state machine as its diagram.
   let decisions := here.filterMap fun w => do
     let inputs ← w.decisionInputs loaded
-    let binders := w.info.type.getForallBinderNames.map writtenBinder
-    return (w, inputs.zip binders)
+    let binders := w.info.type.getForallBinderNames
+    return (w, (inputs.zip binders).map fun (type, binder) => (type, inputHeader type binder))
   let mut drawn : Array Name := #[]
   for (w, inputs) in decisions do
     if drawn.contains w.name then continue
+    let headers := inputs.map Prod.snd
     if let some (state, event) := machine? w.info.type then
       drawn := drawn.push w.name
       let states := (valuesOf env state).toArray
@@ -194,7 +199,7 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
       out := out.push (captioned s!"**{escape (words w.name)}**" (← docOf env w.name))
       out := out.push ("```mermaid\nstateDiagram-v2\n" ++ "\n".intercalate diagram.toList ++ "\n```")
       if !refused.isEmpty then
-        out := out.push (table [typeWords state, typeWords event, "answer"] refused.toList)
+        out := out.push (table (headers ++ ["answer"]) refused.toList)
       continue
     let group := (decisions.filter fun (other, args) =>
       args == inputs && (machine? other.info.type).isNone).map (·.1)
@@ -205,7 +210,6 @@ def viewModule (loaded : Loaded) (module : Name) : IO String := do
       for g in group do
         row := row ++ [← evaluate loaded g.name combination]
       rows := rows.push row
-    let headers := inputs.map fun (type, binder) => (binder.map words).getD (typeWords type)
     out := out.push (table (headers ++ group.toList.map (words ·.name)) rows.toList)
     let mut legend := #[]
     for g in group do

@@ -32,7 +32,7 @@ structure AllowedWindow where
   ok : allowed event = true
 
 /-- The text for each status. -/
-def label : State → String
+def label : (state : State) → String
   | .«a b» => "x|y"
   | .aB => "other"
 
@@ -88,9 +88,9 @@ inductive PaintRefusal where
   | blueUnsupported
 
 /-- Apply an event, with blue paint refused. -/
-def applyEvent (state : State) (event : Event) : Except PaintRefusal State :=
-  match event with
-  | .toggle | .paint .red => .ok (advance state event)
+def applyEvent (currentStatus : State) (incomingEvent : Event) : Except PaintRefusal State :=
+  match incomingEvent with
+  | .toggle | .paint .red => .ok (advance currentStatus incomingEvent)
   | .paint .blue => .error .blueUnsupported
 
 /-- The first natural number above the JavaScript exact integer range that needs rounding. -/
