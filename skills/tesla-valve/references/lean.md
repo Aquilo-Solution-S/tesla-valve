@@ -240,4 +240,10 @@ field's docstring or the proposition itself. Both commands name each proof
 theorem's axioms. The check also counts theorems using `propext`, `Quot.sound`
 or `Classical.choice` and those using none.
 
+Where a runtime invariant checker verifies a stateful system against
+proof-library invariants, apply the [planted-violation control rule](../SKILL.md#tests)
+to a snapshot of the live store (for example, corrupting one pin or state
+transition on a valid snapshot and asserting the checker reports that exact
+violation).
+
 [Set up the gate and run the tool's selftest.](../../prepare/references/lean.md)

@@ -131,7 +131,10 @@ A test has three homes:
   order is cancelled) keeps a test at the cheapest level that shows it, often a
   plain unit test. Types remove the tests of shape, not the tests of meaning.
   Protocols, atomicity and failure recovery are intent: no local type proves
-  them.
+  them. A runtime invariant checker for system-level guarantees gets a
+  planted-violation control per invariant: break a valid state on that invariant
+  and assert the checker reports that violation, so an empty table or dead
+  branch cannot pass silently.
 - **The spring:** every check there gets a test that feeds it the bad data. A
   test double is not a spring: its checks get no tests.
 - **The shape:** where the toolchain checks a line that must not compile, one

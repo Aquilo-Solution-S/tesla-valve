@@ -70,7 +70,11 @@ critique that only rephrases is the last round.
 
 - Test the intent: what the code computes (a date, a price, a business rule)
   and what it guarantees across its parts (a reservation is released when the
-  order is cancelled) keeps a test at the cheapest level that shows it.
+  order is cancelled) keeps a test at the cheapest level that shows it. A
+  runtime invariant checker for system-level guarantees gets a planted-violation
+  control per invariant: break a valid state on that invariant and assert the
+  checker reports that violation, so an empty table or dead branch cannot pass
+  silently.
 - Tests build each value through one test constructor beside its type, which
   fills in defaults and builds it the way the code does. A new required field
   changes that constructor and the tests that care about the field, nothing

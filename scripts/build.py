@@ -111,6 +111,7 @@ SHARED = [
     "Your own repository is not a spring",
     "Derive it from the tree or delete it.",
     "A test double is not a spring: its checks get no tests.",
+    "A runtime invariant checker for system-level guarantees gets a planted-violation control per invariant: break a valid state on that invariant and assert the checker reports that violation, so an empty table or dead branch cannot pass silently.",
     "one test constructor beside its type",
     "A new required field changes that constructor and the tests that care about the field, nothing else.",
     "The line is the proof, not a snapshot of the compiler's message",
